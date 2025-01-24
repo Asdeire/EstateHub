@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  role          Role
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+  listings      Listing[]
+  subscriptions Subscription[]
+  notifications Notification[]
+}
+
+model Listing {
+  id            String   @id @default(uuid())
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id])
+  is_agent_listing Boolean
+  type          String
+  location      String
+  price         Float
+  area          Float
+  description   String?
+  photos        String[]
+  status        ListingStatus
+  category_id   String?
+  category      Category? @relation(fields: [category_id], references: [id])
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+  tags          Tag[]    @relation("ListingTags")
+}
+
+
+
+model Subscription {
+  id            String   @id @default(uuid())
+  buyer_id      String
+  buyer         User     @relation(fields: [buyer_id], references: [id])
+  filters       Json
+  transport     Transport
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+  notifications Notification[]
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id])
+  subscription_id String
+  subscription  Subscription @relation(fields: [subscription_id], references: [id])
+  message       String
+  status        NotificationStatus
+  created_at    DateTime @default(now())
+  sent_at       DateTime?
+}
+
+model Category {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  listings_count Int     @default(0)
+  created_at    DateTime @default(now())
+  listings      Listing[]
+}
+
+model Tag {
+  id            String   @id @default(uuid())
+  name          String
+  listings_count Int     @default(0)
+  created_at    DateTime @default(now())
+  listings      Listing[] @relation("ListingTags")
+}
+
+enum Role {
+  User
+  Makler
+  Admin
+}
+
+enum ListingStatus {
+  Active
+  Archived
+}
+
+enum Transport {
+  EMAIL
+  TELEGRAM
+}
+
+enum NotificationStatus {
+  SENT
+  DELIVERED
+  FAILED
+}
