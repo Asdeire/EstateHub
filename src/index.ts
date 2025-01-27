@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { userRoutes } from './routes/user.routes';
 import { listingRoutes } from './routes/listing.routes';
 import authRoutes from './routes/auth.routes';
+import cors from '@fastify/cors';
 
 dotenv.config();
 
@@ -11,6 +12,12 @@ const app = fastify();
 app.register(userRoutes);
 app.register(listingRoutes);
 app.register(authRoutes);
+
+app.register(cors, {
+    origin: 'http://localhost:5173', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    credentials: true, 
+});
 
 const start = async () => {
     try {
