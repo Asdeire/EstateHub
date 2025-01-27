@@ -1,7 +1,8 @@
 import fastify from 'fastify';
 import dotenv from 'dotenv';
-import userRoutes from './routes/user.routes';
-import listingRoutes from './routes/listing.routes';
+import { userRoutes } from './routes/user.routes';
+import { listingRoutes } from './routes/listing.routes';
+import authRoutes from './routes/auth.routes';
 
 dotenv.config();
 
@@ -9,10 +10,11 @@ const app = fastify();
 
 app.register(userRoutes);
 app.register(listingRoutes);
+app.register(authRoutes);
 
 const start = async () => {
     try {
-        await app.listen({port:3000, host:'0.0.0.0'});
+        await app.listen({ port: 3000, host: '0.0.0.0' });
         console.log('Server running at http://localhost:3000');
     } catch (err) {
         app.log.error(err);
