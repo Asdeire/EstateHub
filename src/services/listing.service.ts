@@ -51,14 +51,11 @@ class ListingService {
         });
     }
 
-    // Оновлення оголошення
     async updateListing(id: string, data: Partial<Listing> & { tags?: string[] }): Promise<Listing> {
         const { tags, ...listingData } = data;
 
-        // Формуємо об'єкт для оновлення
         const updateData: Prisma.ListingUpdateInput = {
             ...listingData,
-            // Якщо є теги, додаємо їх через Prisma
             tags: tags ? {
                 connect: tags.map((tagId) => ({ id: tagId })),
             } : undefined,

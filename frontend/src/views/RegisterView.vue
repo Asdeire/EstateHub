@@ -1,108 +1,76 @@
 <template>
     <div class="register-page">
-        <h1>Register</h1>
-        <form @submit.prevent="submitForm">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input v-model="form.name" type="text" id="name" required />
+        <div class="register-container">
+            <div class="logo">
+                <a href="/">
+                    <img src="../assets/logo.png" alt="Лого">
+                </a>
             </div>
+            <form @submit.prevent="submitForm">
+                <div class="form-group">
+                    <label for="name">Ім'я</label>
+                    <input v-model="form.name" type="text" id="name" required />
+                </div>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input v-model="form.email" type="email" id="email" required />
-            </div>
+                <div class="form-group">
+                    <label for="email">Електронна пошта</label>
+                    <input v-model="form.email" type="email" id="email" required />
+                </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input v-model="form.password" type="password" id="password" required />
-            </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input v-model="form.password" type="password" id="password" required />
+                    <p v-if="passwordError" class="error-text">Пароль повинен містити мінімум 6 символів, в тому числі
+                        одну цифру і одну велику літеру.</p>
+                </div>
 
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input v-model="form.confirmPassword" type="password" id="confirmPassword" required />
-            </div>
+                <div class="form-group checkbox-group">
+                    <input v-model="form.isAgent" type="checkbox" id="isAgent" />
+                    <label for="isAgent">Я посередник</label>
+                </div>
 
-            <button type="submit">Register</button>
-        </form>
+                <button type="submit" :disabled="passwordError">Зареєструватись</button>
+            </form>
 
-        <p v-if="error" class="error">{{ error }}</p>
+            <p class="terms">Вже є аккаунт? <a href="login">Увійти</a></p>
+
+        </div>
+        <div class="translate-button">
+            <img src="../assets/translate.png" alt="Лого">
+        </div>
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
+<script setup>
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { registerUser } from '../services/api';
 
 const router = useRouter();
-
 const form = ref({
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    isAgent: false,
 });
 
-const error = ref<string | null>(null);
+const passwordError = computed(() => {
+    const password = form.value.password;
+    const regex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
+    return password && !regex.test(password);
+});
 
 const submitForm = async () => {
-    if (form.value.password !== form.value.confirmPassword) {
-        error.value = 'Passwords do not match';
-        return;
-    }
-
     try {
         await registerUser({
             name: form.value.name,
             email: form.value.email,
             password: form.value.password,
+            role: form.value.isAgent ? 'Makler' : 'User',
         });
-
-        error.value = null;
-        router.push('/login'); 
-    } catch (err: any) {
-        error.value = err.response?.data?.message || 'Registration failed';
+        router.push('/login');
+    } catch (err) {
+        alert('Помилка реєстрації!');
     }
 };
 </script>
-
-<style scoped>
-.register-page {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.error {
-    color: red;
-    margin-top: 10px;
-}
-</style>

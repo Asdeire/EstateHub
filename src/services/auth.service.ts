@@ -1,4 +1,3 @@
-// src/services/auth.service.ts
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -36,14 +35,14 @@ export class AuthService {
         return token;
     }
 
-    async register(name: string, email: string, password: string) {
+    async register(name: string, email: string, password: string, role: 'User' | 'Makler') {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password_hash: hashedPassword,
-                role: 'User',
+                role,
             },
         });
 

@@ -81,7 +81,7 @@ model Tag {
   listings      Listing[] @relation("ListingTags")
 }
 
-enum Role {
+enum Role { 
   User
   Makler
   Admin

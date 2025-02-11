@@ -28,15 +28,27 @@ export const registerUser = async (userData: {
     name: string;
     email: string;
     password: string;
+    role: 'User' | 'Makler';
 }) => {
     const response = await api.post('/register', userData);
     return response.data;
 };
+
 
 export const loginUser = async (credentials: {
     email: string;
     password: string;
 }) => {
     const response = await api.post('/login', credentials);
-    return response.data; 
+    return response.data;
+};
+
+export const getListingById = async (id: string) => {
+    try {
+        const response = await api.get(`/listings/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching listing with ID ${id}:`, error);
+        throw error;
+    }
 };

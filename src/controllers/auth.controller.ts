@@ -12,6 +12,7 @@ interface RegisterRequestBody {
     name: string;
     email: string;
     password: string;
+    role: 'User' | 'Makler';
 }
 
 export class AuthController {
@@ -37,7 +38,7 @@ export class AuthController {
 
     async register(request: FastifyRequest<{ Body: RegisterRequestBody }>, reply: FastifyReply) {
         try {
-            const { name, email, password } = request.body;
+            const { name, email, password, role } = request.body;
 
             if (!name || !email || !password) {
                 return reply.status(400).send({ message: 'Name, email, and password are required' });
@@ -48,7 +49,7 @@ export class AuthController {
                 return reply.status(400).send({ message: 'Email is already in use' });
             }
 
-            const user = await authService.register(name, email, password);
+            const user = await authService.register(name, email, password, role);
 
             return reply.status(201).send({ message: 'User registered successfully', user });
         } catch (error) {

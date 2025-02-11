@@ -1,21 +1,31 @@
 <template>
     <div class="login-page">
-        <h1>Login</h1>
-        <form @submit.prevent="submitForm">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input v-model="form.email" type="email" id="email" required />
+        <div class="login-container">
+            <div class="logo">
+                <a href="/">
+                    <img src="../assets/logo.png" alt="Лого">
+                </a>
             </div>
+            <form @submit.prevent="submitForm">
+                <div class="form-group">
+                    <label for="email">Електронна пошта</label>
+                    <input v-model="form.email" type="email" id="email" required />
+                </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input v-model="form.password" type="password" id="password" required />
-            </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input v-model="form.password" type="password" id="password" required />
+                </div>
 
-            <button type="submit">Login</button>
-        </form>
+                <button type="submit">Увійти</button>
+            </form>
+            <p class="terms">Якщо ви ще не маєте аккаунту <a href="register">зареєструйтесь</a></p>
 
-        <p v-if="error" class="error">{{ error }}</p>
+            <p v-if="error" class="error-text">{{ error }}</p>
+        </div>
+        <div class="translate-button">
+            <img src="../assets/translate.png" alt="Лого">
+        </div>
     </div>
 </template>
 
@@ -40,54 +50,12 @@ const submitForm = async () => {
             password: form.value.password,
         });
 
-        // Збереження токена у localStorage
         localStorage.setItem('authToken', response.token);
 
         error.value = null;
-        router.push('/'); // Перенаправлення на головну сторінку після успішного входу
+        router.push('/');
     } catch (err: any) {
-        error.value = err.response?.data?.message || 'Login failed';
+        error.value = err.response?.data?.message || 'Помилка входу';
     }
 };
 </script>
-
-<style scoped>
-.login-page {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.error {
-    color: red;
-    margin-top: 10px;
-}
-</style>

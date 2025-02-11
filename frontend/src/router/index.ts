@@ -3,6 +3,7 @@ import Register from '../views/RegisterView.vue';
 import Login from '../views/LoginView.vue'
 import Home from '../views/HomeView.vue';
 import Listings from '../views/ListingsView.vue';
+import ListingDetail from '../views/ListingDetailView.vue';
 
 const routes = [
     {
@@ -24,6 +25,11 @@ const routes = [
         path: '/login',
         name: 'Login',
         component: Login,
+    },
+    {
+        path: '/listings/:id',
+        name: 'ListingDetail',
+        component: ListingDetail,
     }
 ];
 
