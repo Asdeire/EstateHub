@@ -1,60 +1,136 @@
 <template>
-    <div class="container mx-auto p-6">
-        <div v-if="loading" class="text-center text-lg">Loading...</div>
-        <div v-else-if="error" class="text-center text-red-500">{{ error }}</div>
-        <div v-else class="bg-white shadow-lg rounded-2xl p-6">
-            <h1 class="text-3xl font-bold mb-4">{{ listing.title }}</h1>
-            <div class="flex flex-col md:flex-row">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <img v-for="(photo, index) in listing.photos" :key="index" :src="photo"
-                        :alt="`Listing Image ${index + 1}`" class="w-full h-auto rounded-2xl shadow-md" />
-                </div>
+    <Header />
+    <div class="listing-container">
+        <div v-if="loading" class="loading-message" role="status" aria-live="polite">Loading...</div>
+        <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
+        <div v-else class="listing-content">
 
-                <div class="flex-1">
-                    <p class="text-lg mb-4">{{ listing.description }}</p>
-                    <p class="text-xl font-semibold">Price: ${{ listing.price }}</p>
-                    <p class="text-md text-gray-600 mt-2">Location: {{ listing.location }}</p>
+            <div class="listing-gallery">
+                <img v-if="listing.photos.length" :src="listing.photos[0]" alt="Main Image of {{ listing.title }}"
+                    class="main-image" loading="lazy" />
+                <div class="thumbnail-container">
+                    <img v-for="(photo, index) in listing.photos.slice(1, 3)" :key="index" :src="photo"
+                        class="thumbnail" loading="lazy" alt="Thumbnail {{ index + 1 }}" />
+                    <div v-if="listing.photos.length > 4" class="thumbnail overlay" @click="openGallery">
+                        <img :src="listing.photos[3]" class="thumbnail" loading="lazy" alt="Additional photos" />
+                        <div class="overlay-text">+{{ listing.photos.length - 3 }} фото</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-6">
-                <h2 class="text-2xl font-semibold mb-2">All Listing Details</h2>
-                <div v-for="(value, key) in listing" :key="key" class="border-b py-2">
-                    <strong class="capitalize">{{ key }}:</strong>
-                    <span>{{ value }}</span>
+            <div class="listing-info">
+                <h1 class="listing-title">{{ listing.title }}</h1>
+
+                <div class="listing-tags">
+                    <span v-for="(tag, index) in listing.tags" :key="index" class="tag" @click="filterByTag(tag)">
+                        {{ tag.name }}
+                    </span>
                 </div>
+
+                <div class="listing-price">
+                    {{ formatPrice(listing.price) }}
+                    <span class="favorite-icon" @click="toggleFavorite">
+                        <img src="../assets/fav.png" alt="Позначити як улюблене" class="icon">
+                    </span>
+                </div>
+
+                <p class="listing-area">Площа: {{ listing.area }} м²</p>
+                <p class="listing-description">{{ listing.description }}</p>
+            </div>
+
+            <div class="listing-map">
+                <h2 class="map-title">{{ listing.location }}</h2>
+                <div v-if="coords" class="map-container">
+                    <l-map :zoom="13" :center="coords" class="map">
+                        <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        <l-marker :lat-lng="coords" @click="openMap"></l-marker>
+                    </l-map>
+                </div>
+                <p v-else class="no-location">Дані про місцезнаходження відсутні.</p>
             </div>
         </div>
     </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { getListingById } from '../services/api';
+import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
+import axios from "axios";
+import L from "leaflet";
+import Header from '../components/Header.vue';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: new URL("leaflet/dist/images/marker-icon-2x.png", import.meta.url).href,
+    iconUrl: new URL("leaflet/dist/images/marker-icon.png", import.meta.url).href,
+    shadowUrl: new URL("leaflet/dist/images/marker-shadow.png", import.meta.url).href,
+});
 
 const route = useRoute();
 const listing = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const coords = ref(null);
 
 const fetchListing = async () => {
     try {
         const { id } = route.params;
         listing.value = await getListingById(id);
+        await fetchCoordinates(listing.value.location);
     } catch (err) {
-        error.value = err.response?.data?.message || 'Failed to load listing';
+        error.value = err.response?.data?.message || 'Не вдалося завантажити оголошення';
     } finally {
         loading.value = false;
     }
 };
 
+const openGallery = () => {
+    alert("Галерея відкривається тут...");
+};
+
+const filterByTag = (tag) => {
+    alert(`Пошук за тегом: ${tag.name}`);
+}
+
+const formatPrice = (price, currency = 'USD') => {
+    return new Intl.NumberFormat('uk-UA', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0
+    }).format(price);
+};
+
+const fetchCoordinates = async (address) => {
+    try {
+        const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+            params: {
+                q: address,
+                format: "json",
+                limit: 1
+            }
+        });
+
+        if (response.data.length > 0) {
+            coords.value = [
+                parseFloat(response.data[0].lat),
+                parseFloat(response.data[0].lon)
+            ];
+        } else {
+            console.warn("Координати не знайдені");
+        }
+    } catch (err) {
+        console.error("Помилка отримання координат:", err);
+    }
+};
+
+const openMap = () => {
+    if (coords.value) {
+        const [lat, lon] = coords.value;
+        window.open(`https://www.google.com/maps?q=${lat},${lon}`, "_blank");
+    }
+};
+
 onMounted(fetchListing);
 </script>
-
-<style scoped>
-.container {
-    max-width: 800px;
-}
-</style>

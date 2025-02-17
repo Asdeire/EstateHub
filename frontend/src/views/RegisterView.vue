@@ -7,7 +7,7 @@
                 </a>
             </div>
             <form @submit.prevent="submitForm">
-                <div class="form-group">
+                <div class="form-group">    
                     <label for="name">Ім'я</label>
                     <input v-model="form.name" type="text" id="name" required />
                 </div>

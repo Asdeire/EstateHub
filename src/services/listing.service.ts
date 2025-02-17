@@ -15,6 +15,7 @@ class ListingService {
         status: 'Active' | 'Archived';
         category_id?: string;
         tags: string[];
+        title: string;
     }): Promise<Listing> {
         const { tags, ...listingData } = data;
 

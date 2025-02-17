@@ -29,6 +29,7 @@ model Listing {
   location      String
   price         Float
   area          Float
+  title         String @default("none")
   description   String?
   photos        String[]
   status        ListingStatus

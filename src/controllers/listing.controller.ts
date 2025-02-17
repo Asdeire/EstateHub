@@ -13,6 +13,7 @@ interface CreateListingDto {
     status: "Active" | "Archived";
     category_id?: string;
     tags: string[];
+    title: string;
 }
 
 class ListingController {

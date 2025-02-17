@@ -1,0 +1,126 @@
+.listing-container {
+    font-family: 'Open Sans';
+    margin-top: 60px;
+    padding: 0 150px;
+
+    @media (max-width: 1000px) {
+        padding: 0 20px;
+    }
+}
+
+.map-container {
+    width: 70%;
+    height: 400px;
+
+    .map {
+        border-radius: 10px;
+    }
+}
+
+.listing-gallery {
+    display: flex;
+    gap: 50px;
+}
+
+.main-image {
+    width: 70%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.thumbnail-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 30%;
+}
+
+.thumbnail {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.overlay {
+    position: relative;
+    cursor: pointer;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 98%;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 10px;
+    &:hover {
+        background: rgba(0, 0, 0, 0.7);
+    }
+}
+
+.listing-info {
+    width: 70%;
+
+    .listing-title {
+        font-size: 30px;
+        font-weight: bold;
+        margin: 20px 0 20px;
+    }
+
+    .listing-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        .tag {
+            cursor: pointer;
+            background: #F3F6F5;
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+
+            &:hover, &:focus {
+                box-shadow: 0 0 10px rgb(169, 169, 169);
+                transform: translateY(-2px); 
+                outline: none; 
+            }
+        }
+    }
+
+    .listing-price {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .favorite-icon {
+            cursor: pointer;
+            height: 26px;
+
+            .icon {
+                height: 26px;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    height: 28px;
+                }
+            }
+
+        }
+    }
+
+    .listing-area {
+        font-size: 20px;
+        margin: 15px 0;
+    }
+}
