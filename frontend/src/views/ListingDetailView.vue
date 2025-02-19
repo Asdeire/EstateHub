@@ -1,23 +1,22 @@
 <template>
     <Header />
-    <div class="listing-container">
+    <div v-if="listing" class="listing-container">
         <div v-if="loading" class="loading-message" role="status" aria-live="polite">Loading...</div>
         <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
-        <div v-else class="listing-content">
 
-            <div class="listing-gallery">
-                <img v-if="listing.photos.length" :src="listing.photos[0]" alt="Main Image of {{ listing.title }}"
-                    class="main-image" loading="lazy" />
-                <div class="thumbnail-container">
-                    <img v-for="(photo, index) in listing.photos.slice(1, 3)" :key="index" :src="photo"
-                        class="thumbnail" loading="lazy" alt="Thumbnail {{ index + 1 }}" />
-                    <div v-if="listing.photos.length > 4" class="thumbnail overlay" @click="openGallery">
-                        <img :src="listing.photos[3]" class="thumbnail" loading="lazy" alt="Additional photos" />
-                        <div class="overlay-text">+{{ listing.photos.length - 3 }} фото</div>
-                    </div>
+        <div class="listing-gallery">
+            <img v-if="listing?.photos?.length" :src="listing.photos[0]" alt="Main Image of {{ listing.title }}"
+                class="main-image" loading="lazy" />
+            <div class="thumbnail-container">
+                <img v-for="(photo, index) in listing.photos.slice(1, 3)" :key="index" :src="photo" class="thumbnail"
+                    loading="lazy" alt="Thumbnail {{ index + 1 }}" />
+                <div v-if="listing.photos.length > 4" class="thumbnail overlay" @click="openGallery">
+                    <img :src="listing.photos[3]" class="thumbnail" loading="lazy" alt="Additional photos" />
+                    <div class="overlay-text">+{{ listing.photos.length - 3 }} фото</div>
                 </div>
             </div>
-
+        </div>
+        <div class="listing-content">
             <div class="listing-info">
                 <h1 class="listing-title">{{ listing.title }}</h1>
 
@@ -27,9 +26,9 @@
                     </span>
                 </div>
 
-                <div class="listing-price">
-                    {{ formatPrice(listing.price) }}
-                    <span class="favorite-icon" @click="toggleFavorite">
+                <div class="listing-price" @click="toggleCurrency">
+                    {{ formattedPrice }}
+                    <span class="favorite-icon" @click.stop="toggleFavorite">
                         <img src="../assets/fav.png" alt="Позначити як улюблене" class="icon">
                     </span>
                 </div>
@@ -38,28 +37,41 @@
                 <p class="listing-description">{{ listing.description }}</p>
             </div>
 
-            <div class="listing-map">
-                <h2 class="map-title">{{ listing.location }}</h2>
-                <div v-if="coords" class="map-container">
-                    <l-map :zoom="13" :center="coords" class="map">
-                        <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <l-marker :lat-lng="coords" @click="openMap"></l-marker>
-                    </l-map>
+            <div class="listing-contact">
+                <div class="user-info">
+                    <img :src="userIcon" alt="Іконка користувача" class="user-icon" />
+                    <div class="user-details">
+                        <p class="user-name">{{ user?.name }}</p>
+                        <p v-if="user?.role === 'Makler'" class="agent-status">Агент</p>
+                    </div>
                 </div>
-                <p v-else class="no-location">Дані про місцезнаходження відсутні.</p>
+                <button class="contact-button" @click="contactUser">Зв'язатись</button>
             </div>
+        </div>
+
+        <div class="listing-map">
+            <h2 class="map-title">{{ listing.location }}</h2>
+            <div v-if="coords" class="map-container">
+                <l-map :zoom="13" :center="coords" class="map">
+                    <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    <l-marker :lat-lng="coords" @click="openMap"></l-marker>
+                </l-map>
+            </div>
+            <p v-else class="no-location">Дані про місцезнаходження відсутні.</p>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { getListingById } from '../services/api';
+import { getListingById, getUserById } from '../services/api';
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
 import L from "leaflet";
 import Header from '../components/Header.vue';
+import agentIcon from '../assets/agency.png';
+import userIconDefault from '../assets/user-icon.png';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -73,17 +85,56 @@ const listing = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const coords = ref(null);
+const user = ref(null);
+const currency = ref('USD');
+const exchangeRate = ref(1);
 
 const fetchListing = async () => {
     try {
         const { id } = route.params;
         listing.value = await getListingById(id);
         await fetchCoordinates(listing.value.location);
+        const userId = listing.value.user_id;
+        if (userId) {
+            user.value = await getUserById(userId);
+        }
     } catch (err) {
         error.value = err.response?.data?.message || 'Не вдалося завантажити оголошення';
     } finally {
         loading.value = false;
     }
+};
+
+const fetchExchangeRate = async () => {
+    try {
+        const response = await axios.get("https://api.exchangerate-api.com/v4/latest/USD");
+        exchangeRate.value = response.data.rates.UAH;
+    } catch (err) {
+        console.error("Помилка отримання курсу валют:", err);
+    }
+};
+
+const formattedPrice = computed(() => {
+    if (!listing.value) return "";
+    const price = currency.value === "USD"
+        ? listing.value.price
+        : listing.value.price * exchangeRate.value;
+
+    return new Intl.NumberFormat('uk-UA', {
+        style: 'currency',
+        currency: currency.value,
+        minimumFractionDigits: 0
+    }).format(price);
+});
+
+const toggleCurrency = () => {
+    currency.value = currency.value === "USD" ? "UAH" : "USD";
+};
+
+const userIcon = computed(() => user.value?.role === 'Makler' ? agentIcon : userIconDefault);
+
+const contactUser = () => {
+    alert(`Зв'язок із ${user.value?.name}`);
 };
 
 const openGallery = () => {
@@ -92,14 +143,6 @@ const openGallery = () => {
 
 const filterByTag = (tag) => {
     alert(`Пошук за тегом: ${tag.name}`);
-}
-
-const formatPrice = (price, currency = 'USD') => {
-    return new Intl.NumberFormat('uk-UA', {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 0
-    }).format(price);
 };
 
 const fetchCoordinates = async (address) => {

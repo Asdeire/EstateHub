@@ -3,8 +3,213 @@
     margin-top: 60px;
     padding: 0 150px;
 
+    @media (max-width: 1200px) {
+        padding: 0 50px;
+    }
+
     @media (max-width: 1000px) {
         padding: 0 20px;
+    }
+}
+
+.listing-gallery {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .main-image {
+        width: 70%;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .thumbnail-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 25%;
+    }
+
+    .thumbnail {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .overlay {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .overlay-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 98%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        border-radius: 10px;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+    }
+}
+
+.listing-content {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    justify-content: space-between;
+
+    .listing-info {
+        width: 70%;
+
+        @media (max-width: 768px) {
+            width: 100%;
+        }
+
+        .listing-title {
+            font-size: 30px;
+            font-weight: bold;
+            margin-top: 0;
+
+            @media (max-width: 768px) {
+                font-size: 24px;
+            }
+        }
+
+        .listing-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+
+            .tag {
+                cursor: pointer;
+                background: #F3F6F5;
+                padding: 6px 12px;
+                font-size: 14px;
+                border-radius: 12px;
+                transition: all 0.3s ease;
+
+                &:hover,
+                &:focus {
+                    box-shadow: 0 0 10px rgb(169, 169, 169);
+                    transform: translateY(-2px);
+                    outline: none;
+                }
+            }
+        }
+
+        .listing-price {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+
+            @media (max-width: 768px) {
+                font-size: 20px;
+                gap: 0.5rem;
+            }
+
+            .favorite-icon {
+                cursor: pointer;
+                height: 26px;
+
+                .icon {
+                    height: 26px;
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        height: 28px;
+                    }
+                }
+            }
+        }
+
+        .listing-area {
+            font-size: 20px;
+            margin: 15px 0;
+
+            @media (max-width: 768px) {
+                font-size: 16px;
+            }
+        }
+    }
+
+    .listing-contact {
+        width: 25%;
+
+        @media (max-width: 768px) {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            background: #F3F6F5;
+            padding: 12px 16px;
+            border-radius: 10px;
+            gap: 12px;
+            margin-bottom: 12px;
+
+            .user-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .user-details {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .user-name {
+                font-size: 16px;
+                font-weight: 700;
+                color: #184F4F;
+                margin: 0;
+            }
+
+            .agent-status {
+                font-size: 14px;
+                font-weight: 500;
+                color: #184F4F;
+                margin: 0;
+            }
+        }
+
+        .contact-button {
+            background: #07484AB2;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 15px 0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+
+            &:hover {
+                background: #3D6666;
+            }
+
+            @media (max-width: 768px) {
+                font-size: 14px;
+                padding: 12px 0;
+            }
+        }
     }
 }
 
@@ -12,115 +217,12 @@
     width: 70%;
     height: 400px;
 
+    @media (max-width: 768px) {
+        width: 100%;
+        height: 300px;
+    }
+
     .map {
         border-radius: 10px;
-    }
-}
-
-.listing-gallery {
-    display: flex;
-    gap: 50px;
-}
-
-.main-image {
-    width: 70%;
-    height: auto;
-    border-radius: 10px;
-}
-
-.thumbnail-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 30%;
-}
-
-.thumbnail {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-}
-
-.overlay {
-    position: relative;
-    cursor: pointer;
-}
-
-.overlay-text {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 98%;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    border-radius: 10px;
-    &:hover {
-        background: rgba(0, 0, 0, 0.7);
-    }
-}
-
-.listing-info {
-    width: 70%;
-
-    .listing-title {
-        font-size: 30px;
-        font-weight: bold;
-        margin: 20px 0 20px;
-    }
-
-    .listing-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-
-        .tag {
-            cursor: pointer;
-            background: #F3F6F5;
-            padding: 6px 12px;
-            font-size: 14px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-
-            &:hover, &:focus {
-                box-shadow: 0 0 10px rgb(169, 169, 169);
-                transform: translateY(-2px); 
-                outline: none; 
-            }
-        }
-    }
-
-    .listing-price {
-        font-size: 24px;
-        font-weight: bold;
-        margin-top: 20px;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-
-        .favorite-icon {
-            cursor: pointer;
-            height: 26px;
-
-            .icon {
-                height: 26px;
-                transition: all 0.3s ease;
-
-                &:hover {
-                    height: 28px;
-                }
-            }
-
-        }
-    }
-
-    .listing-area {
-        font-size: 20px;
-        margin: 15px 0;
     }
 }

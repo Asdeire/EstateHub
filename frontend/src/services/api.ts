@@ -52,3 +52,13 @@ export const getListingById = async (id: string) => {
         throw error;
     }
 };
+
+export const getUserById = async (userId: string) => {
+    try {
+        const response = await api.get(`/user/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching user with ID ${userId}:`, error);
+        throw error;
+    }
+};
