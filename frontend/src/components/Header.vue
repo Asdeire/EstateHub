@@ -13,7 +13,7 @@
                     :class="{ active: isActive('/subscription') }">Підписка</router-link>
                 <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }">Про нас</router-link>
             </nav>
-
+            
             <div class="user-actions">
                 <img src="../assets/user-icon.png" alt="User" class="icon" />
                 <img src="../assets/translate.png" alt="Logout" class="icon" />

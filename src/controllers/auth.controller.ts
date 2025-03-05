@@ -10,6 +10,7 @@ interface LoginRequestBody {
 
 interface RegisterRequestBody {
     name: string;
+    code: string;
     email: string;
     password: string;
     role: 'User' | 'Makler';
@@ -49,12 +50,30 @@ export class AuthController {
                 return reply.status(400).send({ message: 'Email is already in use' });
             }
 
-            const user = await authService.register(name, email, password, role);
+            // Відправляємо код підтвердження
+            await authService.sendVerificationCode(email);
+
+            return reply.status(201).send({ message: 'Verification code sent successfully to ' + email });
+        } catch (error) {
+            if (error instanceof Error) {
+                return reply.status(500).send({ message: error.message });
+            }
+            console.error('Unexpected error:', error);
+            return reply.status(500).send({ message: 'An unknown error occurred' });
+        }
+    }
+
+    // Перевірка коду підтвердження
+    async verify(request: FastifyRequest<{ Body: RegisterRequestBody }>, reply: FastifyReply) {
+        try {
+            const { email, code, name, password, role } = request.body;
+
+            const user = await authService.verifyCodeAndRegisterUser(email, code, name, password, role);
 
             return reply.status(201).send({ message: 'User registered successfully', user });
         } catch (error) {
             if (error instanceof Error) {
-                return reply.status(500).send({ message: error.message });
+                return reply.status(400).send({ message: error.message });
             }
             console.error('Unexpected error:', error);
             return reply.status(500).send({ message: 'An unknown error occurred' });

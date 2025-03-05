@@ -30,10 +30,26 @@ export const registerUser = async (userData: {
     password: string;
     role: 'User' | 'Makler';
 }) => {
+    try {
     const response = await api.post('/register', userData);
     return response.data;
+    }
+    catch(error) {
+        console.error('Error registering user:', error);
+        throw error;
+    }
 };
 
+export const verifyCode = async (verificationData: {
+    email: string;
+    code: string;
+    name: string;
+    password: string;
+    role: 'User' | 'Makler';
+}) => {
+    const response = await api.post('/verify', verificationData);
+    return response.data;
+};
 
 export const loginUser = async (credentials: {
     email: string;

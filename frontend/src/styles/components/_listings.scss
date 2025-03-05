@@ -1,0 +1,68 @@
+.search-container {
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    background: #f8f8f8;
+    border-bottom: 1px solid #ddd;
+
+    input {
+        width: 300px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        outline: none;
+
+        &:focus {
+            border-color: #007bff;
+        }
+    }
+
+    select {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+}
+
+.listings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    justify-items: center;
+}
+
+.listing-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+
+.no-listings {
+    text-align: center;
+    font-size: 18px;
+    color: #888;
+    padding: 40px;
+}
+
+.loading-message,
+.error-message {
+    text-align: center;
+    font-size: 18px;
+    padding: 20px;
+}
