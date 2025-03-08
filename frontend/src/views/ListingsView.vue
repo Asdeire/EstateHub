@@ -30,18 +30,21 @@
                 @click="goToListingDetail(listing.id)">
                 <img :src="listing.photos[0]" alt="Зображення {{ listing.title }}" class="listing-image" />
                 <div class="listing-info">
-                    <h2>{{ listing.title }}</h2>
+                    <div class="title-and-favorite">
+                        <h2>{{ listing.title }}</h2>
+                        <span class="favorite-icon" @click.stop="toggleFavorite(listing)">
+                            <img src="../assets/fav.png" alt="Лайк" />
+                        </span>
+                    </div>
                     <p class="listing-location">{{ listing.location }}</p>
-                    <p class="listing-price">{{ listing.price }}</p>
+                    <h2 class="listing-price">{{ listing.price }}$</h2>
                 </div>
-                <span class="favorite-icon" @click.stop="toggleFavorite(listing)">
-                    <img src="../assets/fav.png" alt="Лайк" />
-                </span>
             </div>
         </div>
         <div v-else class="no-listings">Немає доступних оголошень.</div>
     </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, computed } from "vue";

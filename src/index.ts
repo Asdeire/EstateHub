@@ -9,7 +9,7 @@ dotenv.config();
 
 const app = fastify();
 
-app.register(userRoutes);
+app.register(userRoutes);   
 app.register(listingRoutes);
 app.register(authRoutes);
 

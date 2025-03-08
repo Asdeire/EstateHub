@@ -9,7 +9,7 @@ export class UserService {
                 where: { id: userId },
             });
             return user;
-        } catch (error) {
+        } catch (error) {   
             console.error(error);
             throw new Error('Error fetching user data');
         }

@@ -6,7 +6,7 @@ import { User } from '@prisma/client';
 const mailjet = require('node-mailjet').apiConnect(
     process.env.MAILJET_API_KEY || 'default_api_key',
     process.env.MAILJET_API_SECRET || 'default_api_secret'
-);
+);  
 
 const prisma = new PrismaClient();
 

@@ -10,3 +10,4 @@ export async function userRoutes(fastify: FastifyInstance) {
 
     fastify.delete('/user/:id', userController.deleteUser);
 }
+    

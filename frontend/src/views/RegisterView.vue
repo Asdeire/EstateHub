@@ -65,7 +65,7 @@ const form = ref({
     email: '',
     password: '',
     isAgent: false,
-    verificationCode: '', // Додали поле для коду підтвердження
+    verificationCode: '',
 });
 
 const passwordError = computed(() => {
@@ -74,12 +74,11 @@ const passwordError = computed(() => {
     return password && !regex.test(password);
 });
 
-const step = ref(1); // Крок реєстрації: 1 - основна форма, 2 - форма підтвердження
+const step = ref(1);
 
 const submitForm = async () => {
     try {
         if (step.value === 1) {
-            // Крок 1: реєстрація
             await registerUser({
                 name: form.value.name,
                 email: form.value.email,
@@ -87,10 +86,8 @@ const submitForm = async () => {
                 role: form.value.isAgent ? 'Makler' : 'User',
             });
             console.log('Код підтвердження відправлено на пошту ' + form.value.email);
-            // Переходимо на крок введення коду
             step.value = 2;
         } else if (step.value === 2) {
-            // Крок 2: перевірка коду підтвердження
             await verifyCode({
                 email: form.value.email,
                 code: form.value.verificationCode,
@@ -102,7 +99,12 @@ const submitForm = async () => {
             router.push('/login');
         }
     } catch (err) {
-        alert('Помилка реєстрації або підтвердження коду!');
+        if (err.response && err.response.data.message === 'Email is already in use') {
+            alert('Ця електронна пошта вже використовується. Спробуйте іншу.');
+        } else {
+            alert('Помилка реєстрації або підтвердження коду!');
+        }
     }
 };
+
 </script>

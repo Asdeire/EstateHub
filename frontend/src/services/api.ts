@@ -11,7 +11,7 @@ export const getListings = async () => {
     } catch (error) {
         console.error('Error fetching listings:', error);
         throw error;
-    }
+    }       
 };
 
 export const createListing = async (listingData: any) => {
@@ -31,11 +31,11 @@ export const registerUser = async (userData: {
     role: 'User' | 'Makler';
 }) => {
     try {
-    const response = await api.post('/register', userData);
-    return response.data;
-    }
-    catch(error) {
-        console.error('Error registering user:', error);
+        const response = await api.post('/register', userData);
+        return response.data;
+    } catch (error) {
+        const err = error as any;
+        console.error('Помилка при реєстрації:', err.response?.data || err.message);
         throw error;
     }
 };
@@ -78,3 +78,4 @@ export const getUserById = async (userId: string) => {
         throw error;
     }
 };
+

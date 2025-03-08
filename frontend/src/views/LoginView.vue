@@ -52,8 +52,8 @@ const submitForm = async () => {
 
         localStorage.setItem('authToken', response.token);
 
-        error.value = null;
-        router.push('/');
+        error.value = null; 
+        router.push('/listings');
     } catch (err: any) {
         error.value = err.response?.data?.message || 'Помилка входу';
     }

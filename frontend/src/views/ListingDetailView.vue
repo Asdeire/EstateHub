@@ -62,7 +62,7 @@
     </div>
 </template>
 
-<script setup>  
+<script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { getListingById, getUserById } from '../services/api';
@@ -175,6 +175,8 @@ const openMap = () => {
     }
 };
 
-onMounted(fetchListing);
+onMounted(async () => {
+    await fetchListing();
+    await fetchExchangeRate();
+});
 </script>
-    
