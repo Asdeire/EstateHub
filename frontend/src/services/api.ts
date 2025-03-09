@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { User } from '../types/user';
 
 const api = axios.create({
     baseURL: 'http://localhost:3000',
@@ -11,7 +12,7 @@ export const getListings = async () => {
     } catch (error) {
         console.error('Error fetching listings:', error);
         throw error;
-    }       
+    }
 };
 
 export const createListing = async (listingData: any) => {
@@ -69,13 +70,12 @@ export const getListingById = async (id: string) => {
     }
 };
 
-export const getUserById = async (userId: string) => {
+export const getUserById = async (userId: string): Promise<User> => {
     try {
-        const response = await api.get(`/user/${userId}`);
+        const response = await api.get<User>(`/user/${userId}`);
         return response.data;
-    } catch (error) {
-        console.error(`Error fetching user with ID ${userId}:`, error);
-        throw error;
+    } catch (error: any) {
+        console.error(`Error fetching user with ID ${userId}:`, error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || 'Failed to fetch user');
     }
 };
-

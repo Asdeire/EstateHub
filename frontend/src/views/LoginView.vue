@@ -33,8 +33,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { loginUser } from '../services/api';
+import { useAuthStore } from '../store/useAuthStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const form = ref({
     email: '',
@@ -45,14 +47,15 @@ const error = ref<string | null>(null);
 
 const submitForm = async () => {
     try {
-        const response = await loginUser({
-            email: form.value.email,
-            password: form.value.password,
-        });
+        const response = await loginUser(form.value);
+        const token = response.token;
+        localStorage.setItem('authToken', token);
 
-        localStorage.setItem('authToken', response.token);
+        const userId = JSON.parse(atob(token.split('.')[1])).id;
 
-        error.value = null; 
+        await authStore.fetchUser(userId);
+
+        error.value = null;
         router.push('/listings');
     } catch (err: any) {
         error.value = err.response?.data?.message || 'Помилка входу';
