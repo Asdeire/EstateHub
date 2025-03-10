@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Favorite {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  listing_id String
+  listing    Listing  @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+
+  @@unique([user_id, listing_id]) // Уникальність зв'язку користувача та оголошення
+}
+
 model User {
   id            String   @id @default(uuid())
   name          String
@@ -18,6 +29,7 @@ model User {
   listings      Listing[]
   subscriptions Subscription[]
   notifications Notification[]
+  favorites     Favorite[]
 }
 
 model Listing {
@@ -38,9 +50,8 @@ model Listing {
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
   tags          Tag[]    @relation("ListingTags")
+  favorites     Favorite[]
 }
-
-
 
 model Subscription {
   id            String   @id @default(uuid())

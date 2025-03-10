@@ -1,7 +1,7 @@
 <template>
     <Header />
     <div class="search-container">
-        <input v-model="searchQuery" type="text" placeholder="Ввести напрямок" class="search-box" />
+        <input v-model="searchQuery" type="text" placeholder="Введіть напрямок" class="search-box" />
         <select v-model="selectedType">
             <option value="">Усі типи</option>
             <option v-for="type in uniqueTypes" :key="type" :value="type">{{ type }}</option>
@@ -17,8 +17,8 @@
         <select v-model="sortBy">
             <option value="newest">Новіші</option>
             <option value="oldest">Старіші</option>
-            <option value="a-z">А-Я</option>
-            <option value="z-a">Я-А</option>
+            <option value="a-z">A-Я</option>
+            <option value="z-a">Я-A</option>
         </select>
     </div>
 
@@ -28,12 +28,12 @@
         <div v-if="filteredListings.length > 0" class="listings-container">
             <div v-for="listing in filteredListings" :key="listing.id" class="listing-card"
                 @click="goToListingDetail(listing.id)">
-                <img :src="listing.photos[0]" alt="Зображення {{ listing.title }}" class="listing-image" />
+                <img :src="listing.photos[0]" alt="Image {{ listing.title }}" class="listing-image" />
                 <div class="listing-info">
                     <div class="title-and-favorite">
                         <h2>{{ listing.title }}</h2>
                         <span class="favorite-icon" @click.stop="toggleFavorite(listing)">
-                            <img src="../assets/fav.png" alt="Лайк" />
+                            <img :src="listing.isFavorite ? '/fav-filled.png' : '/fav.png'" alt="Улюблене" />
                         </span>
                     </div>
                     <p class="listing-location">{{ listing.location }}</p>
@@ -45,12 +45,12 @@
     </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../store/useAuthStore';
 import Header from "../components/Header.vue";
-import { getListings } from "../services/api";
+import { getListings, addFavorite, removeFavorite, getFavorites } from "../services/api";
 
 const router = useRouter();
 const listings = ref([]);
@@ -61,16 +61,60 @@ const selectedType = ref('');
 const selectedTag = ref('');
 const selectedCategory = ref('');
 const sortBy = ref('newest');
+const isAuthenticated = ref(!!localStorage.getItem('token'));
+const favorites = ref(new Set());
+const authStore = useAuthStore();
 
 const fetchListings = async () => {
+    console.log("Loading listings...");
     try {
         const data = await getListings();
+        console.log("Listings loaded:", data);
         listings.value = data;
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Не вдалося завантажити оголошення';
-    } finally {
+        loading.value = false;
+
+        if (authStore.isAuthenticated) {
+            console.log("User is authenticated, fetching favorites...");
+            try {
+                const favData = await getFavorites();
+                console.log("Favorites fetched:", favData);
+                favorites.value = new Set(favData.map(fav => fav.listing_id));
+            } catch (error) {
+                console.error("Error fetching favorites:", error);
+            }
+        }
+
+        listings.value.forEach(listing => {
+            listing.isFavorite = favorites.value.has(listing.id);
+        });
+    } catch (error) {
+        console.error("Error loading listings:", error);
         loading.value = false;
     }
+};
+
+const toggleFavorite = async (listing) => {
+    if (!authStore.isAuthenticated) {
+        alert("Будь ласка, увійдіть, щоб додати до улюблених!");
+        return;
+    }
+    try {
+        if (favorites.value.has(listing.id)) {
+            await removeFavorite(listing.id);
+            favorites.value.delete(listing.id);
+            listing.isFavorite = false;
+        } else {
+            await addFavorite(listing.id);
+            favorites.value.add(listing.id);
+            listing.isFavorite = true;
+        }
+    } catch (error) {
+        console.error("Error toggling favorite status:", error);
+    }
+};
+
+const goToListingDetail = (listingId) => {
+    router.push({ name: 'ListingDetail', params: { id: listingId } });
 };
 
 const uniqueTypes = computed(() => [...new Set(listings.value.map((item) => item.type))]);
@@ -110,14 +154,6 @@ const filteredListings = computed(() => {
 
     return result;
 });
-
-const toggleFavorite = (listing) => {
-    listing.isFavorite = !listing.isFavorite;
-};
-
-const goToListingDetail = (listingId) => {
-    router.push({ name: 'ListingDetail', params: { id: listingId } });
-};
 
 onMounted(fetchListings);
 </script>

@@ -56,7 +56,7 @@ const submitForm = async () => {
         await authStore.fetchUser(userId);
 
         error.value = null;
-        router.push('/listings');
+        router.push('/');
     } catch (err: any) {
         error.value = err.response?.data?.message || 'Помилка входу';
     }

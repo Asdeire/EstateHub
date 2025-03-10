@@ -79,7 +79,7 @@ const toggleUserMenu = () => {
 
 const logout = () => {
     authStore.logout();
-    router.push('/listings');
+    router.push('/');
 };
 
 window.addEventListener('resize', () => {
