@@ -1,47 +1,35 @@
 <template>
     <Header />
-    <div class="search-container">
-        <input v-model="searchQuery" type="text" placeholder="Введіть напрямок" class="search-box" />
-        <select v-model="selectedType">
-            <option value="">Усі типи</option>
-            <option v-for="type in uniqueTypes" :key="type" :value="type">{{ type }}</option>
-        </select>
-        <select v-model="selectedTag">
-            <option value="">Усі теги</option>
-            <option v-for="tag in uniqueTags" :key="tag" :value="tag">{{ tag.name }}</option>
-        </select>
-        <select v-model="selectedCategory">
-            <option value="">Усі категорії</option>
-            <option v-for="category in uniqueCategories" :key="category" :value="category">{{ category.name }}</option>
-        </select>
-        <select v-model="sortBy">
-            <option value="newest">Новіші</option>
-            <option value="oldest">Старіші</option>
-            <option value="a-z">A-Я</option>
-            <option value="z-a">Я-A</option>
-        </select>
-    </div>
-
-    <div v-if="loading" class="loading-message">Завантаження...</div>
-    <div v-else-if="error" class="error-message">{{ error }}</div>
-    <div v-else>
-        <div v-if="filteredListings.length > 0" class="listings-container">
-            <div v-for="listing in filteredListings" :key="listing.id" class="listing-card"
-                @click="goToListingDetail(listing.id)">
-                <img :src="listing.photos[0]" alt="Image {{ listing.title }}" class="listing-image" />
-                <div class="listing-info">
-                    <div class="title-and-favorite">
-                        <h2>{{ listing.title }}</h2>
-                        <span class="favorite-icon" @click.stop="toggleFavorite(listing)">
-                            <img :src="listing.isFavorite ? '/fav-filled.png' : '/fav.png'" alt="Улюблене" />
-                        </span>
-                    </div>
-                    <p class="listing-location">{{ listing.location }}</p>
-                    <h2 class="listing-price">{{ listing.price }}$</h2>
-                </div>
-            </div>
+    <div class="container">
+        <div class="search-container">
+            <input v-model="searchQuery" type="text" placeholder="Введіть напрямок" class="search-box" />
+            <select v-model="selectedType">
+                <option value="">Усі типи</option>
+                <option v-for="type in uniqueTypes" :key="type" :value="type">{{ type }}</option>
+            </select>
+            <select v-model="selectedTag">
+                <option value="">Усі теги</option>
+                <option v-for="tag in uniqueTags" :key="tag" :value="tag">{{ tag.name }}</option>
+            </select>
+            <select v-model="selectedCategory">
+                <option value="">Усі категорії</option>
+                <option v-for="category in uniqueCategories" :key="category" :value="category">{{ category.name }}
+                </option>
+            </select>
+            <select v-model="sortBy">
+                <option value="newest">Новіші</option>
+                <option value="oldest">Старіші</option>
+                <option value="a-z">A-Я</option>
+                <option value="z-a">Я-A</option>
+            </select>
         </div>
-        <div v-else class="no-listings">Немає доступних оголошень.</div>
+
+        <div v-if="loading" class="loading-message">Завантаження...</div>
+        <div v-else-if="error" class="error-message">{{ error }}</div>
+        <div v-else class="list-container">
+            <Listings :listings="filteredListings" :goToListingDetail="goToListingDetail"
+                :toggleFavorite="toggleFavorite" />
+        </div>
     </div>
 </template>
 
@@ -50,6 +38,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import Header from "../components/Header.vue";
+import Listings from "../components/ListingCard.vue";
 import { getListings, addFavorite, removeFavorite, getFavorites } from "../services/api";
 
 const router = useRouter();

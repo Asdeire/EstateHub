@@ -16,6 +16,7 @@
                 </div>
             </div>
         </div>
+
         <div class="listing-content">
             <div class="listing-info">
                 <h1 class="listing-title">{{ listing.title }}</h1>
@@ -29,7 +30,8 @@
                 <div class="listing-price" @click="toggleCurrency">
                     {{ formattedPrice }}
                     <span class="favorite-icon" @click.stop="toggleFavorite">
-                        <img src="../assets/fav.png" alt="Позначити як улюблене" class="icon">
+                        <img :src="listing.isFavorite ? '/fav-filled.png' : '/fav.png'" alt="Позначити як улюблене"
+                            class="icon">
                     </span>
                 </div>
 
@@ -62,10 +64,12 @@
     </div>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { getListingById, getUserById } from '../services/api';
+import { useAuthStore } from '../store/useAuthStore';
+import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite } from '../services/api';
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
 import L from "leaflet";
@@ -89,6 +93,9 @@ const user = ref(null);
 const currency = ref('USD');
 const exchangeRate = ref(1);
 
+const authStore = useAuthStore();
+const favorites = ref(new Set());
+
 const fetchListing = async () => {
     try {
         const { id } = route.params;
@@ -98,10 +105,45 @@ const fetchListing = async () => {
         if (userId) {
             user.value = await getUserById(userId);
         }
+
+        if (authStore.isAuthenticated) {
+            await fetchFavorites();
+        }
+
+        listing.value.isFavorite = favorites.value.has(listing.value.id);
     } catch (err) {
         error.value = err.response?.data?.message || 'Не вдалося завантажити оголошення';
     } finally {
         loading.value = false;
+    }
+};
+
+const fetchFavorites = async () => {
+    try {
+        const favData = await getFavorites();
+        favorites.value = new Set(favData.map(fav => fav.listing_id));
+    } catch (error) {
+        console.error("Помилка отримання улюблених:", error);
+    }
+};
+
+const toggleFavorite = async () => {
+    if (!authStore.isAuthenticated) {
+        alert("Будь ласка, увійдіть, щоб додати до улюблених!");
+        return;
+    }
+    try {
+        if (favorites.value.has(listing.value.id)) {
+            await removeFavorite(listing.value.id);
+            favorites.value.delete(listing.value.id);
+            listing.value.isFavorite = false;
+        } else {
+            await addFavorite(listing.value.id);
+            favorites.value.add(listing.value.id);
+            listing.value.isFavorite = true;
+        }
+    } catch (error) {
+        console.error("Помилка зміни статусу улюбленого:", error);
     }
 };
 
