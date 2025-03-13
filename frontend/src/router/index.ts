@@ -4,7 +4,7 @@ import Login from '../views/LoginView.vue'
 import Home from '../views/HomeView.vue';
 import Listings from '../views/ListingsView.vue';
 import ListingDetail from '../views/ListingDetailView.vue';
-//import MyListings from '../views/MyListingsView.vue';
+import MyListings from '../views/MyListingsView.vue';
 
 const routes = [
     {
@@ -31,12 +31,12 @@ const routes = [
         path: '/listings/:id',
         name: 'ListingDetail',
         component: ListingDetail,
-    }
-    /*{
-        path: '/my-listings',
+    },
+    {
+        path: '/mylistings',
         name: 'MyListings',
         component: MyListings,
-    }*/
+    }
 ];
 
 const router = createRouter({

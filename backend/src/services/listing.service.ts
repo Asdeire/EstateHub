@@ -18,14 +18,15 @@ class ListingService {
         title: string;
     }): Promise<Listing> {
         const { tags, ...listingData } = data;
-
         const listing = await prisma.listing.create({
             data: {
                 ...listingData,
                 status: data.status === 'Active' ? 'Active' : 'Archived',
                 tags: {
-                    connect: tags.map((tagId) => ({ id: tagId })),
-                },
+                    connect: tags.map((tag: string | { id: string }) =>
+                        typeof tag === 'string' ? { id: tag } : { id: tag.id }
+                    ),
+                }
             },
         });
 

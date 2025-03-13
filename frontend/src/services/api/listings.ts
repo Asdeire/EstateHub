@@ -33,7 +33,9 @@ export const getListingById = async (id: string): Promise<Listing | null> => {
 
 export const updateListing = async (id: string, listingData: CreateListingDto): Promise<Listing> => {
     try {
+        console.log('Updating listing with data:', listingData);
         const response = await api.put(`/listings/${id}`, listingData);
+        console.log("Response:", response);
         return response.data;
     } catch (error) {
         console.error(`Error updating listing with ID ${id}:`, error);

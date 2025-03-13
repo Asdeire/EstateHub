@@ -38,7 +38,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import Header from "../components/Header.vue";
-import Listings from "../components/ListingCard.vue";
+import Listings from "../components/listing/ListingCard.vue";
 import { getListings, addFavorite, removeFavorite, getFavorites } from "../services/api/index";
 
 const router = useRouter();
