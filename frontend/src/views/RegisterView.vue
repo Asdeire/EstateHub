@@ -57,7 +57,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { registerUser, verifyCode } from '../services/api';
+import { registerUser, verifyCode } from '../services/api/index';
 
 const router = useRouter();
 const form = ref({

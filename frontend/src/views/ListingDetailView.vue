@@ -69,7 +69,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
-import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite } from '../services/api';
+import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite } from '../services/api/index';
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
 import L from "leaflet";
@@ -176,8 +176,13 @@ const toggleCurrency = () => {
 const userIcon = computed(() => user.value?.role === 'Makler' ? agentIcon : userIconDefault);
 
 const contactUser = () => {
+    if (!authStore.isAuthenticated) {
+        alert("Будь ласка, увійдіть, щоб зв'язатися з власником!");
+        return;
+    }
     alert(`Зв'язок із ${user.value?.name}`);
 };
+
 
 const openGallery = () => {
     alert("Галерея відкривається тут...");

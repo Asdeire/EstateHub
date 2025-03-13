@@ -26,7 +26,7 @@
 
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
-        <div v-else class="list-container">
+        <div v-else>
             <Listings :listings="filteredListings" :goToListingDetail="goToListingDetail"
                 :toggleFavorite="toggleFavorite" />
         </div>
@@ -39,7 +39,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import Header from "../components/Header.vue";
 import Listings from "../components/ListingCard.vue";
-import { getListings, addFavorite, removeFavorite, getFavorites } from "../services/api";
+import { getListings, addFavorite, removeFavorite, getFavorites } from "../services/api/index";
 
 const router = useRouter();
 const listings = ref([]);

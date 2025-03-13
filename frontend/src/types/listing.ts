@@ -7,7 +7,24 @@ export interface Listing {
     price: number;
     area: number;
     description?: string;
+    photos: string[];
     status: 'Active' | 'Archived';
-    created_at: string;
-    updated_at: string;
+    category_id?: string;
+    tags: string[];
+    title: string;
+}
+
+export interface CreateListingDto {
+    user_id: string;
+    is_agent_listing: boolean;
+    type: string;
+    location: string;
+    price: number;
+    area: number;
+    description?: string;
+    photos: string[];
+    status: 'Active' | 'Archived';
+    category_id?: string;
+    tags: string[];
+    title: string;
 }

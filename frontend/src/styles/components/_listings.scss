@@ -27,11 +27,8 @@
         font-size: 16px;
         cursor: pointer;
         background: none;
+        @media(max-width: 1400px){
+            display: none;
+        }
     }
-}
-
-.list-container {
-    display: flex;
-    justify-content: center;
-    min-height: 90vh;
 }

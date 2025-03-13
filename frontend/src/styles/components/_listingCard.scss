@@ -1,19 +1,20 @@
 .listings-container {
-    display: inline-flex;
-    gap: 20px;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    padding: 0 auto;
-    margin: 0 150px;
+    display: grid;
+    justify-content: center;
+    gap: 30px;
+    grid-template-columns: repeat(4, minmax(340px, 1fr));
+    min-height: 90vh;
 
-    @media (max-width: 1000px) {
-        margin: 0 50px;
+    @media(max-width: 1700px) {
+        grid-template-columns: repeat(3, 1fr);
     }
 
-    @media (max-width: 768px) {
-        margin: 0 20px;
-        flex-direction: column;
-        gap: 10px;
+    @media (max-width: 1300px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 800px) {
+        grid-template-columns: repeat(1, 1fr);
     }
 }
 
@@ -36,17 +37,6 @@
 
     &:hover {
         transform: translateY(-5px);
-    }
-
-    @media (max-width: 1200px) {
-        width: 400px;
-    }
-
-    @media (max-width: 768px) {
-        width: 95%;
-        max-height: none;
-        height: auto;
-        padding: 15px;
     }
 }
 
