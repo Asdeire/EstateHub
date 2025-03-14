@@ -18,6 +18,9 @@
                         <p class="listing-location">{{ listing.location }}</p>
                         <h3 class="listing-price">{{ listing.price }}$</h3>
                         <button @click.stop="editListing(listing)" class="edit-button">Редагувати</button>
+                        <button @click.stop="toggleListingStatus(listing)" class="status-toggle-button">
+                            {{ listing.status === 'Active' ? 'Архівувати' : 'Активувати' }}
+                        </button>
                         <button @click.stop="handleDeleteListing(listing.id)" class="delete-button">Видалити</button>
                     </div>
                 </div>
@@ -156,6 +159,18 @@ const getFirebasePathFromUrl = (url) => {
     } catch (error) {
         console.error("Помилка обробки URL:", error);
         return null;
+    }
+};
+
+const toggleListingStatus = async (listing) => {
+    const newStatus = listing.status === 'Active' ? 'Archived' : 'Active';
+    try {
+        await updateListing(listing.id, { status: newStatus });
+        listing.status = newStatus;
+        alert(`Оголошення успішно ${newStatus === 'Active' ? 'активовано' : 'архівовано'}!`);
+    } catch (err) {
+        console.error("Помилка зміни статусу:", err);
+        alert("Помилка при зміні статусу оголошення.");
     }
 };
 

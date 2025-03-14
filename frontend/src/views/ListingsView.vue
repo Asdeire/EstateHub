@@ -111,7 +111,7 @@ const uniqueTags = computed(() => [...new Set(listings.value.flatMap((item) => i
 const uniqueCategories = computed(() => [...new Set(listings.value.map((item) => item.category))]);
 
 const filteredListings = computed(() => {
-    let result = listings.value;
+    let result = listings.value.filter(listing => listing.status === 'Active');;
 
     if (searchQuery.value) {
         result = result.filter((listing) =>
