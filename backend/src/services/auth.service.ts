@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 export class AuthService {
     private jwtSecret = process.env.JWT_SECRET || 'default_secret';
     private jwtExpiresIn = process.env.JWT_EXPIRES_IN || '1h';
-    private verificationCodes: { [email: string]: string } = {}; // Сховище для кодів підтвердження
+    private verificationCodes: { [email: string]: string } = {}; 
 
     async login(email: string, password: string): Promise<string | null> {
         const user = await prisma.user.findUnique({
@@ -36,7 +36,7 @@ export class AuthService {
             throw new Error('JWT_SECRET is not defined');
         }
 
-        const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+        const token = jwt.sign(payload, secret, { expiresIn: '24h' });
 
         return token;
     }

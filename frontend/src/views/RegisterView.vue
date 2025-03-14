@@ -7,7 +7,6 @@
                 </a>
             </div>
             <form @submit.prevent="submitForm">
-                <!-- Інформація для реєстрації -->
                 <div v-if="step === 1">
                     <div class="form-group">
                         <label for="name">Ім'я</label>
@@ -35,7 +34,6 @@
                     <button type="submit" :disabled="passwordError">Зареєструватись</button>
                 </div>
 
-                <!-- Крок введення коду підтвердження -->
                 <div v-if="step === 2">
                     <div class="form-group">
                         <label for="verificationCode">Код підтвердження</label>
@@ -95,7 +93,6 @@ const submitForm = async () => {
                 password: form.value.password,
                 role: form.value.isAgent ? 'Makler' : 'User',
             });
-            // Переходимо на сторінку входу після успішної реєстрації
             router.push('/login');
         }
     } catch (err) {

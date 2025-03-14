@@ -5,19 +5,30 @@ import type { User } from '../types/user';
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null);
-    const isAuthenticated = ref<boolean>(false);;
+    const isAuthenticated = ref<boolean>(false);
+
+    const isTokenValid = (): boolean => {
+        const token = localStorage.getItem('authToken');
+        if (!token) return false;
+
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const expirationTime = decodedToken.exp * 1000;
+        return Date.now() < expirationTime;
+    };
 
     const fetchUser = async (userId: string) => {
         try {
-            if (!userId) throw new Error('User ID is required');
+            if (!userId || !isTokenValid()) {
+                logout(); 
+                return;
+            }
 
             const data = await getUserById(userId);
             user.value = data;
             isAuthenticated.value = true;
         } catch (error: any) {
             console.error('Failed to fetch user:', error.message || error);
-            user.value = null;
-            isAuthenticated.value = false;
+            logout(); 
         }
     };
 
