@@ -1,7 +1,7 @@
 <template>
-    <div v-if="showModal" class="modal-overlay" @click="emit('close')">
+    <div v-if="props.showEditModal" class="modal-overlay" @click="emit('close')">
         <div class="modal" @click.stop>
-            <h2>Додати оголошення</h2>
+            <h2>Редагування оголошення</h2>
             <form @submit.prevent="handleSubmit">
                 <label>
                     Заголовок:
@@ -66,8 +66,10 @@
                     <span v-if="errors.photos" class="error">{{ errors.photos }}</span>
                 </label>
 
-                <button type="submit">Додати</button>
-                <button type="button" @click="emit('close')">Закрити</button>
+                <button type="submit" :disabled="isLoading">
+                    {{ isLoading ? 'Збереження...' : 'Зберегти' }}
+                </button>
+                <button type="button" @click="emit('close')">Скасувати</button>
             </form>
         </div>
     </div>
@@ -75,34 +77,27 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getTags, getCategories, createListing, updateListing } from '../../services/api/index';
-import { useAuthStore } from '../../store/useAuthStore';
-import { storage } from '../../services/utils/firebase.config';
-import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { getTags, getCategories, getListingById, updateListing } from '../../services/api/index';
 
-const props = defineProps({ showModal: Boolean });
+const props = defineProps({ showEditModal: Boolean, listingId: String });
 const emit = defineEmits(['close', 'save']);
-const authStore = useAuthStore();
 
 const formData = ref({
-    user_id: '',
-    is_agent_listing: false,
     title: '',
     location: '',
     price: 0,
     area: 0,
     description: '',
     photos: [],
-    status: 'Active',
     category_id: '',
     tags: [],
 });
 
 const tags = ref([]);
 const categories = ref([]);
-const maxTags = 5;
 const errors = ref({});
 const selectedFiles = ref([]);
+const maxTags = 5;
 
 const validateForm = () => {
     errors.value = {};
@@ -112,87 +107,52 @@ const validateForm = () => {
     if (formData.value.area <= 0) errors.value.area = 'Площа повинна бути більше 0';
     if (!formData.value.category_id) errors.value.category_id = 'Оберіть категорію';
     if (formData.value.tags.length > maxTags) errors.value.tags = `Максимум ${maxTags} тегів`;
-    if (selectedFiles.value.length < 5 || selectedFiles.value.length > 25) {
-        errors.value.photos = 'Дозволено від 5 до 25 фото';
-    }
     return Object.keys(errors.value).length === 0;
 };
 
 const toggleTag = (tagId) => {
     const index = formData.value.tags.indexOf(tagId);
     if (index === -1) {
-        if (formData.value.tags.length < maxTags) {
-            formData.value.tags.push(tagId);
-        }
+        if (formData.value.tags.length < maxTags) formData.value.tags.push(tagId);
     } else {
         formData.value.tags.splice(index, 1);
     }
 };
 
 onMounted(async () => {
+    console.log('Listing ID:', props.listingId); 
     try {
         tags.value = await getTags();
         categories.value = await getCategories();
-        formData.value.user_id = authStore.user?.id || '';
+        if (props.listingId) {
+            const listing = await getListingById(props.listingId);
+            console.log('Listing:', listing);
+            Object.assign(formData.value, listing);
+        }
     } catch (err) {
-        console.error('Error: ', err);
+        console.error('Error:', err);
     }
 });
-
 
 const handleFileUpload = (event) => {
     selectedFiles.value = Array.from(event.target.files);
 };
 
+const isLoading = ref(false);
+
 const handleSubmit = async () => {
     if (!validateForm()) return;
-
+    isLoading.value = true;
     try {
-        const data = { ...formData.value, is_agent_listing: true, photos: [] };
-
-        const createdListing = await createListing(data);
-
-        if (!createdListing || !createdListing.id) {
-            throw new Error('Помилка створення оголошення.');
-        }
-
-        const fileUrls = await uploadFilesToStorage(selectedFiles.value, createdListing.id);
-
-        await updateListingPhotos(createdListing.id, fileUrls);
-
+        await updateListing(props.listingId, { ...formData.value });
         emit('save');
         emit('close');
     } catch (err) {
-        console.error('Помилка додавання оголошення:', err);
+        console.error('Помилка оновлення оголошення:', err);
+    } finally {
+        isLoading.value = false;
     }
 };
-
-const uploadFilesToStorage = async (files, listingId) => {
-    const fileUrls = [];
-    for (const file of files) {
-        const storagePath = `images/${listingId}/${Date.now()}_${file.name}`;
-        const storageReference = storageRef(storage, storagePath);
-        const uploadTask = uploadBytesResumable(storageReference, file);
-
-        try {
-            await uploadTask;
-            const fileURL = await getDownloadURL(storageReference);
-            fileUrls.push(fileURL);
-        } catch (error) {
-            console.error('Помилка завантаження фото:', error);
-        }
-    }
-    return fileUrls;
-};
-
-const updateListingPhotos = async (listingId, fileUrls) => {
-    try {
-        await updateListing(listingId, { photos: fileUrls });
-    } catch (error) {
-        console.error('Помилка оновлення фото в базі:', error);
-    }
-};
-
 </script>
 
 <style scoped>

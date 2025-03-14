@@ -53,21 +53,40 @@ class ListingService {
         });
     }
 
-    async updateListing(id: string, data: Partial<Listing> & { tags?: string[] }): Promise<Listing> {
-        const { tags, ...listingData } = data;
-
+    async updateListing(
+        id: string, 
+        data: Partial<Listing> & { tags?: string[]; category_id?: string }
+    ): Promise<Listing> {
+        const { tags, category_id, user_id, ...listingData } = data;
+    
         const updateData: Prisma.ListingUpdateInput = {
             ...listingData,
+            category: category_id ? {
+                connect: { id: category_id },  
+            } : undefined,
             tags: tags ? {
-                connect: tags.map((tagId) => ({ id: tagId })),
+                connect: tags.map((tag: string | { id: string }) =>
+                    typeof tag === 'string' ? { id: tag } : { id: tag.id }
+                ),
+            } : undefined,
+            user: user_id ? {
+                connect: { id: user_id },
             } : undefined,
         };
-
-        return await prisma.listing.update({
-            where: { id },
-            data: updateData,
-        });
+    
+        try {
+            const updatedListing = await prisma.listing.update({
+                where: { id },
+                data: updateData,
+            });
+    
+            return updatedListing;
+        } catch (error) {
+            console.error('Error updating listing:', error);
+            throw new Error('Error: ' + error);
+        }
     }
+    
 
 
     async deleteListing(id: string): Promise<Listing> {

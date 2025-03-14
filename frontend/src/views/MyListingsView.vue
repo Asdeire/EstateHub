@@ -17,7 +17,8 @@
                         <h2>{{ listing.title }}</h2>
                         <p class="listing-location">{{ listing.location }}</p>
                         <h3 class="listing-price">{{ listing.price }}$</h3>
-                        <button @click.stop="deleteListing(listing.id)" class="delete-button">Видалити</button>
+                        <button @click.stop="editListing(listing)" class="edit-button">Редагувати</button>
+                        <button @click.stop="handleDeleteListing(listing.id)" class="delete-button">Видалити</button>
                     </div>
                 </div>
             </div>
@@ -26,6 +27,8 @@
     </div>
 
     <CreateListing v-if="showModal" :showModal="showModal" @close="closeModal" @save="createNewListing" />
+    <EditListing v-if="showEditModal" :showEditModal="showEditModal" :listingId="currentListingId"
+        @close="closeEditModal" @save="handleUpdateListing" />
 </template>
 
 <script setup>
@@ -33,9 +36,10 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { getStorage, ref as storageRef, deleteObject } from "firebase/storage";
-import { getListings, createListing, deleteListing as apiDeleteListing, getListingById } from '../services/api/index';
+import { getListings, createListing, deleteListing, getListingById, updateListing } from '../services/api/index';
 import Header from '../components/Header.vue';
 import CreateListing from '../components/listing/CreateListing.vue';
+import EditListing from '../components/listing/EditListing.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -43,6 +47,8 @@ const listings = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const showModal = ref(false);
+const showEditModal = ref(false);
+const currentListingId = ref(null);
 
 const fetchMyListings = async () => {
     try {
@@ -68,6 +74,16 @@ const closeModal = () => {
     showModal.value = false;
 };
 
+const editListing = (listing) => {
+    currentListingId.value = listing.id;
+    showEditModal.value = true;
+};
+
+const closeEditModal = () => {
+    showEditModal.value = false;
+    currentListing.value = null;
+};
+
 const createNewListing = async (newListing) => {
     try {
         const createdListing = await createListing({ ...newListing, user_id: authStore.user.id });
@@ -80,7 +96,24 @@ const createNewListing = async (newListing) => {
     }
 };
 
-const deleteListing = async (id) => {
+const handleUpdateListing = async (updatedListing) => {
+    try {
+        await updateListing(updatedListing.id, updatedListing);
+
+        const index = listings.value.findIndex(listing => listing.id === updatedListing.id);
+        if (index !== -1) {
+            listings.value[index] = { ...listings.value[index], ...updatedListing };
+        }
+
+        alert("Оголошення успішно оновлено!");
+        closeEditModal();
+    } catch (err) {
+        console.error('Error updating listing:', err);
+        alert("Помилка при оновленні оголошення.");
+    }
+};
+
+const handleDeleteListing = async (id) => {
     if (!confirm("Ви впевнені, що хочете видалити це оголошення?")) return;
 
     try {
@@ -104,7 +137,7 @@ const deleteListing = async (id) => {
             })
         );
 
-        await apiDeleteListing(id);
+        await deleteListing(id);
         listings.value = listings.value.filter(listing => listing.id !== id);
         alert("Оголошення успішно видалено!");
     } catch (err) {
