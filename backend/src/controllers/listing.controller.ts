@@ -62,6 +62,21 @@ class ListingController {
         }
     }
 
+    async getByUserId(req: FastifyRequest<{ Params: { user_id: string } }>, res: FastifyReply): Promise<void> {
+        const { user_id } = req.params;
+
+        try {
+            const listings = await listingService.getListingsByUserId(user_id);
+            res.status(200).send(listings);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                res.status(500).send({ message: error.message });
+            } else {
+                res.status(500).send({ message: 'An unknown error occurred' });
+            }
+        }
+    }
+
     async update(req: FastifyRequest<{ Params: { id: string }, Body: CreateListingDto }>, res: FastifyReply): Promise<void> {
         const { id } = req.params;
 

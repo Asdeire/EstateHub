@@ -75,7 +75,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getTags, getCategories, createListing, updateListing } from '../../services/api/index';
+import { getTags, getCategories, createListing, updateListing, getListingById, getListingsByUserId } from '../../services/api/index';
 import { useAuthStore } from '../../store/useAuthStore';
 import { storage } from '../../services/utils/firebase.config';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -103,6 +103,7 @@ const categories = ref([]);
 const maxTags = 5;
 const errors = ref({});
 const selectedFiles = ref([]);
+const userListingsCount = ref(0);
 
 const validateForm = () => {
     errors.value = {};
@@ -134,6 +135,12 @@ onMounted(async () => {
         tags.value = await getTags();
         categories.value = await getCategories();
         formData.value.user_id = authStore.user?.id || '';
+
+        formData.value.is_agent_listing = authStore.user?.role === 'agent';
+
+        const listings = await getListingsByUserId(authStore.user?.id);
+        userListingsCount.value = listings.length;
+        console.log(userListingsCount);
     } catch (err) {
         console.error('Error: ', err);
     }
@@ -145,6 +152,11 @@ const handleFileUpload = (event) => {
 };
 
 const handleSubmit = async () => {
+    if (userListingsCount.value >= 10) {
+        alert('Ви досягли ліміту у 10 оголошень.');
+        return;
+    }
+
     if (!validateForm()) return;
 
     try {
@@ -163,7 +175,7 @@ const handleSubmit = async () => {
         emit('save');
         emit('close');
     } catch (err) {
-        console.error('Помилка додавання оголошення:', err);
+        console.error('Error adding listing:', err);
     }
 };
 

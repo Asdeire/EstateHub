@@ -17,6 +17,14 @@ class ListingService {
         tags: string[];
         title: string;
     }): Promise<Listing> {
+        const userListingsCount = await prisma.listing.count({
+            where: { user_id: data.user_id },
+        });
+
+        if (userListingsCount >= 10) {
+            throw new Error('Maximum listings — 10.');
+        }
+
         const { tags, ...listingData } = data;
         const listing = await prisma.listing.create({
             data: {
@@ -53,16 +61,26 @@ class ListingService {
         });
     }
 
+    async getListingsByUserId(user_id: string): Promise<Listing[]> {
+        return await prisma.listing.findMany({
+            where: { user_id },
+            include: {
+                category: true,
+                tags: true,
+            },
+        });
+    }
+
     async updateListing(
-        id: string, 
+        id: string,
         data: Partial<Listing> & { tags?: string[]; category_id?: string }
     ): Promise<Listing> {
         const { tags, category_id, user_id, ...listingData } = data;
-    
+
         const updateData: Prisma.ListingUpdateInput = {
             ...listingData,
             category: category_id ? {
-                connect: { id: category_id },  
+                connect: { id: category_id },
             } : undefined,
             tags: tags ? {
                 connect: tags.map((tag: string | { id: string }) =>
@@ -73,20 +91,20 @@ class ListingService {
                 connect: { id: user_id },
             } : undefined,
         };
-    
+
         try {
             const updatedListing = await prisma.listing.update({
                 where: { id },
                 data: updateData,
             });
-    
+
             return updatedListing;
         } catch (error) {
             console.error('Error updating listing:', error);
             throw new Error('Error: ' + error);
         }
     }
-    
+
 
 
     async deleteListing(id: string): Promise<Listing> {

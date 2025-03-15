@@ -31,6 +31,16 @@ export const getListingById = async (id: string): Promise<Listing | null> => {
     }
 };
 
+export const getListingsByUserId = async (user_id: string): Promise<Listing[]> => {
+    try {
+        const response = await api.get(`/listings/user/${user_id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching listings for user ${user_id}:`, error);
+        throw error;
+    }
+};
+
 export const updateListing = async (id: string, listingData: CreateListingDto): Promise<Listing> => {
     try {
         console.log('Updating listing with data:', listingData);
