@@ -46,9 +46,14 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
     const authStore = useAuthStore();
     const isAuthRequired = to.matched.some(route => route.meta.requiresAuth); 
+
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        authStore.isAuthenticated = true; 
+    }
 
     if (isAuthRequired && !authStore.isAuthenticated) {
         next('/login'); 
@@ -56,6 +61,5 @@ router.beforeEach((to, from, next) => {
         next(); 
     }
 });
-
 
 export default router;

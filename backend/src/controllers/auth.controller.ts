@@ -50,7 +50,6 @@ export class AuthController {
                 return reply.status(400).send({ message: 'Email is already in use' });
             }
 
-            // Відправляємо код підтвердження
             await authService.sendVerificationCode(email);
 
             return reply.status(201).send({ message: 'Verification code sent successfully to ' + email });
@@ -63,7 +62,6 @@ export class AuthController {
         }
     }
 
-    // Перевірка коду підтвердження
     async verify(request: FastifyRequest<{ Body: RegisterRequestBody }>, reply: FastifyReply) {
         try {
             const { email, code, name, password, role } = request.body;

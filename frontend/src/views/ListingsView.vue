@@ -55,18 +55,14 @@ const favorites = ref(new Set());
 const authStore = useAuthStore();
 
 const fetchListings = async () => {
-    console.log("Loading listings...");
     try {
         const data = await getListings();
-        console.log("Listings loaded:", data);
         listings.value = data;
         loading.value = false;
 
         if (authStore.isAuthenticated) {
-            console.log("User is authenticated, fetching favorites...");
             try {
                 const favData = await getFavorites();
-                console.log("Favorites fetched:", favData);
                 favorites.value = new Set(favData.map(fav => fav.listing_id));
             } catch (error) {
                 console.error("Error fetching favorites:", error);

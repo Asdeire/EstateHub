@@ -136,7 +136,7 @@ onMounted(async () => {
 
 const handleFileUpload = (event) => {
     selectedFiles.value = Array.from(event.target.files);
-};
+}; 
 
 const isLoading = ref(false);
 
