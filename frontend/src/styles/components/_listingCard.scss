@@ -3,7 +3,7 @@
     justify-content: center;
     gap: 30px;
     grid-template-columns: repeat(4, minmax(340px, 1fr));
-    min-height: 90vh;
+    min-height: 82vh;
 
     @media(max-width: 1700px) {
         grid-template-columns: repeat(3, 1fr);
@@ -18,9 +18,10 @@
     }
 }
 
-.listing-card { 
+.listing-card {
     width: 340px;
-    height: 450px;
+    min-height: 450px;
+    max-height: 500px;
     padding: 20px;
     background: #F5F4F1;
     border-radius: 12px;
@@ -74,6 +75,31 @@
     @media (max-width: 768px) {
         width: 25px;
         height: 25px;
+    }
+}
+
+.actions {
+    border-top: solid 3px ;
+    padding: 5px 0;
+    display: flex;
+    justify-content: space-around;
+
+    .button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .button img {
+        height: 40px;
+        width: auto;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .button:hover img {
+        transform: scale(1.1);
     }
 }
 

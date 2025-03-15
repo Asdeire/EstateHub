@@ -9,23 +9,22 @@
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
         <div v-else>
-            <div v-if="listings.length > 0" class="listings-container">
-                <div v-for="listing in listings" :key="listing.id" class="listing-card"
-                    @click="goToListingDetail(listing.id)">
-                    <img :src="listing.photos[0]" alt="Image {{ listing.title }}" class="listing-image" />
-                    <div class="listing-info">
-                        <h2>{{ listing.title }}</h2>
-                        <p class="listing-location">{{ listing.location }}</p>
-                        <h3 class="listing-price">{{ listing.price }}$</h3>
-                        <button @click.stop="editListing(listing)" class="edit-button">Редагувати</button>
-                        <button @click.stop="toggleListingStatus(listing)" class="status-toggle-button">
-                            {{ listing.status === 'Active' ? 'Архівувати' : 'Активувати' }}
-                        </button>
-                        <button @click.stop="handleDeleteListing(listing.id)" class="delete-button">Видалити</button>
-                    </div>
-                </div>
+            <div v-if="activeListings.length > 0">
+                <Listings :listings="activeListings" :goToListingDetail="goToListingDetail" :editListing="editListing"
+                    :toggleListingStatus="toggleListingStatus" :deleteListing="handleDeleteListing" />
             </div>
-            <div v-else class="no-listings">Немає ваших оголошень.</div>
+            <div v-else>
+                <div class="no-listings">Немає активних оголошень.</div>
+            </div>
+
+            <div v-if="archivedListings.length > 0">
+                <h1>Архівовані оголошення</h1>
+                <Listings :listings="archivedListings" :toggleListingStatus="toggleListingStatus" />
+            </div>
+            <div v-else>
+                <div class="no-listings">Немає архівованих оголошень.</div>
+            </div>
+
         </div>
     </div>
 
@@ -38,11 +37,11 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
-import { getStorage, ref as storageRef, deleteObject } from "firebase/storage";
 import { getListings, createListing, deleteListing, getListingById, updateListing } from '../services/api/index';
 import Header from '../components/Header.vue';
 import CreateListing from '../components/listing/CreateListing.vue';
 import EditListing from '../components/listing/EditListing.vue';
+import Listings from '../components/listing/ListingCard.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -53,10 +52,16 @@ const showModal = ref(false);
 const showEditModal = ref(false);
 const currentListingId = ref(null);
 
+const activeListings = ref([]);
+const archivedListings = ref([]);
+
 const fetchMyListings = async () => {
     try {
         const data = await getListings();
-        listings.value = data.filter(listing => listing.user_id === authStore.user.id);
+        const userListings = data.filter(listing => listing.user_id === authStore.user.id);
+        activeListings.value = userListings.filter(listing => listing.status === 'Active');
+        archivedListings.value = userListings.filter(listing => listing.status === 'Archived');
+        console.log(activeListings, archivedListings);
     } catch (err) {
         console.error('Error loading listings:', err);
         error.value = 'Помилка завантаження оголошень.';
@@ -90,7 +95,7 @@ const closeEditModal = () => {
 const createNewListing = async (newListing) => {
     try {
         const createdListing = await createListing({ ...newListing, user_id: authStore.user.id });
-        listings.value.push(createdListing);
+        activeListings.value.push(createdListing);
         alert("Оголошення успішно додано!");
         closeModal();
     } catch (err) {
@@ -103,9 +108,9 @@ const handleUpdateListing = async (updatedListing) => {
     try {
         await updateListing(updatedListing.id, updatedListing);
 
-        const index = listings.value.findIndex(listing => listing.id === updatedListing.id);
+        const index = activeListings.value.findIndex(listing => listing.id === updatedListing.id);
         if (index !== -1) {
-            listings.value[index] = { ...listings.value[index], ...updatedListing };
+            activeListings.value[index] = { ...activeListings.value[index], ...updatedListing };
         }
 
         alert("Оголошення успішно оновлено!");
@@ -120,45 +125,13 @@ const handleDeleteListing = async (id) => {
     if (!confirm("Ви впевнені, що хочете видалити це оголошення?")) return;
 
     try {
-        const listing = await getListingById(id);
-        if (!listing || !listing.photos) {
-            console.error("Фото не знайдені або помилка отримання оголошення.");
-            return;
-        }
-
-        const storage = getStorage();
-
-        await Promise.all(
-            listing.photos.map(async (photoUrl) => {
-                const photoPath = getFirebasePathFromUrl(photoUrl);
-                const photoRef = storageRef(storage, photoPath);
-                try {
-                    await deleteObject(photoRef);
-                } catch (err) {
-                    console.error(`Помилка видалення фото ${photoUrl}:`, err);
-                }
-            })
-        );
-
         await deleteListing(id);
-        listings.value = listings.value.filter(listing => listing.id !== id);
+        activeListings.value = activeListings.value.filter(listing => listing.id !== id);
+        archivedListings.value = archivedListings.value.filter(listing => listing.id !== id);
         alert("Оголошення успішно видалено!");
     } catch (err) {
         console.error("Помилка видалення оголошення:", err);
         alert("Помилка при видаленні оголошення.");
-    }
-};
-
-const getFirebasePathFromUrl = (url) => {
-    try {
-        const baseUrl = `https://firebasestorage.googleapis.com/v0/b/${import.meta.env.VITE_FIREBASE_STORAGE_BUCKET}/o/`;
-        if (!url.startsWith(baseUrl)) return null;
-
-        const decodedPath = decodeURIComponent(url.split(baseUrl)[1].split("?")[0]);
-        return decodedPath;
-    } catch (error) {
-        console.error("Помилка обробки URL:", error);
-        return null;
     }
 };
 
@@ -167,6 +140,15 @@ const toggleListingStatus = async (listing) => {
     try {
         await updateListing(listing.id, { status: newStatus });
         listing.status = newStatus;
+
+        if (newStatus === 'Active') {
+            archivedListings.value = archivedListings.value.filter(l => l.id !== listing.id);
+            activeListings.value.push(listing);
+        } else {
+            activeListings.value = activeListings.value.filter(l => l.id !== listing.id);
+            archivedListings.value.push(listing);
+        }
+
         alert(`Оголошення успішно ${newStatus === 'Active' ? 'активовано' : 'архівовано'}!`);
     } catch (err) {
         console.error("Помилка зміни статусу:", err);
@@ -179,22 +161,16 @@ onMounted(fetchMyListings);
 
 <style scoped>
 .my-listings-header {
-    margin-top: 60px;
+    margin: 60px 0 30px;
     display: block;
     align-items: center;
-    text-align: center;
     justify-content: center;
     align-items: center;
 }
 
-.listings-container {
-    margin-top: 40px;
-
-    .listing-card {
-        height: 550px;
-    }
+h1{
+    text-align: center;
 }
-
 
 .create-button {
     background: none;
@@ -207,19 +183,6 @@ onMounted(fetchMyListings);
     &:hover {
         transform: translateY(-5px);
     }
-}
-
-.delete-button {
-    background-color: darkred;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.delete-button:hover {
-    background-color: #ff1a1a;
 }
 
 .loading-message,
