@@ -140,7 +140,6 @@ onMounted(async () => {
 
         const listings = await getListingsByUserId(authStore.user?.id);
         userListingsCount.value = listings.length;
-        console.log(userListingsCount);
     } catch (err) {
         console.error('Error: ', err);
     }
@@ -206,82 +205,3 @@ const updateListingPhotos = async (listingId, fileUrls) => {
 };
 
 </script>
-
-<style scoped>
-.modal-overlay {
-    h2 {
-        text-align: center;
-    }
-
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal {
-    background: white;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    border-radius: 8px;
-    padding: 20px;
-}
-
-.tag-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: white;
-}
-
-.tag-item {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f5f5f5;
-    cursor: pointer;
-    user-select: none;
-}
-
-.tag-item.selected {
-    background-color: #07484A;
-    color: white;
-}
-
-form label {
-    display: block;
-    margin-bottom: 10px;
-}
-
-form input,
-form select,
-form textarea {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-button {
-    margin-right: 10px;
-}
-
-.error {
-    color: red;
-    font-size: 0.875rem;
-    margin-top: 5px;
-    display: block;
-}
-</style>

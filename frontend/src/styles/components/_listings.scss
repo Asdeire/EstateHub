@@ -18,7 +18,9 @@
             border-color: darken($primary-color, 10%);
         }
     }
+}
 
+.controls{
     select {
         color: $primary-color;
         padding: 10px;

@@ -3,19 +3,9 @@
     <div class="container">
         <div class="search-container">
             <input v-model="searchQuery" type="text" placeholder="Введіть напрямок" class="search-box" />
-            <select v-model="selectedType">
-                <option value="">Усі типи</option>
-                <option v-for="type in uniqueTypes" :key="type" :value="type">{{ type }}</option>
-            </select>
-            <select v-model="selectedTag">
-                <option value="">Усі теги</option>
-                <option v-for="tag in uniqueTags" :key="tag" :value="tag">{{ tag.name }}</option>
-            </select>
-            <select v-model="selectedCategory">
-                <option value="">Усі категорії</option>
-                <option v-for="category in uniqueCategories" :key="category" :value="category">{{ category.name }}
-                </option>
-            </select>
+        </div>
+        <div class="controls">
+            <button @click="showFilters = true" class="filter-button">Фільтри</button>
             <select v-model="sortBy">
                 <option value="newest">Новіші</option>
                 <option value="oldest">Старіші</option>
@@ -23,6 +13,14 @@
                 <option value="z-a">Я-A</option>
             </select>
         </div>
+
+        <FilterModal :show="showFilters" :selectedType="selectedType" :selectedTags="selectedTags"
+            :selectedCategory="selectedCategory" :uniqueTypes="uniqueTypes" :uniqueTags="uniqueTags"
+            :uniqueCategories="uniqueCategories" :priceMin="priceMin" :priceMax="priceMax" :areaMin="areaMin"
+            :areaMax="areaMax" @update:show="showFilters = $event" @update:selectedType="selectedType = $event"
+            @update:selectedTags="selectedTags = $event" @update:selectedCategory="selectedCategory = $event"
+            @update:selectedMinPrice="priceMin = $event" @update:selectedMaxPrice="priceMax = $event"
+            @update:selectedMinArea="areaMin = $event" @update:selectedMaxArea="areaMax = $event" />
 
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
@@ -39,6 +37,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import Header from "../components/Header.vue";
 import Listings from "../components/listing/ListingCard.vue";
+import FilterModal from "../components/listing/ModalFilter.vue";
 import { getListings, addFavorite, removeFavorite, getFavorites } from "../services/api/index";
 
 const router = useRouter();
@@ -47,9 +46,14 @@ const loading = ref(true);
 const error = ref(null);
 const searchQuery = ref('');
 const selectedType = ref('');
-const selectedTag = ref('');
+const selectedTags = ref([]);
 const selectedCategory = ref('');
+const priceMin = ref(null);
+const priceMax = ref(null);
+const areaMin = ref(null);
+const areaMax = ref(null);
 const sortBy = ref('newest');
+const showFilters = ref(false);
 const isAuthenticated = ref(!!localStorage.getItem('token'));
 const favorites = ref(new Set());
 const authStore = useAuthStore();
@@ -58,25 +62,20 @@ const fetchListings = async () => {
     try {
         const data = await getListings();
         listings.value = data;
-        loading.value = false;
 
         if (authStore.isAuthenticated) {
-            try {
-                const favData = await getFavorites();
-                favorites.value = new Set(favData.map(fav => fav.listing_id));
-            } catch (error) {
-                console.error("Error fetching favorites:", error);
-            }
+            const favData = await getFavorites();
+            favorites.value = new Set(favData.map(fav => fav.listing_id));
+            listings.value.forEach(listing => listing.isFavorite = favorites.value.has(listing.id));
         }
 
-        listings.value.forEach(listing => {
-            listing.isFavorite = favorites.value.has(listing.id);
-        });
+        loading.value = false;
     } catch (error) {
         console.error("Error loading listings:", error);
         loading.value = false;
     }
 };
+
 
 const toggleFavorite = async (listing) => {
     if (!authStore.isAuthenticated) {
@@ -107,7 +106,7 @@ const uniqueTags = computed(() => [...new Set(listings.value.flatMap((item) => i
 const uniqueCategories = computed(() => [...new Set(listings.value.map((item) => item.category))]);
 
 const filteredListings = computed(() => {
-    let result = listings.value.filter(listing => listing.status === 'Active');;
+    let result = listings.value.filter(listing => listing.status === 'Active');
 
     if (searchQuery.value) {
         result = result.filter((listing) =>
@@ -119,26 +118,48 @@ const filteredListings = computed(() => {
         result = result.filter((listing) => listing.type === selectedType.value);
     }
 
-    if (selectedTag.value) {
-        result = result.filter((listing) => listing.tags.includes(selectedTag.value));
+    if (selectedTags.value.length) {
+        result = result.filter((listing) => {
+            const listingTagIds = listing.tags.map(tag => tag.id);
+            return selectedTags.value.every(tag => listingTagIds.includes(tag));
+        });
     }
 
     if (selectedCategory.value) {
-        result = result.filter((listing) => listing.category === selectedCategory.value);
+        result = result.filter((listing) =>
+            listing.category === selectedCategory.value ||
+            listing.category?.id === selectedCategory.value
+        );
     }
 
-    if (sortBy.value === 'newest') {
-        result = result.sort((a, b) => new Date(b.date) - new Date(a.date));
-    } else if (sortBy.value === 'oldest') {
-        result = result.sort((a, b) => new Date(a.date) - new Date(b.date));
-    } else if (sortBy.value === 'a-z') {
-        result = result.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy.value === 'z-a') {
-        result = result.sort((a, b) => b.title.localeCompare(a.title));
+    if (priceMin.value !== null) {
+        result = result.filter((listing) => Number(listing.price) >= Number(priceMin.value));
+    }
+
+    if (priceMax.value !== null) {
+        result = result.filter((listing) => Number(listing.price) <= Number(priceMax.value));
+    }
+
+    if (areaMin.value !== null) {
+        result = result.filter((listing) => Number(listing.area) >= Number(areaMin.value));
+    }
+
+    if (areaMax.value !== null) {
+        result = result.filter((listing) => Number(listing.area) <= Number(areaMax.value));
+    }
+
+    const sortingMethods = {
+        newest: (a, b) => new Date(b.updated_at) - new Date(a.updated_at),
+        oldest: (a, b) => new Date(a.updated_at) - new Date(b.updated_at),
+        "a-z": (a, b) => a.title.localeCompare(b.title),
+        "z-a": (a, b) => b.title.localeCompare(a.title),
+    };
+
+    if (sortingMethods[sortBy.value]) {
+        result = result.sort(sortingMethods[sortBy.value]);
     }
 
     return result;
 });
-
 onMounted(fetchListings);
 </script>
