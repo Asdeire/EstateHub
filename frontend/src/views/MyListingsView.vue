@@ -61,7 +61,6 @@ const fetchMyListings = async () => {
         const userListings = data.filter(listing => listing.user_id === authStore.user.id);
         activeListings.value = userListings.filter(listing => listing.status === 'Active');
         archivedListings.value = userListings.filter(listing => listing.status === 'Archived');
-        console.log(activeListings, archivedListings);
     } catch (err) {
         console.error('Error loading listings:', err);
         error.value = 'Помилка завантаження оголошень.';
@@ -168,7 +167,7 @@ onMounted(fetchMyListings);
     align-items: center;
 }
 
-h1{
+h1 {
     text-align: center;
 }
 

@@ -30,9 +30,12 @@ class ListingController {
         }
     }
 
-    async getAll(req: FastifyRequest, res: FastifyReply): Promise<void> {
+    async getAll(req: FastifyRequest<{ Querystring: { page?: number, limit?: number } }>, res: FastifyReply): Promise<void> {
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 12;
+
         try {
-            const listings = await listingService.getAllListings();
+            const listings = await listingService.getAllListings(page, limit);
             res.status(200).send(listings);
         } catch (error: unknown) {
             if (error instanceof Error) {

@@ -42,14 +42,23 @@ class ListingService {
     }
 
 
-    async getAllListings(): Promise<Listing[]> {
-        return await prisma.listing.findMany({
+    async getAllListings(page: number = 1, limit: number = 12): Promise<{ listings: Listing[], totalPages: number }> {
+        const totalListings = await prisma.listing.count();
+        const totalPages = Math.ceil(totalListings / limit);
+    
+        const skip = (page - 1) * limit;
+    
+        const listings = await prisma.listing.findMany({
+            skip,
+            take: limit,
             include: {
                 category: true,
                 tags: true,
             },
         });
-    }
+    
+        return { listings, totalPages };
+    }    
 
     async getListingById(id: string): Promise<Listing | null> {
         return await prisma.listing.findUnique({

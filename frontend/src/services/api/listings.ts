@@ -1,9 +1,9 @@
 import { api } from './config';
 import type { Listing, CreateListingDto } from '../../types/listing';
 
-export const getListings = async (): Promise<Listing[]> => {
+export const getListings = async (page = 1, limit = 12): Promise<{ listings: Listing[], totalPages: number }> => {
     try {
-        const response = await api.get('/listings');
+        const response = await api.get(`/listings?page=${page}&limit=${limit}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching listings:', error);
