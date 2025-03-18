@@ -4,18 +4,28 @@ import type { Listing, CreateListingDto } from '../../types/listing';
 export const getListings = async (
     page = 1,
     limit = 12,
-    filters: { category?: string, minPrice?: number, maxPrice?: number, minArea?: number, maxArea?: number, status?: string, tags?: string[] } = {}
+    filters: {
+        category?: string,
+        type?: string, 
+        minPrice?: number,
+        maxPrice?: number,
+        minArea?: number,
+        maxArea?: number,
+        status?: string,
+        tags?: string[]
+    } = {}
 ): Promise<{ listings: Listing[], totalPages: number }> => {
     const queryParams = new URLSearchParams({
         page: String(page),
         limit: String(limit),
         ...(filters.category && { category: filters.category }),
+        ...(filters.type && { type: filters.type }), 
         ...(filters.minPrice && { minPrice: String(filters.minPrice) }),
         ...(filters.maxPrice && { maxPrice: String(filters.maxPrice) }),
         ...(filters.minArea && { minArea: String(filters.minArea) }),
         ...(filters.maxArea && { maxArea: String(filters.maxArea) }),
         ...(filters.status && { status: filters.status }),
-        ...(filters.tags?.length && { tags: filters.tags.join(',') }), 
+        ...(filters.tags?.length && { tags: filters.tags.join(',') }),
     });
 
     try {

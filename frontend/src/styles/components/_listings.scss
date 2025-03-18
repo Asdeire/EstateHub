@@ -1,4 +1,4 @@
-.top-container{
+.top-container {
     margin-top: 60px;
     display: flex;
     justify-content: center;
@@ -24,7 +24,7 @@
     }
 }
 
-.controls{
+.controls {
     select {
         color: $primary-color;
         padding: 10px;
@@ -33,8 +33,18 @@
         font-size: 16px;
         cursor: pointer;
         background: none;
-        @media(max-width: 1400px){
+
+        @media(max-width: 1400px) {
             display: none;
         }
     }
+}
+
+.pagination-container {
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    display: flex;
+    gap: 20px;
+    margin: 0 auto;
 }

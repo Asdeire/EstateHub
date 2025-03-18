@@ -41,45 +41,61 @@ class ListingService {
         return listing;
     }
 
-
     async getAllListings(
         page: number = 1,
         limit: number = 12,
-        filters: { category?: string, minPrice?: number, maxPrice?: number, minArea?: number, maxArea?: number, status?: string, tags?: string[] } = {}
+        filters: {
+            category?: string;
+            type?: string; 
+            minPrice?: number;
+            maxPrice?: number;
+            minArea?: number;
+            maxArea?: number;
+            status?: string;
+            tags?: string[];
+        } = {}
     ): Promise<{ listings: Listing[], totalPages: number }> {
         const where: any = {};
-    
-        if (filters.category) {
-            where.category = { name: filters.category };
+
+        if (filters.minPrice !== undefined && !isNaN(Number(filters.minPrice))) {
+            where.price = { gte: Number(filters.minPrice) };
         }
+        if (filters.maxPrice !== undefined && !isNaN(Number(filters.maxPrice))) {
+            where.price = { ...where.price, lte: Number(filters.maxPrice) };
+        }
+
+        if (filters.minArea !== undefined && !isNaN(Number(filters.minArea))) {
+            where.area = { gte: Number(filters.minArea) };
+        }
+        if (filters.maxArea !== undefined && !isNaN(Number(filters.maxArea))) {
+            where.area = { ...where.area, lte: Number(filters.maxArea) };
+        }
+
+        if (filters.category) {
+            where.category = { id: filters.category };
+        }
+
         if (filters.status) {
             where.status = filters.status;
         }
-        if (filters.minPrice) {
-            where.price = { gte: filters.minPrice };
+
+        if (filters.type) {
+            where.type = filters.type; 
         }
-        if (filters.maxPrice) {
-            where.price = { ...where.price, lte: filters.maxPrice };
-        }
-        if (filters.minArea) {
-            where.area = { gte: filters.minArea };
-        }
-        if (filters.maxArea) {
-            where.area = { ...where.area, lte: filters.maxArea };
-        }
+
         if (filters.tags?.length) {
             where.tags = {
                 some: {
-                    name: { in: filters.tags }
+                    id: { in: filters.tags }
                 }
             };
         }
-    
+
         const totalListings = await prisma.listing.count({ where });
         const totalPages = Math.ceil(totalListings / limit);
-    
+
         const skip = (page - 1) * limit;
-    
+
         const listings = await prisma.listing.findMany({
             skip,
             take: limit,
@@ -89,9 +105,10 @@ class ListingService {
                 tags: true,
             },
         });
-    
+
         return { listings, totalPages };
-    }    
+    }
+
 
     async getListingById(id: string): Promise<Listing | null> {
         return await prisma.listing.findUnique({

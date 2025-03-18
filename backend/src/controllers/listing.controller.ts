@@ -35,6 +35,7 @@ class ListingController {
             page?: number,
             limit?: number,
             category?: string,
+            type?: string,
             minPrice?: number,
             maxPrice?: number,
             minArea?: number,
@@ -43,17 +44,19 @@ class ListingController {
             tags?: string
         }
     }>, res: FastifyReply): Promise<void> {
+
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 12;
 
         const filters = {
             category: req.query.category,
+            type: req.query.type, 
             minPrice: req.query.minPrice,
             maxPrice: req.query.maxPrice,
             minArea: req.query.minArea,
             maxArea: req.query.maxArea,
             status: req.query.status,
-            tags: req.query.tags ? req.query.tags.split(',') : undefined, 
+            tags: req.query.tags ? req.query.tags.split(',') : undefined,
         };
 
         try {

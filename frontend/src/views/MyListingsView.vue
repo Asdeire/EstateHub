@@ -57,10 +57,11 @@ const archivedListings = ref([]);
 
 const fetchMyListings = async () => {
     try {
-        const data = await getListings();
-        const userListings = data.filter(listing => listing.user_id === authStore.user.id);
-        activeListings.value = userListings.filter(listing => listing.status === 'Active');
-        archivedListings.value = userListings.filter(listing => listing.status === 'Archived');
+        const data = await getListings(1, 12, { status: 'Active' });
+        activeListings.value = data.listings.filter(listing => listing.user_id === authStore.user.id);
+
+        const archivedData = await getListings(1, 12, { status: 'Archived' });
+        archivedListings.value = archivedData.listings.filter(listing => listing.user_id === authStore.user.id);
     } catch (err) {
         console.error('Error loading listings:', err);
         error.value = 'Помилка завантаження оголошень.';
