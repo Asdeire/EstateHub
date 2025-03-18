@@ -42,8 +42,40 @@ class ListingService {
     }
 
 
-    async getAllListings(page: number = 1, limit: number = 12): Promise<{ listings: Listing[], totalPages: number }> {
-        const totalListings = await prisma.listing.count();
+    async getAllListings(
+        page: number = 1,
+        limit: number = 12,
+        filters: { category?: string, minPrice?: number, maxPrice?: number, minArea?: number, maxArea?: number, status?: string, tags?: string[] } = {}
+    ): Promise<{ listings: Listing[], totalPages: number }> {
+        const where: any = {};
+    
+        if (filters.category) {
+            where.category = { name: filters.category };
+        }
+        if (filters.status) {
+            where.status = filters.status;
+        }
+        if (filters.minPrice) {
+            where.price = { gte: filters.minPrice };
+        }
+        if (filters.maxPrice) {
+            where.price = { ...where.price, lte: filters.maxPrice };
+        }
+        if (filters.minArea) {
+            where.area = { gte: filters.minArea };
+        }
+        if (filters.maxArea) {
+            where.area = { ...where.area, lte: filters.maxArea };
+        }
+        if (filters.tags?.length) {
+            where.tags = {
+                some: {
+                    name: { in: filters.tags }
+                }
+            };
+        }
+    
+        const totalListings = await prisma.listing.count({ where });
         const totalPages = Math.ceil(totalListings / limit);
     
         const skip = (page - 1) * limit;
@@ -51,6 +83,7 @@ class ListingService {
         const listings = await prisma.listing.findMany({
             skip,
             take: limit,
+            where,
             include: {
                 category: true,
                 tags: true,

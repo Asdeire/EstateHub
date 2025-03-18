@@ -2,9 +2,11 @@
     <Header />
     <div class="container">
         <div class="top-container">
+
             <div class="search-container">
                 <input v-model="searchQuery" type="text" placeholder="Введіть напрямок" class="search-box" />
             </div>
+
             <div class="filters">
                 <FilterModal :show="showFilters" :selectedType="selectedType" :selectedTags="selectedTags"
                     :selectedCategory="selectedCategory" :uniqueTypes="uniqueTypes" :uniqueTags="uniqueTags"
@@ -14,6 +16,7 @@
                     @update:selectedMinPrice="priceMin = $event" @update:selectedMaxPrice="priceMax = $event"
                     @update:selectedMinArea="areaMin = $event" @update:selectedMaxArea="areaMax = $event" />
             </div>
+
             <div class="controls">
                 <button @click="showFilters = true" class="filter-button">Фільтри</button>
                 <select v-model="sortBy">
@@ -24,16 +27,19 @@
                 </select>
             </div>
         </div>
+
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
+
         <div v-else>
-            <Listings :listings="filteredListings" :goToListingDetail="goToListingDetail"
+            <Listings :listings="paginatedListings" :goToListingDetail="goToListingDetail"
                 :toggleFavorite="toggleFavorite" />
-            <div id="pagination">
-                <button @click="changePage(currentPage - 1)" :disabled="currentPage <= 1">Попередня</button>
-                <span>{{ currentPage }} / {{ totalPages }}</span>
-                <button @click="changePage(currentPage + 1)" :disabled="currentPage >= totalPages">Наступна</button>
-            </div>
+        </div>
+
+        <div id="pagination">
+            <button @click="changePage(currentPage - 1)" :disabled="currentPage <= 1">Попередня</button>
+            <span>{{ currentPage }} / {{ totalPages }}</span>
+            <button @click="changePage(currentPage + 1)" :disabled="currentPage >= totalPages">Наступна</button>
         </div>
     </div>
 </template>
@@ -68,23 +74,15 @@ const favorites = ref(new Set());
 const authStore = useAuthStore();
 
 const currentPage = ref(1);
-const totalPages = ref(1);
 const listingsPerPage = 12;
-const cache = ref(new Map());
+const totalPages = ref(0);
 
-const fetchListings = async () => {
+const fetchListings = async (page = 1, filters = {}) => {
     try {
-        if (cache.value.has(currentPage.value)) {
-            listings.value = cache.value.get(currentPage.value);
-            loading.value = false;
-            return;
-        }
-
-        const data = await getListings(currentPage.value, listingsPerPage);
+        loading.value = true;
+        const data = await getListings(page, listingsPerPage, filters);
         listings.value = data.listings;
         totalPages.value = data.totalPages;
-
-        cache.value.set(currentPage.value, data.listings);
 
         if (authStore.isAuthenticated) {
             const favData = await getFavorites();
@@ -95,9 +93,26 @@ const fetchListings = async () => {
         loading.value = false;
     } catch (error) {
         console.error("Error loading listings:", error);
+        error.value = "Не вдалося завантажити оголошення.";
         loading.value = false;
     }
 };
+
+const applyFilters = () => {
+    const filters = {
+        category: selectedCategory.value,
+        minPrice: priceMin.value,
+        maxPrice: priceMax.value,
+        minArea: areaMin.value,
+        maxArea: areaMax.value,
+        status: 'Active',
+        tags: selectedTags.value.map(tag => tag.name),
+        search: searchQuery.value,
+    };
+
+    fetchListings(currentPage.value, filters);
+};
+
 
 const toggleFavorite = async (listing) => {
     if (!authStore.isAuthenticated) {
@@ -126,7 +141,7 @@ const goToListingDetail = (listingId) => {
 const changePage = (page) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
-        fetchListings();
+        applyFilters(); 
     }
 };
 
@@ -134,62 +149,7 @@ const uniqueTypes = computed(() => [...new Set(listings.value.map((item) => item
 const uniqueTags = computed(() => [...new Set(listings.value.flatMap((item) => item.tags))]);
 const uniqueCategories = computed(() => [...new Set(listings.value.map((item) => item.category))]);
 
-const filteredListings = computed(() => {
-    let result = listings.value.filter(listing => listing.status === 'Active');
-
-    if (searchQuery.value) {
-        result = result.filter((listing) =>
-            listing.location.toLowerCase().includes(searchQuery.value.toLowerCase())
-        );
-    }
-
-    if (selectedType.value) {
-        result = result.filter((listing) => listing.type === selectedType.value);
-    }
-
-    if (selectedTags.value.length) {
-        result = result.filter((listing) => {
-            const listingTagIds = listing.tags.map(tag => tag.id);
-            return selectedTags.value.every(tag => listingTagIds.includes(tag));
-        });
-    }
-
-    if (selectedCategory.value) {
-        result = result.filter((listing) =>
-            listing.category === selectedCategory.value ||
-            listing.category?.id === selectedCategory.value
-        );
-    }
-
-    if (priceMin.value !== null) {
-        result = result.filter((listing) => Number(listing.price) >= Number(priceMin.value));
-    }
-
-    if (priceMax.value !== null) {
-        result = result.filter((listing) => Number(listing.price) <= Number(priceMax.value));
-    }
-
-    if (areaMin.value !== null) {
-        result = result.filter((listing) => Number(listing.area) >= Number(areaMin.value));
-    }
-
-    if (areaMax.value !== null) {
-        result = result.filter((listing) => Number(listing.area) <= Number(areaMax.value));
-    }
-
-    const sortingMethods = {
-        newest: (a, b) => new Date(b.updated_at) - new Date(a.updated_at),
-        oldest: (a, b) => new Date(a.updated_at) - new Date(b.updated_at),
-        "a-z": (a, b) => a.title.localeCompare(b.title),
-        "z-a": (a, b) => b.title.localeCompare(a.title),
-    };
-
-    if (sortingMethods[sortBy.value]) {
-        result = result.sort(sortingMethods[sortBy.value]);
-    }
-
-    return result;
-});
+const paginatedListings = computed(() => listings.value);
 
 onMounted(() => {
     fetchListings();

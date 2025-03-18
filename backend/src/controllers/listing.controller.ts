@@ -30,12 +30,34 @@ class ListingController {
         }
     }
 
-    async getAll(req: FastifyRequest<{ Querystring: { page?: number, limit?: number } }>, res: FastifyReply): Promise<void> {
+    async getAll(req: FastifyRequest<{
+        Querystring: {
+            page?: number,
+            limit?: number,
+            category?: string,
+            minPrice?: number,
+            maxPrice?: number,
+            minArea?: number,
+            maxArea?: number,
+            status?: string,
+            tags?: string
+        }
+    }>, res: FastifyReply): Promise<void> {
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 12;
 
+        const filters = {
+            category: req.query.category,
+            minPrice: req.query.minPrice,
+            maxPrice: req.query.maxPrice,
+            minArea: req.query.minArea,
+            maxArea: req.query.maxArea,
+            status: req.query.status,
+            tags: req.query.tags ? req.query.tags.split(',') : undefined, 
+        };
+
         try {
-            const listings = await listingService.getAllListings(page, limit);
+            const listings = await listingService.getAllListings(page, limit, filters);
             res.status(200).send(listings);
         } catch (error: unknown) {
             if (error instanceof Error) {

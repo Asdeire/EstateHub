@@ -1,9 +1,25 @@
 import { api } from './config';
 import type { Listing, CreateListingDto } from '../../types/listing';
 
-export const getListings = async (page = 1, limit = 12): Promise<{ listings: Listing[], totalPages: number }> => {
+export const getListings = async (
+    page = 1,
+    limit = 12,
+    filters: { category?: string, minPrice?: number, maxPrice?: number, minArea?: number, maxArea?: number, status?: string, tags?: string[] } = {}
+): Promise<{ listings: Listing[], totalPages: number }> => {
+    const queryParams = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        ...(filters.category && { category: filters.category }),
+        ...(filters.minPrice && { minPrice: String(filters.minPrice) }),
+        ...(filters.maxPrice && { maxPrice: String(filters.maxPrice) }),
+        ...(filters.minArea && { minArea: String(filters.minArea) }),
+        ...(filters.maxArea && { maxArea: String(filters.maxArea) }),
+        ...(filters.status && { status: filters.status }),
+        ...(filters.tags?.length && { tags: filters.tags.join(',') }), 
+    });
+
     try {
-        const response = await api.get(`/listings?page=${page}&limit=${limit}`);
+        const response = await api.get(`/listings?${queryParams.toString()}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching listings:', error);
