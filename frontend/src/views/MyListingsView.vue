@@ -29,8 +29,8 @@
     </div>
 
     <CreateListing v-if="showModal" :showModal="showModal" @close="closeModal" @save="createNewListing" />
-    <EditListing v-if="showEditModal" :showEditModal="showEditModal" :listingId="currentListingId"
-        @close="closeEditModal" @save="handleUpdateListing" />
+    <EditListing v-if="showEditModal" :showEditModal="showEditModal" :listing="currentListing" @close="closeEditModal"
+        @save="handleUpdateListing" />
 </template>
 
 <script setup>
@@ -50,7 +50,7 @@ const loading = ref(true);
 const error = ref(null);
 const showModal = ref(false);
 const showEditModal = ref(false);
-const currentListingId = ref(null);
+const currentListing = ref(null);
 
 const activeListings = ref([]);
 const archivedListings = ref([]);
@@ -82,14 +82,34 @@ const closeModal = () => {
     showModal.value = false;
 };
 
-const editListing = (listing) => {
-    currentListingId.value = listing.id;
-    showEditModal.value = true;
+const editListing = async (listing) => {
+    try {
+        const listingData = await getListingById(listing.id);
+        currentListing.value = listingData; 
+        showEditModal.value = true;
+    } catch (err) {
+        console.error('Error loading listing data:', err);
+        alert("Помилка при завантаженні даних оголошення.");
+    }
 };
 
 const closeEditModal = () => {
     showEditModal.value = false;
-    currentListing.value = null;
+    currentListing.value = null; 
+};
+
+const handleUpdateListing = async (updatedListing) => {
+    try {
+        const index = activeListings.value.findIndex(listing => listing.id === updatedListing.id);
+        if (index !== -1) {
+            activeListings.value[index] = { ...activeListings.value[index], ...updatedListing };
+        }
+        alert("Оголошення успішно оновлено!");
+        closeEditModal();
+    } catch (err) {
+        console.error('Error updating listing:', err);
+        alert("Помилка при оновленні оголошення.");
+    }
 };
 
 const createNewListing = async (newListing) => {
@@ -101,23 +121,6 @@ const createNewListing = async (newListing) => {
     } catch (err) {
         console.error('Error creating listing:', err);
         alert("Помилка при створенні оголошення.");
-    }
-};
-
-const handleUpdateListing = async (updatedListing) => {
-    try {
-        await updateListing(updatedListing.id, updatedListing);
-
-        const index = activeListings.value.findIndex(listing => listing.id === updatedListing.id);
-        if (index !== -1) {
-            activeListings.value[index] = { ...activeListings.value[index], ...updatedListing };
-        }
-
-        alert("Оголошення успішно оновлено!");
-        closeEditModal();
-    } catch (err) {
-        console.error('Error updating listing:', err);
-        alert("Помилка при оновленні оголошення.");
     }
 };
 

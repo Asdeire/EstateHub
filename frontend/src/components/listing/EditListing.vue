@@ -77,9 +77,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getTags, getCategories, getListingById, updateListing } from '../../services/api/index';
+import { getTags, getCategories, updateListing } from '../../services/api/index';
 
-const props = defineProps({ showEditModal: Boolean, listingId: String });
+const props = defineProps({
+    showEditModal: Boolean,
+    listing: Object
+});
 const emit = defineEmits(['close', 'save']);
 
 const formData = ref({
@@ -87,6 +90,7 @@ const formData = ref({
     location: '',
     price: 0,
     area: 0,
+    type: '',
     description: '',
     photos: [],
     category_id: '',
@@ -105,6 +109,7 @@ const validateForm = () => {
     if (!formData.value.location.trim()) errors.value.location = 'Місце обов’язкове';
     if (formData.value.price <= 0) errors.value.price = 'Ціна повинна бути більше 0';
     if (formData.value.area <= 0) errors.value.area = 'Площа повинна бути більше 0';
+    if (!formData.value.type) errors.value.type = 'Тип нерухомості обов’язковий';
     if (!formData.value.category_id) errors.value.category_id = 'Оберіть категорію';
     if (formData.value.tags.length > maxTags) errors.value.tags = `Максимум ${maxTags} тегів`;
     return Object.keys(errors.value).length === 0;
@@ -120,17 +125,14 @@ const toggleTag = (tagId) => {
 };
 
 onMounted(async () => {
-    console.log('Listing ID:', props.listingId);
     try {
         tags.value = await getTags();
         categories.value = await getCategories();
-        if (props.listingId) {
-            const listing = await getListingById(props.listingId);
-            console.log('Listing:', listing);
-            Object.assign(formData.value, listing);
+        if (props.listing) {
+            Object.assign(formData.value, props.listing);
         }
     } catch (err) {
-        console.error('Error:', err);
+        console.error('Error loading tags or categories:', err);
     }
 });
 
@@ -144,8 +146,12 @@ const handleSubmit = async () => {
     if (!validateForm()) return;
     isLoading.value = true;
     try {
-        await updateListing(props.listingId, { ...formData.value });
-        emit('save');
+        const updatedData = { ...formData.value };
+        if (selectedFiles.value.length > 0) {
+            updatedData.photos = selectedFiles.value;
+        }
+        await updateListing(props.listing.id, updatedData);
+        emit('save', updatedData);
         emit('close');
     } catch (err) {
         console.error('Помилка оновлення оголошення:', err);

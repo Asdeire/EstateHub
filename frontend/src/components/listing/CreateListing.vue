@@ -145,9 +145,30 @@ onMounted(async () => {
     }
 });
 
+const maxFileSizeMB = 2; 
+const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 const handleFileUpload = (event) => {
-    selectedFiles.value = Array.from(event.target.files);
+    const files = Array.from(event.target.files);
+    selectedFiles.value = [];
+
+    for (const file of files) {
+        if (!allowedTypes.includes(file.type)) {
+            errors.value.photos = 'Дозволені лише зображення (JPEG, PNG, WebP).';
+            return;
+        }
+
+        if (file.size > maxFileSizeMB * 1024 * 1024) {
+            errors.value.photos = `Файл ${file.name} перевищує ${maxFileSizeMB}MB.`;
+            return;
+        }
+
+        selectedFiles.value.push(file);
+    }
+
+    if (selectedFiles.value.length > 0) {
+        errors.value.photos = '';
+    }
 };
 
 const handleSubmit = async () => {
