@@ -66,7 +66,9 @@
                     <span v-if="errors.photos" class="error">{{ errors.photos }}</span>
                 </label>
 
-                <button type="submit">Додати</button>
+                <button type="submit" :disabled="isLoading">
+                    {{ isLoading ? 'Створення...' : 'Створити' }}
+                </button>
                 <button type="button" @click="emit('close')">Закрити</button>
             </form>
         </div>
@@ -104,6 +106,7 @@ const maxTags = 5;
 const errors = ref({});
 const selectedFiles = ref([]);
 const userListingsCount = ref(0);
+const isLoading = ref(false);
 
 const validateForm = () => {
     errors.value = {};
@@ -145,7 +148,7 @@ onMounted(async () => {
     }
 });
 
-const maxFileSizeMB = 2; 
+const maxFileSizeMB = 2;
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 const handleFileUpload = (event) => {
@@ -180,8 +183,8 @@ const handleSubmit = async () => {
     if (!validateForm()) return;
 
     try {
+        isLoading.value = true;
         const data = { ...formData.value, is_agent_listing: true, photos: [] };
-
         const createdListing = await createListing(data);
 
         if (!createdListing || !createdListing.id) {
@@ -189,13 +192,13 @@ const handleSubmit = async () => {
         }
 
         const fileUrls = await uploadFilesToStorage(selectedFiles.value, createdListing.id);
-
         await updateListingPhotos(createdListing.id, fileUrls);
 
-        emit('save');
+        emit('save', createdListing);
         emit('close');
     } catch (err) {
         console.error('Error adding listing:', err);
+        alert('Помилка при створенні оголошення: ' + (err.message || 'Невідома помилка'));
     }
 };
 

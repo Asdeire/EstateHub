@@ -85,7 +85,7 @@ const closeModal = () => {
 const editListing = async (listing) => {
     try {
         const listingData = await getListingById(listing.id);
-        currentListing.value = listingData; 
+        currentListing.value = listingData;
         showEditModal.value = true;
     } catch (err) {
         console.error('Error loading listing data:', err);
@@ -95,7 +95,7 @@ const editListing = async (listing) => {
 
 const closeEditModal = () => {
     showEditModal.value = false;
-    currentListing.value = null; 
+    currentListing.value = null;
 };
 
 const handleUpdateListing = async (updatedListing) => {
@@ -114,13 +114,12 @@ const handleUpdateListing = async (updatedListing) => {
 
 const createNewListing = async (newListing) => {
     try {
-        const createdListing = await createListing({ ...newListing, user_id: authStore.user.id });
-        activeListings.value.push(createdListing);
+        activeListings.value.push(newListing);
         alert("Оголошення успішно додано!");
         closeModal();
     } catch (err) {
-        console.error('Error creating listing:', err);
-        alert("Помилка при створенні оголошення.");
+        console.error('Error in createNewListing:', err);
+        alert("Помилка при додаванні оголошення: " + (err.message || 'Невідома помилка'));
     }
 };
 

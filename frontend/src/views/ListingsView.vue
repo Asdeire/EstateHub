@@ -7,16 +7,14 @@
                     @input="debouncedApplyFilters" />
             </div>
 
-            <div class="controls">
-                <select v-model="sortBy" @change="applyFilters">
-                    <option value="newest">Новіші</option>
-                    <option value="oldest">Старіші</option>
-                    <option value="a-z">A-Я</option>
-                    <option value="z-a">Я-A</option>
-                </select>
+            <select v-model="sortBy" @change="applyFilters">
+                <option value="newest">Новіші</option>
+                <option value="oldest">Старіші</option>
+                <option value="a-z">A-Я</option>
+                <option value="z-a">Я-A</option>
+            </select>
 
-                <button @click="showFilters = !showFilters">Фільтри</button>
-            </div>
+            <button @click="showFilters = !showFilters">Фільтри</button>
         </div>
 
         <div v-if="showFilters" class="modal-overlay" @click="showFilters = false">
@@ -78,9 +76,11 @@
         </div>
 
         <div class="pagination-container" v-if="totalPages > 1">
-            <button class="pagination-button" @click="changePage(currentPage - 1)" :disabled="currentPage <= 1">Попередня</button>
+            <button class="pagination-button" @click="changePage(currentPage - 1)"
+                :disabled="currentPage <= 1">Попередня</button>
             <span>{{ currentPage }} / {{ totalPages }}</span>
-            <button class="pagination-button" @click="changePage(currentPage + 1)" :disabled="currentPage >= totalPages">Наступна</button>
+            <button class="pagination-button" @click="changePage(currentPage + 1)"
+                :disabled="currentPage >= totalPages">Наступна</button>
         </div>
     </div>
 </template>
@@ -148,18 +148,21 @@ const toggleFavorite = async (listing) => {
         alert("Будь ласка, увійдіть, щоб додати до улюблених!");
         return;
     }
+
+    const originalState = listing.isFavorite;
+    listing.isFavorite = !listing.isFavorite;
+
     try {
-        if (favorites.value.has(listing.id)) {
+        if (originalState) {
             await removeFavorite(listing.id);
             favorites.value.delete(listing.id);
-            listing.isFavorite = false;
         } else {
             await addFavorite(listing.id);
             favorites.value.add(listing.id);
-            listing.isFavorite = true;
         }
     } catch (error) {
-        console.error("Error toggling favorite status:", error);
+        listing.isFavorite = originalState;
+        console.error("Error toggling favorite:", error);
     }
 };
 

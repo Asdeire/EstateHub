@@ -3,7 +3,8 @@
         <div v-for="listing in listings" :key="listing.id" class="listing-card"
             @click="goToListingDetail && goToListingDetail(listing.id)">
 
-            <img :src="listing.photos[0]" alt="Image {{ listing.title }}" class="listing-image" />
+            <img :src="listing.photos?.[0] || '/house.png'" alt="Image {{ listing.title }}" class="listing-image"
+                loading="lazy" />
 
             <div class="listing-info">
                 <div class="title-and-favorite">
@@ -15,15 +16,16 @@
                 <p class="listing-location">{{ listing.location }}</p>
                 <h2 class="listing-price">{{ listing.price }}$</h2>
 
-                <div v-if="editListing || toggleListingStatus || deleteListing" class="actions">
-                    <span v-if="editListing" @click.stop="editListing(listing)" class="button">
+                <div v-if="hasActions" class="actions">
+                    <span v-if="props.editListing" @click.stop="props.editListing(listing)" class="button">
                         <img src="/edit.png" alt="Редагувати" />
                     </span>
-                    <span v-if="toggleListingStatus" @click.stop="toggleListingStatus(listing)" class="button">
+                    <span v-if="props.toggleListingStatus" @click.stop="props.toggleListingStatus(listing)"
+                        class="button">
                         <img :src="listing.status === 'Active' ? '/archive.png' : '/unarchive.png'"
                             alt="Змінити статус" />
                     </span>
-                    <span v-if="deleteListing" @click.stop="deleteListing(listing.id)" class="button">
+                    <span v-if="props.deleteListing" @click.stop="props.deleteListing(listing.id)" class="button">
                         <img src="/delete.png" alt="Видалити" />
                     </span>
                 </div>
@@ -35,32 +37,16 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, computed } from "vue";
 
 const props = defineProps({
-    listings: {
-        type: Array,
-        required: true,
-    },
-    goToListingDetail: {
-        type: Function,
-        required: false,
-    },
-    toggleFavorite: {
-        type: Function,
-        required: false,
-    },
-    editListing: {
-        type: Function,
-        required: false,
-    },
-    toggleListingStatus: {
-        type: Function,
-        required: false,
-    },
-    deleteListing: {
-        type: Function,
-        required: false,
-    }
+    listings: { type: Array, required: true },
+    goToListingDetail: { type: Function, default: null },
+    toggleFavorite: { type: Function, default: null },
+    editListing: { type: Function, default: null },
+    toggleListingStatus: { type: Function, default: null },
+    deleteListing: { type: Function, default: null },
 });
+
+const hasActions = computed(() => props.editListing || props.toggleListingStatus || props.deleteListing);
 </script>

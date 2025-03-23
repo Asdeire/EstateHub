@@ -129,7 +129,10 @@ onMounted(async () => {
         tags.value = await getTags();
         categories.value = await getCategories();
         if (props.listing) {
-            Object.assign(formData.value, props.listing);
+            Object.assign(formData.value, {
+                ...props.listing,
+                tags: props.listing.tags.map(tag => tag.id)
+            });
         }
     } catch (err) {
         console.error('Error loading tags or categories:', err);

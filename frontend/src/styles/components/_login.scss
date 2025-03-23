@@ -72,32 +72,6 @@ body {
     }
 }
 
-button {
-    margin-top: 10px;
-    width: 100%;
-    padding: 10px;
-    background-color: $primary-color;
-    color: white;
-    border: none;
-    border-radius: $border-radius;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s ease, transform 0.2s ease;
-
-    &:hover {
-        background-color: $button-hover-color;
-    }
-
-    &:active {
-        transform: scale(0.98);
-    }
-
-    &:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-    }
-}
-
 .error-text {
     color: red;
     font-size: 12px;
