@@ -163,6 +163,11 @@ const toggleFavorite = async (listing) => {
     } catch (error) {
         listing.isFavorite = originalState;
         console.error("Error toggling favorite:", error);
+        if (error.message === 'Ви досягли ліміту у 12 улюблених оголошень.') {
+            alert(error.message);
+        } else {
+            alert("Сталася помилка при зміні улюблених.");
+        }
     }
 };
 

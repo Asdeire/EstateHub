@@ -20,6 +20,13 @@ export const addFavorite = async (listingId: string) => {
         const token = localStorage.getItem('authToken');
         if (!token) throw new Error('User is not authenticated');
 
+        const currentFavorites = await getFavorites();
+        const favoriteCount = Array.isArray(currentFavorites) ? currentFavorites.length : 0;
+
+        if (favoriteCount >= 12) {
+            throw new Error('Ви досягли ліміту у 12 улюблених оголошень.');
+        }
+
         await api.post(`/favorites/${listingId}`, {}, {
             headers: { Authorization: `Bearer ${token}` }
         });

@@ -5,6 +5,7 @@ import Home from '../views/HomeView.vue';
 import Listings from '../views/ListingsView.vue';
 import ListingDetail from '../views/ListingDetailView.vue';
 import MyListings from '../views/MyListingsView.vue';
+import FavoritesView from '../views/FavoritesView.vue';
 import { useAuthStore } from '../store/useAuthStore';
 
 const routes = [
@@ -37,6 +38,12 @@ const routes = [
         path: '/mylistings',
         name: 'MyListings',
         component: MyListings,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/favourites',
+        name: 'Favorites',
+        component: FavoritesView,
         meta: { requiresAuth: true }
     }
 ];
