@@ -47,18 +47,17 @@
                         </div>
                     </div>
 
-                    <label>Мінімальна ціна</label>
-                    <input type="number" v-model="priceMin" placeholder="Введіть мінімальну ціну" />
+                    <h4>Ціна</h4>
+                    <div class="range-container">
+                        <input type="number" v-model="priceMin" placeholder="Від" />
+                        <input type="number" v-model="priceMax" placeholder="До" />
+                    </div>
 
-                    <label>Максимальна ціна</label>
-                    <input type="number" v-model="priceMax" placeholder="Введіть максимальну ціну" />
-
-                    <label>Мінімальна площа</label>
-                    <input type="number" v-model="areaMin" placeholder="Введіть мінімальну площу" />
-
-                    <label>Максимальна площа</label>
-                    <input type="number" v-model="areaMax" placeholder="Введіть максимальну площу" />
-
+                    <h4>Площа</h4>
+                    <div class="range-container">
+                        <input type="number" v-model="areaMin" placeholder="Від" />
+                        <input type="number" v-model="areaMax" placeholder="До" />
+                    </div>
                     <div class="filter-buttons">
                         <button @click="applyAndClose">Застосувати</button>
                         <button @click="clearFilters">Очистити</button>
@@ -76,53 +75,74 @@
         </div>
 
         <div class="pagination-container" v-if="totalPages > 1">
-            <button class="pagination-button" @click="changePage(currentPage - 1)"
-                :disabled="currentPage <= 1">Попередня</button>
+            <button class="pagination-button" @click="changePage(currentPage - 1)" :disabled="currentPage <= 1">
+                Попередня
+            </button>
             <span>{{ currentPage }} / {{ totalPages }}</span>
             <button class="pagination-button" @click="changePage(currentPage + 1)"
-                :disabled="currentPage >= totalPages">Наступна</button>
+                :disabled="currentPage >= totalPages">
+                Наступна
+            </button>
         </div>
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRouter } from 'vue-router';
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
-import Header from "../components/Header.vue";
-import Listings from "../components/listing/ListingCard.vue";
-import { getListings, getCategories, getTags, addFavorite, removeFavorite, getFavorites } from "../services/api/index";
+import Header from '../components/Header.vue';
+import Listings from '../components/listing/ListingCard.vue';
+import { getListings, getCategories, getTags, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
 import { debounce } from 'lodash';
+import { getItem } from '../services/localStorageService';
+
+interface Listing {
+    id: string;
+    location: string;
+    createdAt: string;
+    title: string;
+    isFavorite?: boolean;
+}
+
+interface Category {
+    id: string;
+    name: string;
+}
+
+interface Tag {
+    id: string;
+    name: string;
+}
 
 const router = useRouter();
-const listings = ref([]);
-const loading = ref(true);
-const error = ref(null);
-
-const searchQuery = ref('');
-const selectedType = ref('');
-const selectedTags = ref([]);
-const selectedCategory = ref('');
-const priceMin = ref(null);
-const priceMax = ref(null);
-const areaMin = ref(null);
-const areaMax = ref(null);
-const sortBy = ref('newest');
-const showFilters = ref(false);
-const selectedStatus = ref('Active');
-
-const isAuthenticated = ref(!!localStorage.getItem('token'));
-const favorites = ref(new Set());
 const authStore = useAuthStore();
+const listings = ref<Listing[]>([]);
+const loading = ref<boolean>(true);
+const error = ref<string | null>(null);
 
-const currentPage = ref(1);
+const searchQuery = ref<string>('');
+const selectedType = ref<string>('');
+const selectedTags = ref<string[]>([]);
+const selectedCategory = ref<string>('');
+const priceMin = ref<number | null>(null);
+const priceMax = ref<number | null>(null);
+const areaMin = ref<number | null>(null);
+const areaMax = ref<number | null>(null);
+const sortBy = ref<string>('newest');
+const showFilters = ref<boolean>(false);
+const selectedStatus = ref<string>('Active');
+
+const isAuthenticated = ref<boolean>(!!getItem('authToken'));
+const currentPage = ref<number>(1);
 const listingsPerPage = 12;
-const totalPages = ref(0);
+const totalPages = ref<number>(0);
 
-const categories = ref([]);
-const tags = ref([]);
+const categories = ref<Category[]>([]);
+const tags = ref<Tag[]>([]);
+const favorites = ref<Set<string>>(new Set());
 
-const fetchListings = async (page = 1, filters = {}) => {
+const fetchListings = async (page: number = 1, filters: Record<string, any> = {}) => {
     try {
         loading.value = true;
         const data = await getListings(page, listingsPerPage, filters);
@@ -131,21 +151,21 @@ const fetchListings = async (page = 1, filters = {}) => {
 
         if (authStore.isAuthenticated) {
             const favData = await getFavorites();
-            favorites.value = new Set(favData.map(fav => fav.listing_id));
-            listings.value.forEach(listing => listing.isFavorite = favorites.value.has(listing.id));
+            favorites.value = new Set(favData.map((fav: { listing_id: string }) => fav.listing_id));
+            listings.value.forEach((listing) => (listing.isFavorite = favorites.value.has(listing.id)));
         }
 
         loading.value = false;
-    } catch (error) {
-        console.error("Error loading listings:", error);
-        error.value = "Не вдалося завантажити оголошення.";
+    } catch (err) {
+        console.error('Error loading listings:', err);
+        error.value = 'Не вдалося завантажити оголошення.';
         loading.value = false;
     }
 };
 
-const toggleFavorite = async (listing) => {
+const toggleFavorite = async (listing: Listing) => {
     if (!authStore.isAuthenticated) {
-        alert("Будь ласка, увійдіть, щоб додати до улюблених!");
+        alert('Будь ласка, увійдіть, щоб додати до улюблених!');
         return;
     }
 
@@ -160,22 +180,22 @@ const toggleFavorite = async (listing) => {
             await addFavorite(listing.id);
             favorites.value.add(listing.id);
         }
-    } catch (error) {
+    } catch (error: any) {
         listing.isFavorite = originalState;
-        console.error("Error toggling favorite:", error);
+        console.error('Error toggling favorite:', error);
         if (error.message === 'Ви досягли ліміту у 12 улюблених оголошень.') {
             alert(error.message);
         } else {
-            alert("Сталася помилка при зміні улюблених.");
+            alert('Сталася помилка при зміні улюблених.');
         }
     }
 };
 
-const goToListingDetail = (listingId) => {
+const goToListingDetail = (listingId: string) => {
     router.push({ name: 'ListingDetail', params: { id: listingId } });
 };
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
         applyFilters();
@@ -183,15 +203,15 @@ const changePage = (page) => {
 };
 
 const sortedListings = computed(() => {
-    let filtered = listings.value.filter(listing =>
+    let filtered = listings.value.filter((listing) =>
         listing.location.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 
     switch (sortBy.value) {
         case 'newest':
-            return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         case 'oldest':
-            return filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            return filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         case 'a-z':
             return filtered.sort((a, b) => a.title.localeCompare(b.title));
         case 'z-a':
@@ -234,18 +254,28 @@ const clearFilters = () => {
     applyFilters();
 };
 
-const toggleTag = (tagId) => {
+const toggleTag = (tagId: string) => {
     if (selectedTags.value.includes(tagId)) {
-        selectedTags.value = selectedTags.value.filter(id => id !== tagId);
+        selectedTags.value = selectedTags.value.filter((id) => id !== tagId);
     } else {
         selectedTags.value.push(tagId);
     }
     applyFilters();
 };
 
+
+const route = useRoute();
+
 onMounted(async () => {
     categories.value = await getCategories();
     tags.value = await getTags();
-    fetchListings();
+    const tagFromUrl = route.query.tag;
+    if (tagFromUrl) {
+        const tag = tags.value.find(t => t.name === tagFromUrl);
+        if (tag) {
+            selectedTags.value = [tag.id];
+        }
+    }
+    applyFilters();
 });
 </script>

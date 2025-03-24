@@ -67,7 +67,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite } from '../services/api/index';
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
@@ -188,8 +188,10 @@ const openGallery = () => {
     alert("Галерея відкривається тут...");
 };
 
+const router = useRouter();
+
 const filterByTag = (tag) => {
-    alert(`Пошук за тегом: ${tag.name}`);
+    router.push({ name: 'Listings', query: { tag: tag.name } });
 };
 
 const fetchCoordinates = async (address) => {

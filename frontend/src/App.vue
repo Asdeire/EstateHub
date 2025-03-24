@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useAuthStore } from './store/useAuthStore';
+import { getUserIdFromToken } from './services/localStorageService';
 
 const authStore = useAuthStore();
 
 onMounted(async () => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
+  const userId: string | null = getUserIdFromToken();
+  if (userId) {
     try {
-      const userId = JSON.parse(atob(token.split('.')[1])).id;
       await authStore.fetchUser(userId);
     } catch (error) {
       console.error('Помилка при завантаженні користувача:', error);
-      localStorage.removeItem('authToken'); 
     }
   }
 });

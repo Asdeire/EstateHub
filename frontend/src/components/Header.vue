@@ -21,7 +21,7 @@
                         <ul v-if="showUserMenu" class="dropdown-menu">
                             <li><router-link to="/profile">Профіль</router-link></li>
                             <li><router-link to="/subscription">Підписка</router-link></li>
-                            <li><router-link to="/favourite">Улюблені</router-link></li>
+                            <li><router-link to="/favourites">Улюблені</router-link></li>
                             <li><router-link to="/mylistings">Мої оголошення</router-link></li>
                             <li @click="logout">Вийти</li>
                         </ul>

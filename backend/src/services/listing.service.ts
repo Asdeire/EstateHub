@@ -46,7 +46,7 @@ class ListingService {
         limit: number = 12,
         filters: {
             category?: string;
-            type?: string; 
+            type?: string;
             minPrice?: number;
             maxPrice?: number;
             minArea?: number;
@@ -80,7 +80,7 @@ class ListingService {
         }
 
         if (filters.type) {
-            where.type = filters.type; 
+            where.type = filters.type;
         }
 
         if (filters.tags?.length) {
@@ -142,7 +142,7 @@ class ListingService {
                 connect: { id: category_id },
             } : undefined,
             tags: tags ? {
-                connect: tags.map((tag: string | { id: string }) =>
+                set: tags.map((tag: string | { id: string }) =>
                     typeof tag === 'string' ? { id: tag } : { id: tag.id }
                 ),
             } : undefined,
@@ -155,6 +155,7 @@ class ListingService {
             const updatedListing = await prisma.listing.update({
                 where: { id },
                 data: updateData,
+                include: { tags: true },
             });
 
             return updatedListing;
@@ -163,8 +164,6 @@ class ListingService {
             throw new Error('Error: ' + error);
         }
     }
-
-
 
     async deleteListing(id: string): Promise<Listing> {
         return await prisma.listing.delete({
