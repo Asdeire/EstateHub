@@ -3,7 +3,7 @@
     justify-content: center;
     gap: 30px;
     grid-template-columns: repeat(4, minmax(340px, 1fr));
-    min-height: 82vh;
+    min-height: 80vh;
 
     @media(max-width: 1700px) {
         grid-template-columns: repeat(3, 1fr);

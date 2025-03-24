@@ -15,13 +15,30 @@
                     <div class="overlay-text">+{{ listing.photos.length - 3 }} фото</div>
                 </div>
             </div>
+            <button v-if="listing.photos.length > 4" class="gallery-button" @click="openGallery">+{{ listing.photos.length - 1 }}
+                фото</button>
+        </div>
+
+        <div v-if="showGallery" class="gallery-modal" @click.self="closeGallery">
+            <div class="gallery-modal-content">
+                <carousel :items-to-show="1" :wrap-around="true" v-model="currentSlide" class="carousel">
+                    <slide v-for="(photo, index) in listing.photos" :key="index">
+                        <img :src="photo" :alt="`Photo ${index + 1}`" class="carousel-image" loading="lazy">
+                    </slide>
+
+                    <template #addons>
+                        <navigation />
+                        <pagination />
+                    </template>
+                </carousel>
+            </div>
         </div>
 
         <div class="listing-content">
             <div class="listing-info">
                 <h1 class="listing-title">{{ listing.title }}</h1>
 
-                <div class="listing-tags">
+                <div class="listing-tags" v-if="listing.tags.length">
                     <span v-for="(tag, index) in listing.tags" :key="index" class="tag" @click="filterByTag(tag)">
                         {{ tag.name }}
                     </span>
@@ -67,6 +84,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { Carousel, Slide, Navigation, Pagination } from 'vue3-carousel';
+import 'vue3-carousel/dist/carousel.css';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite } from '../services/api/index';
@@ -95,6 +114,18 @@ const exchangeRate = ref(1);
 
 const authStore = useAuthStore();
 const favorites = ref(new Set());
+
+const showGallery = ref(false);
+const currentSlide = ref(0);
+
+const openGallery = () => {
+    showGallery.value = true;
+    currentSlide.value = 0;
+};
+
+const closeGallery = () => {
+    showGallery.value = false;
+};
 
 const fetchListing = async () => {
     try {
@@ -181,11 +212,6 @@ const contactUser = () => {
         return;
     }
     alert(`Зв'язок із ${user.value?.name}`);
-};
-
-
-const openGallery = () => {
-    alert("Галерея відкривається тут...");
 };
 
 const router = useRouter();

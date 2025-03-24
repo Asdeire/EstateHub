@@ -7,7 +7,7 @@
                     @input="debouncedApplyFilters" />
             </div>
 
-            <select v-model="sortBy" @change="applyFilters">
+            <select v-model="sortBy" @change="debouncedApplyFilters">
                 <option value="newest">Новіші</option>
                 <option value="oldest">Старіші</option>
                 <option value="a-z">A-Я</option>
@@ -17,54 +17,10 @@
             <button @click="showFilters = !showFilters">Фільтри</button>
         </div>
 
-        <div v-if="showFilters" class="modal-overlay" @click="showFilters = false">
-            <div class="modal" @click.stop>
-                <h2>Фільтри</h2>
-                <div class="filter-options">
-                    <label>
-                        Тип нерухомості:
-                        <select v-model="selectedType">
-                            <option value="">Всі</option>
-                            <option value="квартира">Квартира</option>
-                            <option value="будинок">Будинок</option>
-                            <option value="комерційна">Комерційна</option>
-                        </select>
-                    </label>
-
-                    <label>Категорія</label>
-                    <select v-model="selectedCategory">
-                        <option value="">Всі</option>
-                        <option v-for="category in categories" :key="category.id" :value="category.id">
-                            {{ category.name }}
-                        </option>
-                    </select>
-
-                    <label>Теги</label>
-                    <div class="tag-container">
-                        <div v-for="tag in tags" :key="tag.id" class="tag-item"
-                            :class="{ selected: selectedTags.includes(tag.id) }" @click="toggleTag(tag.id)">
-                            {{ tag.name }}
-                        </div>
-                    </div>
-
-                    <h4>Ціна</h4>
-                    <div class="range-container">
-                        <input type="number" v-model="priceMin" placeholder="Від" />
-                        <input type="number" v-model="priceMax" placeholder="До" />
-                    </div>
-
-                    <h4>Площа</h4>
-                    <div class="range-container">
-                        <input type="number" v-model="areaMin" placeholder="Від" />
-                        <input type="number" v-model="areaMax" placeholder="До" />
-                    </div>
-                    <div class="filter-buttons">
-                        <button @click="applyAndClose">Застосувати</button>
-                        <button @click="clearFilters">Очистити</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
+            :selected-type="selectedType" :selected-category="selectedCategory" :selected-tags="selectedTags"
+            :price-min="priceMin" :price-max="priceMax" :area-min="areaMin" :area-max="areaMax"
+            @close="showFilters = false" @apply="handleApplyFilters" @clear="clearFilters" />
 
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
@@ -91,9 +47,11 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
+import { useDataStore } from '../store/useDataStore';
 import Header from '../components/Header.vue';
 import Listings from '../components/listing/ListingCard.vue';
-import { getListings, getCategories, getTags, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
+import FilterModal from '../components/listing/FilterModal.vue';
+import { getListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
 import { debounce } from 'lodash';
 import { getItem } from '../services/localStorageService';
 
@@ -105,18 +63,11 @@ interface Listing {
     isFavorite?: boolean;
 }
 
-interface Category {
-    id: string;
-    name: string;
-}
-
-interface Tag {
-    id: string;
-    name: string;
-}
-
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
+const dataStore = useDataStore(); 
+
 const listings = ref<Listing[]>([]);
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
@@ -138,27 +89,27 @@ const currentPage = ref<number>(1);
 const listingsPerPage = 12;
 const totalPages = ref<number>(0);
 
-const categories = ref<Category[]>([]);
-const tags = ref<Tag[]>([]);
 const favorites = ref<Set<string>>(new Set());
+
+const updateFavorites = async () => {
+    if (!authStore.isAuthenticated) return;
+    const favData = await getFavorites();
+    favorites.value = new Set(favData.map((fav: { listing_id: string }) => fav.listing_id));
+    listings.value.forEach((listing) => (listing.isFavorite = favorites.value.has(listing.id)));
+};
 
 const fetchListings = async (page: number = 1, filters: Record<string, any> = {}) => {
     try {
         loading.value = true;
+        filters.status = selectedStatus.value;
         const data = await getListings(page, listingsPerPage, filters);
         listings.value = data.listings;
         totalPages.value = data.totalPages;
-
-        if (authStore.isAuthenticated) {
-            const favData = await getFavorites();
-            favorites.value = new Set(favData.map((fav: { listing_id: string }) => fav.listing_id));
-            listings.value.forEach((listing) => (listing.isFavorite = favorites.value.has(listing.id)));
-        }
-
-        loading.value = false;
+        await updateFavorites();
     } catch (err) {
         console.error('Error loading listings:', err);
         error.value = 'Не вдалося завантажити оголошення.';
+    } finally {
         loading.value = false;
     }
 };
@@ -183,11 +134,7 @@ const toggleFavorite = async (listing: Listing) => {
     } catch (error: any) {
         listing.isFavorite = originalState;
         console.error('Error toggling favorite:', error);
-        if (error.message === 'Ви досягли ліміту у 12 улюблених оголошень.') {
-            alert(error.message);
-        } else {
-            alert('Сталася помилка при зміні улюблених.');
-        }
+        alert(error.message || 'Сталася помилка при зміні улюблених.');
     }
 };
 
@@ -198,7 +145,7 @@ const goToListingDetail = (listingId: string) => {
 const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
-        applyFilters();
+        debouncedApplyFilters();
     }
 };
 
@@ -229,7 +176,6 @@ const applyFilters = () => {
         maxPrice: priceMax.value,
         minArea: areaMin.value,
         maxArea: areaMax.value,
-        status: selectedStatus.value,
         tags: selectedTags.value,
     };
     fetchListings(currentPage.value, filters);
@@ -237,9 +183,15 @@ const applyFilters = () => {
 
 const debouncedApplyFilters = debounce(applyFilters, 300);
 
-const applyAndClose = () => {
-    applyFilters();
-    showFilters.value = false;
+const handleApplyFilters = (filters: Record<string, any>) => {
+    selectedType.value = filters.type;
+    selectedCategory.value = filters.category;
+    selectedTags.value = filters.tags;
+    priceMin.value = filters.minPrice;
+    priceMax.value = filters.maxPrice;
+    areaMin.value = filters.minArea;
+    areaMax.value = filters.maxArea;
+    debouncedApplyFilters(); 
 };
 
 const clearFilters = () => {
@@ -250,28 +202,15 @@ const clearFilters = () => {
     priceMax.value = null;
     areaMin.value = null;
     areaMax.value = null;
-    showFilters.value = false;
-    applyFilters();
+    debouncedApplyFilters(); 
 };
-
-const toggleTag = (tagId: string) => {
-    if (selectedTags.value.includes(tagId)) {
-        selectedTags.value = selectedTags.value.filter((id) => id !== tagId);
-    } else {
-        selectedTags.value.push(tagId);
-    }
-    applyFilters();
-};
-
-
-const route = useRoute();
 
 onMounted(async () => {
-    categories.value = await getCategories();
-    tags.value = await getTags();
+    await dataStore.loadData(); 
+
     const tagFromUrl = route.query.tag;
     if (tagFromUrl) {
-        const tag = tags.value.find(t => t.name === tagFromUrl);
+        const tag = dataStore.tags.find(t => t.name === tagFromUrl);
         if (tag) {
             selectedTags.value = [tag.id];
         }
