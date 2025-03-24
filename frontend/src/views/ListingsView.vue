@@ -66,7 +66,7 @@ interface Listing {
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
-const dataStore = useDataStore(); 
+const dataStore = useDataStore();
 
 const listings = ref<Listing[]>([]);
 const loading = ref<boolean>(true);
@@ -181,8 +181,6 @@ const applyFilters = () => {
     fetchListings(currentPage.value, filters);
 };
 
-const debouncedApplyFilters = debounce(applyFilters, 300);
-
 const handleApplyFilters = (filters: Record<string, any>) => {
     selectedType.value = filters.type;
     selectedCategory.value = filters.category;
@@ -191,7 +189,7 @@ const handleApplyFilters = (filters: Record<string, any>) => {
     priceMax.value = filters.maxPrice;
     areaMin.value = filters.minArea;
     areaMax.value = filters.maxArea;
-    debouncedApplyFilters(); 
+    applyFilters();
 };
 
 const clearFilters = () => {
@@ -202,11 +200,11 @@ const clearFilters = () => {
     priceMax.value = null;
     areaMin.value = null;
     areaMax.value = null;
-    debouncedApplyFilters(); 
+    applyFilters();
 };
 
 onMounted(async () => {
-    await dataStore.loadData(); 
+    await dataStore.loadData();
 
     const tagFromUrl = route.query.tag;
     if (tagFromUrl) {

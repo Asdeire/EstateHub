@@ -1,6 +1,8 @@
-import { PrismaClient, Listing, Prisma } from '@prisma/client';
+import { PrismaClient, Listing, Prisma, Subscription } from '@prisma/client';
+import { NotificationService } from './notification.service';
 
 const prisma = new PrismaClient();
+const notificationService = new NotificationService();
 
 class ListingService {
     async createListing(data: {
@@ -34,11 +36,52 @@ class ListingService {
                     connect: tags.map((tag: string | { id: string }) =>
                         typeof tag === 'string' ? { id: tag } : { id: tag.id }
                     ),
-                }
+                },
             },
+            include: { tags: true, category: true },
         });
 
+        const subscriptions = await prisma.subscription.findMany({
+            include: { buyer: true },
+        });
+
+        for (const subscription of subscriptions) {
+            const filters = subscription.filters as {
+                category?: string;
+                type?: string;
+                minPrice?: number;
+                maxPrice?: number;
+                minArea?: number;
+                maxArea?: number;
+                tags?: string[];
+            };
+
+            if (this.matchesFilters(listing, filters)) {
+                await notificationService.createNotification({
+                    user_id: subscription.buyer_id,
+                    subscription_id: subscription.id,
+                    message: `New listing matches your subscription: "${listing.title}" (Price: ${listing.price}, Area: ${listing.area}) http://localhost:5173/listings/${listing.id}`,
+                    status: 'SENT',
+                });
+            }
+        }
+
         return listing;
+    }
+
+    private matchesFilters(listing: Listing & { tags: { id: string }[], category?: { id: string } | null }, filters: any): boolean {
+        if (filters.category && (!listing.category || listing.category?.id !== filters.category)) return false;
+        if (filters.type && listing.type !== filters.type) return false;
+        if (filters.minPrice && listing.price < filters.minPrice) return false;
+        if (filters.maxPrice && listing.price > filters.maxPrice) return false;
+        if (filters.minArea && listing.area < filters.minArea) return false;
+        if (filters.maxArea && listing.area > filters.maxArea) return false;
+        if (filters.tags && filters.tags.length > 0) {
+            const listingTagIds = listing.tags.map(tag => tag.id);
+            const hasMatchingTag = filters.tags.some((tag: string) => listingTagIds.includes(tag));
+            if (!hasMatchingTag) return false;
+        }
+        return true;
     }
 
     async getAllListings(
@@ -108,7 +151,6 @@ class ListingService {
 
         return { listings, totalPages };
     }
-
 
     async getListingById(id: string): Promise<Listing | null> {
         return await prisma.listing.findUnique({
