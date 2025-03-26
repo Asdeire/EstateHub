@@ -65,6 +65,11 @@
                     <input type="file" multiple @change="handleFileUpload" />
                     <span v-if="errors.photos" class="error">{{ errors.photos }}</span>
                 </label>
+                <div v-if="formData.photos.length" class="photo-preview">
+                    <p>Поточні фото:</p>
+                    <img v-for="(photo, index) in formData.photos" :key="index" :src="photo" alt="Photo preview"
+                        style="max-width: 100px; margin: 5px;" />
+                </div>
 
                 <button type="submit" :disabled="isLoading">
                     {{ isLoading ? 'Збереження...' : 'Зберегти' }}
@@ -78,10 +83,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getTags, getCategories, updateListing } from '../../services/api/index';
+import { storage } from '../../services/utils/firebase.config';
+import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const props = defineProps({
     showEditModal: Boolean,
-    listing: Object
+    listing: Object,
 });
 const emit = defineEmits(['close', 'save']);
 
@@ -92,7 +99,7 @@ const formData = ref({
     area: 0,
     type: '',
     description: '',
-    photos: [],
+    photos: [], // Зберігаємо поточні URL фотографій
     category_id: '',
     tags: [],
 });
@@ -100,8 +107,12 @@ const formData = ref({
 const tags = ref([]);
 const categories = ref([]);
 const errors = ref({});
-const selectedFiles = ref([]);
+const selectedFiles = ref([]); // Нові файли для завантаження
 const maxTags = 5;
+const isLoading = ref(false);
+
+const maxFileSizeMB = 2;
+const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 const validateForm = () => {
     errors.value = {};
@@ -112,6 +123,9 @@ const validateForm = () => {
     if (!formData.value.type) errors.value.type = 'Тип нерухомості обов’язковий';
     if (!formData.value.category_id) errors.value.category_id = 'Оберіть категорію';
     if (formData.value.tags.length > maxTags) errors.value.tags = `Максимум ${maxTags} тегів`;
+    if (selectedFiles.value.length > 0 && (selectedFiles.value.length < 5 || selectedFiles.value.length > 25)) {
+        errors.value.photos = 'Дозволено від 5 до 25 фото при завантаженні';
+    }
     return Object.keys(errors.value).length === 0;
 };
 
@@ -131,7 +145,8 @@ onMounted(async () => {
         if (props.listing) {
             Object.assign(formData.value, {
                 ...props.listing,
-                tags: props.listing.tags.map(tag => tag.id)
+                tags: props.listing.tags.map(tag => tag.id),
+                photos: props.listing.photos || [], // Завантажуємо поточні фото
             });
         }
     } catch (err) {
@@ -140,26 +155,74 @@ onMounted(async () => {
 });
 
 const handleFileUpload = (event) => {
-    selectedFiles.value = Array.from(event.target.files);
-};
+    const files = Array.from(event.target.files);
+    selectedFiles.value = [];
 
-const isLoading = ref(false);
+    for (const file of files) {
+        if (!allowedTypes.includes(file.type)) {
+            errors.value.photos = 'Дозволені лише зображення (JPEG, PNG, WebP).';
+            return;
+        }
+
+        if (file.size > maxFileSizeMB * 1024 * 1024) {
+            errors.value.photos = `Файл ${file.name} перевищує ${maxFileSizeMB}MB.`;
+            return;
+        }
+
+        selectedFiles.value.push(file);
+    }
+
+    if (selectedFiles.value.length > 0) {
+        errors.value.photos = '';
+    }
+};
 
 const handleSubmit = async () => {
     if (!validateForm()) return;
     isLoading.value = true;
+
     try {
-        const updatedData = { ...formData.value };
+        let updatedPhotos = [...formData.value.photos]; // Зберігаємо поточні фото
+
+        // Якщо є нові файли, завантажуємо їх у Firebase
         if (selectedFiles.value.length > 0) {
-            updatedData.photos = selectedFiles.value;
+            const fileUrls = await uploadFilesToStorage(selectedFiles.value, props.listing.id);
+            updatedPhotos = fileUrls; // Замінюємо старі фото новими
         }
+
+        // Оновлюємо оголошення з новими даними і фото
+        const updatedData = {
+            ...formData.value,
+            photos: updatedPhotos,
+        };
+
         await updateListing(props.listing.id, updatedData);
         emit('save', updatedData);
         emit('close');
     } catch (err) {
         console.error('Помилка оновлення оголошення:', err);
+        alert('Помилка при оновленні оголошення: ' + (err.message || 'Невідома помилка'));
     } finally {
         isLoading.value = false;
     }
+};
+
+const uploadFilesToStorage = async (files, listingId) => {
+    const fileUrls = [];
+    for (const file of files) {
+        const storagePath = `images/${listingId}/${Date.now()}_${file.name}`;
+        const storageReference = storageRef(storage, storagePath);
+        const uploadTask = uploadBytesResumable(storageReference, file);
+
+        try {
+            await uploadTask;
+            const fileURL = await getDownloadURL(storageReference);
+            fileUrls.push(fileURL);
+        } catch (error) {
+            console.error('Помилка завантаження фото:', error);
+            throw error;
+        }
+    }
+    return fileUrls;
 };
 </script>

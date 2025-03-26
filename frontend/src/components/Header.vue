@@ -19,11 +19,11 @@
                     <div class="user-menu" @click="toggleUserMenu">
                         {{ authStore.user?.name }}
                         <ul v-if="showUserMenu" class="dropdown-menu">
-                            <li><router-link to="/profile">Профіль</router-link></li>
-                            <li><router-link to="/subscription">Підписка</router-link></li>
-                            <li><router-link to="/favourites">Улюблені</router-link></li>
-                            <li><router-link to="/mylistings">Мої оголошення</router-link></li>
-                            <li @click="logout">Вийти</li>
+                            <li class="nav-item" @click="goTo('/profile')">Профіль</li>
+                            <li class="nav-item" @click="goTo('/notifications):')">Повідомлення</li>
+                            <li class="nav-item" @click="goTo('/favourites')">Улюблені</li>
+                            <li class="nav-item" @click="goTo('/mylistings')">Мої оголошення</li>
+                            <li class="nav-item logout-item" @click="logout">Вийти</li>
                         </ul>
                     </div>
                 </template>
@@ -75,6 +75,10 @@ const toggleMenu = () => {
 
 const toggleUserMenu = () => {
     showUserMenu.value = !showUserMenu.value;
+};
+
+const goTo = (path: string): void => {
+    router.push(path);
 };
 
 const logout = () => {

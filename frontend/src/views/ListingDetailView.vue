@@ -7,15 +7,24 @@
         <div class="listing-gallery">
             <img v-if="listing?.photos?.length" :src="listing.photos[0]" alt="Main Image of {{ listing.title }}"
                 class="main-image" loading="lazy" />
+            <img v-else :src="defaultPhoto" alt="Default Image" class="main-image" loading="lazy" />
+
             <div class="thumbnail-container">
-                <img v-for="(photo, index) in listing.photos.slice(1, 3)" :key="index" :src="photo" class="thumbnail"
-                    loading="lazy" alt="Thumbnail {{ index + 1 }}" />
-                <div v-if="listing.photos.length > 4" class="thumbnail overlay" @click="openGallery">
-                    <img :src="listing.photos[3]" class="thumbnail" loading="lazy" alt="Additional photos" />
-                    <div class="overlay-text">+{{ listing.photos.length - 3 }} фото</div>
-                </div>
+                <template v-if="listing?.photos?.length > 1">
+                    <img v-for="(photo, index) in listing.photos.slice(1, 3)" :key="index" :src="photo"
+                        class="thumbnail" loading="lazy" alt="Thumbnail {{ index + 1 }}" />
+                    <div v-if="listing.photos.length > 4" class="thumbnail overlay" @click="openGallery">
+                        <img :src="listing.photos[3]" class="thumbnail" loading="lazy" alt="Additional photos" />
+                        <div class="overlay-text">+{{ listing.photos.length - 3 }} фото</div>
+                    </div>
+                </template>
+                <template v-else>
+                    <img :src="defaultPhoto" class="thumbnail" loading="lazy" alt="Default Thumbnail 1" />
+                    <img :src="defaultPhoto" class="thumbnail" loading="lazy" alt="Default Thumbnail 2" />
+                </template>
             </div>
-            <button v-if="listing.photos.length > 4" class="gallery-button" @click="openGallery">+{{ listing.photos.length - 1 }}
+            <button v-if="listing.photos.length > 4" class="gallery-button" @click="openGallery">+{{
+                listing.photos.length - 1 }}
                 фото</button>
         </div>
 
@@ -95,6 +104,7 @@ import L from "leaflet";
 import Header from '../components/Header.vue';
 import agentIcon from '../assets/agency.png';
 import userIconDefault from '../assets/user-icon.png';
+import defaultPhoto from '../assets/undefined.png';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({

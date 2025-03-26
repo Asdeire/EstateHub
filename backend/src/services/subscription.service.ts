@@ -24,7 +24,6 @@ export class SubscriptionService {
         });
     }
 
-    // Отримати підписку за ID
     async getSubscriptionById(id: string): Promise<Subscription | null> {
         return await prisma.subscription.findUnique({
             where: { id },

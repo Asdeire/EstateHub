@@ -13,6 +13,17 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
 }
 
 .modal {
@@ -24,10 +35,12 @@
     border-radius: 8px;
     padding: 20px;
     margin: 0 20px;
+
     button {
         margin-top: 10px;
     }
-    h4{
+
+    h4 {
         text-align: center;
     }
 }
@@ -67,16 +80,7 @@ label {
     gap: 10px;
 }
 
-input,
-select,
-textarea {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
+
 
 .error {
     color: red;

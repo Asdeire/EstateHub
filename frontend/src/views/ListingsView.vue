@@ -7,14 +7,14 @@
                     @input="debouncedApplyFilters" />
             </div>
 
-            <select v-model="sortBy" @change="debouncedApplyFilters">
+            <select v-model="sortBy">
                 <option value="newest">Новіші</option>
                 <option value="oldest">Старіші</option>
                 <option value="a-z">A-Я</option>
                 <option value="z-a">Я-A</option>
             </select>
 
-            <button @click="showFilters = !showFilters">Фільтри</button>
+            <span @click="showFilters = !showFilters"><img src="../assets/filter.png"></span>
         </div>
 
         <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
@@ -156,9 +156,9 @@ const sortedListings = computed(() => {
 
     switch (sortBy.value) {
         case 'newest':
-            return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return filtered.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
         case 'oldest':
-            return filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+            return filtered.sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
         case 'a-z':
             return filtered.sort((a, b) => a.title.localeCompare(b.title));
         case 'z-a':
@@ -167,6 +167,10 @@ const sortedListings = computed(() => {
             return filtered;
     }
 });
+
+const debouncedApplyFilters = debounce(() => {
+    applyFilters();
+}, 300);
 
 const applyFilters = () => {
     const filters = {
