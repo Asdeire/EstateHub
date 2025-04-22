@@ -41,31 +41,6 @@ class ListingService {
             include: { tags: true, category: true },
         });
 
-        const subscriptions = await prisma.subscription.findMany({
-            include: { buyer: true },
-        });
-
-        for (const subscription of subscriptions) {
-            const filters = subscription.filters as {
-                category?: string;
-                type?: string;
-                minPrice?: number;
-                maxPrice?: number;
-                minArea?: number;
-                maxArea?: number;
-                tags?: string[];
-            };
-
-            if (this.matchesFilters(listing, filters)) {
-                await notificationService.createNotification({
-                    user_id: subscription.buyer_id,
-                    subscription_id: subscription.id,
-                    message: `New listing matches your subscription: "${listing.title}" (Price: ${listing.price}, Area: ${listing.area}) http://localhost:5173/listings/${listing.id}`,
-                    status: 'SENT',
-                });
-            }
-        }
-
         return listing;
     }
 
@@ -197,8 +172,36 @@ class ListingService {
             const updatedListing = await prisma.listing.update({
                 where: { id },
                 data: updateData,
-                include: { tags: true },
+                include: { tags: true, category: true },
             });
+
+            if (data.photos || data.title || data.price || data.area || data.status === 'Active') {
+                const subscriptions = await prisma.subscription.findMany({
+                    include: { buyer: true },
+                });
+
+                for (const subscription of subscriptions) {
+                    const filters = subscription.filters as {
+                        category?: string;
+                        type?: string;
+                        minPrice?: number;
+                        maxPrice?: number;
+                        minArea?: number;
+                        maxArea?: number;
+                        tags?: string[];
+                    };
+
+                    if (this.matchesFilters(updatedListing, filters)) {
+                        await notificationService.createNotification({
+                            user_id: subscription.buyer_id,
+                            subscription_id: subscription.id,
+                            message: `Нове оголошення за вашою підпискою: "${updatedListing.title}" (Ціна: ${updatedListing.price}, Площа: ${updatedListing.area}) http://localhost:5173/listings/${updatedListing.id}`,
+                            status: 'SENT',
+                            listing_id: updatedListing.id,
+                        });
+                    }
+                }
+            }
 
             return updatedListing;
         } catch (error) {
