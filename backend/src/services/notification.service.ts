@@ -94,7 +94,7 @@ export class NotificationService {
 
                     formattedMessage = `<b>Нове оголошення за вашою підпискою!</b> 🏠\n\n` +
                         `<b>Назва:</b> ${title}\n` +
-                        `<b>Ціна:</b> ${listing.price.toLocaleString('uk-UA')} грн\n` +
+                        `<b>Ціна:</b> ${listing.price} грн\n` +
                         `<b>Площа:</b> ${listing.area} м²\n` +
                         `<a href="${link}">Переглянути оголошення</a>`;
                 } else {

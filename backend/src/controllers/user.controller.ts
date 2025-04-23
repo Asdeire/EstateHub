@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/user.service';
+import bcrypt from 'bcrypt';
 
 const userService = new UserService();
 
@@ -24,31 +25,64 @@ export class UserController {
         }
     }
 
-    async updateUser(request: FastifyRequest<{ Params: { id: string }, Body: { name?: string; email?: string; password?: string } }>, reply: FastifyReply) {
+    async updateUser(
+        request: FastifyRequest<{
+            Params: { id: string },
+            Body: {
+                name?: string;
+                email?: string;
+                password?: string;
+                telegram_username?: string;
+            }
+        }>,
+        reply: FastifyReply
+    ) {
         try {
             const userId = request.params.id;
-            const { name, email, password } = request.body;
+            const { name, email, password, telegram_username } = request.body;
 
             if (!userId) {
                 return reply.status(400).send({ message: 'User ID is required' });
             }
 
-            if (!name && !email && !password) {
-                return reply.status(400).send({ message: 'At least one field (name, email, password) must be provided to update' });
+            if (!name && !email && !password && !telegram_username) {
+                return reply.status(400).send({
+                    message: 'At least one field (name, email, password, telegram_username) must be provided to update',
+                });
             }
 
-            const updatedUser = await userService.updateUser(userId, { name, email, password });
+            const dataToUpdate: {
+                name?: string;
+                email?: string;
+                password_hash?: string;
+                telegram_username?: string;
+            } = {};
+
+            if (name) dataToUpdate.name = name;
+            if (email) dataToUpdate.email = email;
+            if (telegram_username) dataToUpdate.telegram_username = telegram_username;
+            if (password) dataToUpdate.password_hash = await bcrypt.hash(password, 10);
+
+            const updatedUser = await userService.updateUser(userId, dataToUpdate);
 
             if (!updatedUser) {
                 return reply.status(404).send({ message: 'User not found or no changes made' });
             }
 
             return reply.send(updatedUser);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+
+            if (error.code === 'P2002') {
+                return reply.status(409).send({
+                    message: `Unique constraint failed on the field: ${error.meta?.target?.join(', ')}`,
+                });
+            }
+
             return reply.status(500).send({ message: 'Error updating user data' });
         }
     }
+
 
     async deleteUser(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {

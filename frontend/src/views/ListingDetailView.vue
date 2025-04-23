@@ -1,7 +1,7 @@
 <template>
     <Header />
     <div v-if="listing" class="listing-container">
-        <div v-if="loading" class="loading-message" role="status" aria-live="polite">Loading...</div>
+        <div v-if="loading" class="loading-message" role="status" aria-live="polite">Завантаження...</div>
         <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
 
         <div class="listing-gallery">

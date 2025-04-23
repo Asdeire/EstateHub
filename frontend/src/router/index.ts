@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Register from '../views/RegisterView.vue';
-import Login from '../views/LoginView.vue'
+import Login from '../views/LoginView.vue';
 import Home from '../views/HomeView.vue';
 import Listings from '../views/ListingsView.vue';
 import ListingDetail from '../views/ListingDetailView.vue';
 import MyListings from '../views/MyListingsView.vue';
 import FavoritesView from '../views/FavoritesView.vue';
+import ProfileView from '../views/ProfileView.vue';
 import { useAuthStore } from '../store/useAuthStore';
 
 const routes = [
@@ -38,14 +39,20 @@ const routes = [
         path: '/mylistings',
         name: 'MyListings',
         component: MyListings,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
     },
     {
         path: '/favourites',
         name: 'Favorites',
         component: FavoritesView,
-        meta: { requiresAuth: true }
-    }
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/profile',
+        name: 'Profile',
+        component: ProfileView,
+        meta: { requiresAuth: true },
+    },
 ];
 
 const router = createRouter({
@@ -55,17 +62,17 @@ const router = createRouter({
 
 router.beforeEach((to, _from, next) => {
     const authStore = useAuthStore();
-    const isAuthRequired = to.matched.some(route => route.meta.requiresAuth); 
+    const isAuthRequired = to.matched.some(route => route.meta.requiresAuth);
 
     const token = localStorage.getItem('authToken');
     if (token) {
-        authStore.isAuthenticated = true; 
+        authStore.isAuthenticated = true;
     }
 
     if (isAuthRequired && !authStore.isAuthenticated) {
-        next('/login'); 
+        next('/login');
     } else {
-        next(); 
+        next();
     }
 });
 

@@ -9,13 +9,18 @@ export class UserService {
                 where: { id: userId },
             });
             return user;
-        } catch (error) {   
+        } catch (error) {
             console.error(error);
             throw new Error('Error fetching user data');
         }
     }
 
-    async updateUser(userId: string, data: { name?: string; email?: string; password?: string }) {
+    async updateUser(userId: string, data: {
+        name?: string;
+        email?: string;
+        password_hash?: string;
+        telegram_username?: string;
+    }) {
         try {
             const updatedUser = await prisma.user.update({
                 where: { id: userId },

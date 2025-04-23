@@ -1,12 +1,39 @@
 import { api } from './config';
-import type { User } from '../../types/user';
 
-export const getUserById = async (userId: string): Promise<User> => {
+export const getUserById = async (id: string) => {
     try {
-        const response = await api.get<User>(`/user/${userId}`);
+        const response = await api.get(`/user/${id}`);
         return response.data;
-    } catch (error: any) {
-        console.error(`Error fetching user with ID ${userId}:`, error.response?.data || error.message);
-        throw new Error(error.response?.data?.message || 'Failed to fetch user');
+    } catch (error) {
+        console.error(`Error fetching user with ID ${id}:`, error);
+        throw error;
+    }
+};
+
+export const updateUser = async (
+    id: string,
+    data: {
+        name?: string;
+        email?: string;
+        password?: string;
+        telegram_username?: string;
+    }
+) => {
+    try {
+        const response = await api.put(`/user/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.error(`Error updating user with ID ${id}:`, error);
+        throw error;
+    }
+};
+
+export const deleteUser = async (id: string) => {
+    try {
+        const response = await api.delete(`/user/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error deleting user with ID ${id}:`, error);
+        throw error;
     }
 };
