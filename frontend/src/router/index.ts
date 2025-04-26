@@ -5,9 +5,10 @@ import Home from '../views/HomeView.vue';
 import Listings from '../views/ListingsView.vue';
 import ListingDetail from '../views/ListingDetailView.vue';
 import MyListings from '../views/MyListingsView.vue';
-import FavoritesView from '../views/FavoritesView.vue';
-import ProfileView from '../views/ProfileView.vue';
-import NotificationsView from '../views/NotificationsView.vue';
+import Favorites from '../views/FavoritesView.vue';
+import Profile from '../views/ProfileView.vue';
+import Notifications from '../views/NotificationsView.vue';
+import MySubscriptions from '../views/MySubscriptionsView.vue';
 import { useAuthStore } from '../store/useAuthStore';
 
 const routes = [
@@ -45,19 +46,25 @@ const routes = [
     {
         path: '/favourites',
         name: 'Favorites',
-        component: FavoritesView,
+        component: Favorites,
         meta: { requiresAuth: true },
     },
     {
         path: '/profile',
         name: 'Profile',
-        component: ProfileView,
+        component: Profile,
         meta: { requiresAuth: true },
     },
     {
         path: '/notifications',
         name: 'Notifications',
-        component: NotificationsView,
+        component: Notifications,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/mysubscriptions',
+        name: 'MySubscriptions',
+        component: MySubscriptions,
         meta: { requiresAuth: true },
     }
 ];

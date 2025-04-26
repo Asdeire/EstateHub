@@ -28,6 +28,14 @@ export class SubscriptionService {
     }): Promise<Subscription> {
         await this.validateTransport(data.buyer_id, data.transport);
 
+        const subscriptionCount = await prisma.subscription.count({
+            where: { buyer_id: data.buyer_id },
+        });
+
+        if (subscriptionCount >= 4) {
+            throw new Error('User already has the maximum number of subscriptions (4)');
+        }
+
         const subscription = await prisma.subscription.create({
             data: {
                 buyer_id: data.buyer_id,
@@ -37,6 +45,7 @@ export class SubscriptionService {
         });
         return subscription;
     }
+
 
     async updateSubscription(id: string, data: Partial<{
         filters: Prisma.JsonValue;
@@ -92,10 +101,15 @@ export class SubscriptionService {
     }
 
     async deleteSubscription(id: string): Promise<Subscription> {
+        await prisma.notification.deleteMany({
+            where: { subscription_id: id },
+        });
+    
         return await prisma.subscription.delete({
             where: { id },
         });
     }
+    
 
     async getSubscriptionsByUser(buyer_id: string): Promise<Subscription[]> {
         return await prisma.subscription.findMany({

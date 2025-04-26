@@ -9,8 +9,8 @@
                 <router-link to="/" class="nav-item" :class="{ active: isActive('/') }">Головна</router-link>
                 <router-link to="/listings" class="nav-item"
                     :class="{ active: isActive('/listings') }">Оголошення</router-link>
-                <router-link to="/subscription" class="nav-item"
-                    :class="{ active: isActive('/subscription') }">Підписка</router-link>
+                <router-link to="/mysubscriptions" class="nav-item"
+                    :class="{ active: isActive('/mysubscriptions') }">Підписка</router-link>
                 <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }">Про нас</router-link>
             </nav>
 

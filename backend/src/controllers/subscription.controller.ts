@@ -37,6 +37,27 @@ export class SubscriptionController {
         return reply.send(subscription);
     }
 
+    async getSubscriptionsByUser(
+        request: FastifyRequest<{ Params: { buyer_id: string } }>,
+        reply: FastifyReply
+    ) {
+        await authMiddleware(request, reply);
+        const userId = request.user?.id;
+        const buyerId = request.params.buyer_id;
+
+        if (!userId) {
+            return reply.status(401).send({ message: 'User not found' });
+        }
+
+        if (userId !== buyerId) {
+            return reply.status(403).send({ message: 'Access denied' });
+        }
+
+        const subscriptions = await subscriptionService.getSubscriptionsByUser(buyerId);
+        return reply.send(subscriptions);
+    }
+
+
     async createSubscription(
         request: FastifyRequest<{
             Body: { filters: any; transport: 'EMAIL' | 'TELEGRAM' };
