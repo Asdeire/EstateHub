@@ -15,4 +15,6 @@ export async function notificationRoutes(fastify: FastifyInstance) {
     fastify.put('/notifications/:id/status', notificationController.updateNotificationStatus);
 
     fastify.delete('/notifications/:id', notificationController.deleteNotification);
+
+    fastify.delete('/notifications', notificationController.clearUserNotifications);
 }

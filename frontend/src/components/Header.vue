@@ -20,7 +20,7 @@
                         {{ authStore.user?.name }}
                         <ul v-if="showUserMenu" class="dropdown-menu">
                             <li class="nav-item" @click="goTo('/profile')">Профіль</li>
-                            <li class="nav-item" @click="goTo('/notifications):')">Повідомлення</li>
+                            <li class="nav-item" @click="goTo('/notifications')">Повідомлення</li>
                             <li class="nav-item" @click="goTo('/favourites')">Улюблені</li>
                             <li class="nav-item" @click="goTo('/mylistings')">Мої оголошення</li>
                             <li class="nav-item logout-item" @click="logout">Вийти</li>

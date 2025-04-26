@@ -7,6 +7,7 @@ import ListingDetail from '../views/ListingDetailView.vue';
 import MyListings from '../views/MyListingsView.vue';
 import FavoritesView from '../views/FavoritesView.vue';
 import ProfileView from '../views/ProfileView.vue';
+import NotificationsView from '../views/NotificationsView.vue';
 import { useAuthStore } from '../store/useAuthStore';
 
 const routes = [
@@ -53,6 +54,12 @@ const routes = [
         component: ProfileView,
         meta: { requiresAuth: true },
     },
+    {
+        path: '/notifications',
+        name: 'Notifications',
+        component: NotificationsView,
+        meta: { requiresAuth: true },
+    }
 ];
 
 const router = createRouter({

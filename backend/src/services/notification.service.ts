@@ -30,7 +30,7 @@ export class NotificationService {
                 user_id: data.user_id,
                 subscription_id: data.subscription_id,
                 message: data.message,
-                status: data.status,
+                status: data.status, 
             },
         });
 
@@ -44,35 +44,37 @@ export class NotificationService {
             throw new SubscriptionNotFoundError();
         }
 
-        if (subscription.transport === Transport.EMAIL) {
-            if (!subscription.buyer.email) {
-                await this.updateNotificationStatus(notification.id, 'FAILED', 'User must have an email address');
-                throw new Error('User must have an email address for EMAIL transport');
-            }
+        try {
+            if (subscription.transport === Transport.EMAIL) {
+                if (!subscription.buyer.email) {
+                    await this.updateNotificationStatus(notification.id, 'FAILED', 'User must have an email address');
+                    throw new Error('User must have an email address for EMAIL transport');
+                }
 
-            await emailService.sendNotificationEmail(
-                'c.kutsak.oleksandr@student.uzhnu.edu.ua',
-                'Нове оголошення за вашою підпискою',
-                `<p>${data.message}</p>`,
-            );
-        }
-
-        if (subscription.transport === Transport.TELEGRAM) {
-            if (!subscription.buyer.telegram_username) {
-                await this.updateNotificationStatus(notification.id, 'FAILED', 'User must have a Telegram username');
-                throw new MissingTelegramUsernameError();
-            }
-
-            if (!subscription.buyer.telegram_chat_id) {
-                await this.updateNotificationStatus(
-                    notification.id,
-                    'FAILED',
-                    'Telegram chat ID not set. User must link their account.',
+                await emailService.sendNotificationEmail(
+                    subscription.buyer.email, 
+                    'Нове оголошення за вашою підпискою',
+                    `<p>${data.message}</p>`,
                 );
-                throw new TelegramChatNotLinkedError();
+
+                await this.updateNotificationStatus(notification.id, 'DELIVERED');
             }
 
-            try {
+            if (subscription.transport === Transport.TELEGRAM) {
+                if (!subscription.buyer.telegram_username) {
+                    await this.updateNotificationStatus(notification.id, 'FAILED', 'User must have a Telegram username');
+                    throw new MissingTelegramUsernameError();
+                }
+
+                if (!subscription.buyer.telegram_chat_id) {
+                    await this.updateNotificationStatus(
+                        notification.id,
+                        'FAILED',
+                        'Telegram chat ID not set. User must link their account.',
+                    );
+                    throw new TelegramChatNotLinkedError();
+                }
+
                 let listing;
                 if (data.listing_id) {
                     listing = await prisma.listing.findUnique({
@@ -122,32 +124,30 @@ export class NotificationService {
 
                 console.log('Telegram notification sent successfully to:', subscription.buyer.telegram_chat_id);
 
-                if (data.status === 'DELIVERED') {
-                    await this.markAsSent(notification.id);
-                }
-            } catch (err) {
-                console.error('Error sending Telegram notification:', err);
-                if (
-                    (err as any)?.response?.body?.error_code === 400 &&
-                    (err as any).response?.body?.description.includes('chat not found')
-                ) {
-                    await this.updateNotificationStatus(
-                        notification.id,
-                        'FAILED',
-                        'Chat not found. User must start a chat with the bot.',
-                    );
-                    throw new TelegramChatNotFoundError();
-                } else if ((err as any)?.response?.body?.error_code === 400) {
-                    await this.updateNotificationStatus(
-                        notification.id,
-                        'FAILED',
-                        `Telegram API error: ${(err as any).response?.body?.description}`,
-                    );
-                    throw new Error(`Telegram API error: ${(err as any).response?.body?.description}`);
-                } else {
-                    await this.updateNotificationStatus(notification.id, 'FAILED', 'Failed to send Telegram message');
-                    throw err;
-                }
+                await this.updateNotificationStatus(notification.id, 'DELIVERED');
+            }
+        } catch (err) {
+            console.error('Error sending notification:', err);
+            if (
+                (err as any)?.response?.body?.error_code === 400 &&
+                (err as any).response?.body?.description.includes('chat not found')
+            ) {
+                await this.updateNotificationStatus(
+                    notification.id,
+                    'FAILED',
+                    'Chat not found. User must start a chat with the bot.',
+                );
+                throw new TelegramChatNotFoundError();
+            } else if ((err as any)?.response?.body?.error_code === 400) {
+                await this.updateNotificationStatus(
+                    notification.id,
+                    'FAILED',
+                    `Telegram API error: ${(err as any).response?.body?.description}`,
+                );
+                throw new Error(`Telegram API error: ${(err as any).response?.body?.description}`);
+            } else {
+                await this.updateNotificationStatus(notification.id, 'FAILED', 'Failed to send notification');
+                throw err;
             }
         }
 
@@ -201,7 +201,10 @@ export class NotificationService {
     async updateNotificationStatus(id: string, status: NotificationStatus, errorMessage?: string): Promise<Notification> {
         return await prisma.notification.update({
             where: { id },
-            data: { status },
+            data: {
+                status,
+                sent_at: status === 'DELIVERED' ? new Date() : undefined,
+            },
         });
     }
 
@@ -212,6 +215,12 @@ export class NotificationService {
                 status: 'SENT',
                 sent_at: new Date(),
             },
+        });
+    }
+
+    async clearUserNotifications(user_id: string): Promise<void> {
+        await prisma.notification.deleteMany({
+            where: { user_id },
         });
     }
 }

@@ -138,4 +138,16 @@ export class NotificationController {
         await notificationService.deleteNotification(notificationId);
         return reply.send({ message: 'Notification deleted' });
     }
+
+    async clearUserNotifications(request: FastifyRequest, reply: FastifyReply) {
+        await authMiddleware(request, reply);
+        const userId = request.user?.id;
+
+        if (!userId) {
+            return reply.status(401).send({ message: 'User not found' });
+        }
+
+        await notificationService.clearUserNotifications(userId);
+        return reply.send({ message: 'All notifications for the user have been deleted' });
+    }
 }
