@@ -17,13 +17,15 @@
 
                 <label>
                     Ціна:
-                    <input v-model.number="formData.price" type="number" placeholder="Ціна" required />
+                    <input v-model.number="formData.price" type="number" placeholder="Ціна" maxlength="9"
+                        @input="limitDigits('price', 9)" required />
                     <span v-if="errors.price" class="error">{{ errors.price }}</span>
                 </label>
 
                 <label>
                     Площа (м²):
-                    <input v-model.number="formData.area" type="number" placeholder="Площа" required />
+                    <input v-model.number="formData.area" type="number" placeholder="Площа" maxlength="6"
+                        @input="limitDigits('area', 6)" required />
                     <span v-if="errors.area" class="error">{{ errors.area }}</span>
                 </label>
 
@@ -99,7 +101,7 @@ const formData = ref({
     area: 0,
     type: '',
     description: '',
-    photos: [], // Зберігаємо поточні URL фотографій
+    photos: [],
     category_id: '',
     tags: [],
 });
@@ -107,12 +109,20 @@ const formData = ref({
 const tags = ref([]);
 const categories = ref([]);
 const errors = ref({});
-const selectedFiles = ref([]); // Нові файли для завантаження
+const selectedFiles = ref([]);
 const maxTags = 5;
 const isLoading = ref(false);
 
 const maxFileSizeMB = 2;
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+const limitDigits = (field, maxDigits) => {
+    let value = String(formData.value[field]);
+    if (value.length > maxDigits) {
+        value = value.slice(0, maxDigits);
+        formData.value[field] = Number(value);
+    }
+};
 
 const validateForm = () => {
     errors.value = {};
@@ -146,7 +156,7 @@ onMounted(async () => {
             Object.assign(formData.value, {
                 ...props.listing,
                 tags: props.listing.tags.map(tag => tag.id),
-                photos: props.listing.photos || [], // Завантажуємо поточні фото
+                photos: props.listing.photos || [],
             });
         }
     } catch (err) {
@@ -182,15 +192,13 @@ const handleSubmit = async () => {
     isLoading.value = true;
 
     try {
-        let updatedPhotos = [...formData.value.photos]; // Зберігаємо поточні фото
+        let updatedPhotos = [...formData.value.photos];
 
-        // Якщо є нові файли, завантажуємо їх у Firebase
         if (selectedFiles.value.length > 0) {
             const fileUrls = await uploadFilesToStorage(selectedFiles.value, props.listing.id);
-            updatedPhotos = fileUrls; // Замінюємо старі фото новими
+            updatedPhotos = fileUrls;
         }
 
-        // Оновлюємо оголошення з новими даними і фото
         const updatedData = {
             ...formData.value,
             photos: updatedPhotos,

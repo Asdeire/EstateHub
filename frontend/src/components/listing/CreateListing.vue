@@ -17,13 +17,15 @@
 
                 <label>
                     Ціна:
-                    <input v-model.number="formData.price" type="number" placeholder="Ціна" required />
+                    <input v-model.number="formData.price" type="number" placeholder="Ціна" maxlength="9"
+                        @input="limitDigits('price', 9)" required />
                     <span v-if="errors.price" class="error">{{ errors.price }}</span>
                 </label>
 
                 <label>
                     Площа (м²):
-                    <input v-model.number="formData.area" type="number" placeholder="Площа" required />
+                    <input v-model.number="formData.area" type="number" placeholder="Площа" maxlength="6"
+                        @input="limitDigits('area', 6)" required />
                     <span v-if="errors.area" class="error">{{ errors.area }}</span>
                 </label>
 
@@ -107,6 +109,14 @@ const errors = ref({});
 const selectedFiles = ref([]);
 const userListingsCount = ref(0);
 const isLoading = ref(false);
+
+const limitDigits = (field, maxDigits) => {
+    let value = String(formData.value[field]);
+    if (value.length > maxDigits) {
+        value = value.slice(0, maxDigits);
+        formData.value[field] = Number(value);
+    }
+};
 
 const validateForm = () => {
     errors.value = {};

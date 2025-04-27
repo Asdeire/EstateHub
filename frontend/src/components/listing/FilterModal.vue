@@ -31,14 +31,14 @@
 
                 <h4>Ціна</h4>
                 <div class="range-container">
-                    <input type="number" v-model="localPriceMin" placeholder="Від" />
-                    <input type="number" v-model="localPriceMax" placeholder="До" />
+                    <input type="number" v-model="localPriceMin" placeholder="Від" @input="restrictInput($event, 'localPriceMin', 10)" />
+                    <input type="number" v-model="localPriceMax" placeholder="До" @input="restrictInput($event, 'localPriceMax', 10)" />
                 </div>
 
                 <h4>Площа</h4>
                 <div class="range-container">
-                    <input type="number" v-model="localAreaMin" placeholder="Від" />
-                    <input type="number" v-model="localAreaMax" placeholder="До" />
+                    <input type="number" v-model="localAreaMin" placeholder="Від" @input="restrictInput($event, 'localAreaMin', 10)" />
+                    <input type="number" v-model="localAreaMax" placeholder="До" @input="restrictInput($event, 'localAreaMax', 10)" />
                 </div>
 
                 <div class="filter-buttons">
@@ -95,6 +95,29 @@ const toggleTag = (tagId: string) => {
     }
 };
 
+const restrictInput = (event: Event, field: string, maxLength: number) => {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    value = value.replace(/[^0-9]/g, '');
+
+    if (value.length > maxLength) {
+        value = value.slice(0, maxLength);
+    }
+
+    if (field === 'localPriceMin') {
+        localPriceMin.value = value ? parseInt(value) : null;
+    } else if (field === 'localPriceMax') {
+        localPriceMax.value = value ? parseInt(value) : null;
+    } else if (field === 'localAreaMin') {
+        localAreaMin.value = value ? parseInt(value) : null;
+    } else if (field === 'localAreaMax') {
+        localAreaMax.value = value ? parseInt(value) : null;
+    }
+
+    input.value = value;
+};
+
 const applyFilters = () => {
     const filters = {
         type: localSelectedType.value,
@@ -105,7 +128,7 @@ const applyFilters = () => {
         minArea: localAreaMin.value,
         maxArea: localAreaMax.value,
     };
-    emit('apply', filters); 
+    emit('apply', filters);
     emit('close');
 };
 

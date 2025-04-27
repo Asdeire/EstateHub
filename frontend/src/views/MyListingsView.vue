@@ -1,6 +1,6 @@
 <template>
     <Header />
-    <div class="container">
+    <div class="my-listings-container">
         <div class="my-listings-header">
             <h1>Мої оголошення</h1>
             <button @click="openCreateModal" class="create-button">Додати нове оголошення</button>
@@ -13,18 +13,13 @@
                 <Listings :listings="activeListings" :goToListingDetail="goToListingDetail" :editListing="editListing"
                     :toggleListingStatus="toggleListingStatus" :deleteListing="handleDeleteListing" />
             </div>
-            <div v-else>
-                <div class="no-listings">Немає активних оголошень.</div>
-            </div>
-
             <div v-if="archivedListings.length > 0">
                 <h1>Архівовані оголошення</h1>
                 <Listings :listings="archivedListings" :toggleListingStatus="toggleListingStatus" />
             </div>
             <div v-else>
-                <div class="no-listings">Немає архівованих оголошень.</div>
+                <div class="no-listings">Немає оголошень.</div>
             </div>
-
         </div>
     </div>
 
@@ -163,10 +158,9 @@ onMounted(fetchMyListings);
 
 <style scoped>
 .my-listings-header {
-    margin: 60px 0 30px;
-    display: block;
-    align-items: center;
-    justify-content: center;
+    margin: 70px 0 30px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
 }
 
@@ -175,6 +169,7 @@ h1 {
 }
 
 .create-button {
+    width: auto;
     background: none;
     border: #07484A 3px dashed;
     color: #07484A;
@@ -191,6 +186,6 @@ h1 {
 .error-message,
 .no-listings {
     text-align: center;
-    padding: 20px;
+    height: 80vh;
 }
 </style>

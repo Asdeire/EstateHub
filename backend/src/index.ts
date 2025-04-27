@@ -9,8 +9,10 @@ const app = fastify();
 
 registerRoutes(app);
 
+const corsUrl = process.env.CORS_URL || 'http://localhost:5173';
+
 app.register(cors, {
-    origin: 'http://localhost:5173',
+    origin: corsUrl,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 });
