@@ -4,7 +4,7 @@
         <div class="top-container">
             <div class="search-container">
                 <input v-model="searchQuery" type="text" placeholder="Введіть напрямок" class="search-box"
-                    @input="debouncedApplyFilters" />
+                    @input="onSearchInput" />
             </div>
 
             <select v-model="sortBy">
@@ -52,13 +52,11 @@ import Header from '../components/Header.vue';
 import Listings from '../components/listing/ListingCard.vue';
 import FilterModal from '../components/listing/FilterModal.vue';
 import { getListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
-import { debounce } from 'lodash';
-import { getItem } from '../services/localStorageService';
 
 interface Listing {
     id: string;
     location: string;
-    createdAt: string;
+    updated_at: string;
     title: string;
     isFavorite?: boolean;
 }
@@ -84,12 +82,16 @@ const sortBy = ref<string>('newest');
 const showFilters = ref<boolean>(false);
 const selectedStatus = ref<string>('Active');
 
-const isAuthenticated = ref<boolean>(!!getItem('authToken'));
 const currentPage = ref<number>(1);
 const listingsPerPage = 12;
 const totalPages = ref<number>(0);
 
 const favorites = ref<Set<string>>(new Set());
+
+const onSearchInput = () => {
+    currentPage.value = 1;
+    applyFilters();
+};
 
 const updateFavorites = async () => {
     if (!authStore.isAuthenticated) return;
@@ -98,11 +100,22 @@ const updateFavorites = async () => {
     listings.value.forEach((listing) => (listing.isFavorite = favorites.value.has(listing.id)));
 };
 
+const cache = ref<Map<string, { listings: Listing[], totalPages: number }>>(new Map());
+
 const fetchListings = async (page: number = 1, filters: Record<string, any> = {}) => {
+    const cacheKey = JSON.stringify({ page, filters });
+    if (cache.value.has(cacheKey)) {
+        const cached = cache.value.get(cacheKey)!;
+        listings.value = cached.listings;
+        totalPages.value = cached.totalPages;
+        loading.value = false;
+        return;
+    }
     try {
         loading.value = true;
         filters.status = selectedStatus.value;
         const data = await getListings(page, listingsPerPage, filters);
+        cache.value.set(cacheKey, data);
         listings.value = data.listings;
         totalPages.value = data.totalPages;
         await updateFavorites();
@@ -145,32 +158,25 @@ const goToListingDetail = (listingId: string) => {
 const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
-        debouncedApplyFilters();
+        applyFilters();
     }
 };
 
 const sortedListings = computed(() => {
-    let filtered = listings.value.filter((listing) =>
-        listing.location.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-
+    const sorted = [...listings.value];
     switch (sortBy.value) {
         case 'newest':
-            return filtered.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+            return sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
         case 'oldest':
-            return filtered.sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
+            return sorted.sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
         case 'a-z':
-            return filtered.sort((a, b) => a.title.localeCompare(b.title));
+            return sorted.sort((a, b) => a.title.localeCompare(b.title));
         case 'z-a':
-            return filtered.sort((a, b) => b.title.localeCompare(a.title));
+            return sorted.sort((a, b) => b.title.localeCompare(a.title));
         default:
-            return filtered;
+            return sorted;
     }
 });
-
-const debouncedApplyFilters = debounce(() => {
-    applyFilters();
-}, 300);
 
 const applyFilters = () => {
     const filters = {
@@ -181,6 +187,7 @@ const applyFilters = () => {
         minArea: areaMin.value,
         maxArea: areaMax.value,
         tags: selectedTags.value,
+        search: searchQuery.value.trim(),
     };
     fetchListings(currentPage.value, filters);
 };
@@ -193,8 +200,10 @@ const handleApplyFilters = (filters: Record<string, any>) => {
     priceMax.value = filters.maxPrice;
     areaMin.value = filters.minArea;
     areaMax.value = filters.maxArea;
+    searchQuery.value = filters.search || '';
     applyFilters();
 };
+
 
 const clearFilters = () => {
     selectedType.value = '';

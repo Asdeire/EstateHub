@@ -12,6 +12,7 @@ export interface Listing {
     category_id?: string;
     tags: string[];
     title: string;
+    created_at: string;
 }
 
 export interface CreateListingDto {

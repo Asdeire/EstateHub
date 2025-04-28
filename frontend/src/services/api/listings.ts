@@ -6,30 +6,33 @@ export const getListings = async (
     limit = 12,
     filters: {
         category?: string,
-        type?: string, 
+        type?: string,
         minPrice?: number,
         maxPrice?: number,
         minArea?: number,
         maxArea?: number,
         status?: string,
-        tags?: string[]
+        tags?: string[],
+        search?: string,
     } = {}
 ): Promise<{ listings: Listing[], totalPages: number }> => {
     const queryParams = new URLSearchParams({
         page: String(page),
         limit: String(limit),
         ...(filters.category && { category: filters.category }),
-        ...(filters.type && { type: filters.type }), 
+        ...(filters.type && { type: filters.type }),
         ...(filters.minPrice && { minPrice: String(filters.minPrice) }),
         ...(filters.maxPrice && { maxPrice: String(filters.maxPrice) }),
         ...(filters.minArea && { minArea: String(filters.minArea) }),
         ...(filters.maxArea && { maxArea: String(filters.maxArea) }),
         ...(filters.status && { status: filters.status }),
         ...(filters.tags?.length && { tags: filters.tags.join(',') }),
+        ...(filters.search && { location: filters.search }),
     });
 
     try {
         const response = await api.get(`/listings?${queryParams.toString()}`);
+        console.log('Response from getListings:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching listings:', error);

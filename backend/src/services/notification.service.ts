@@ -21,16 +21,46 @@ export class NotificationService {
     async createNotification(data: {
         user_id: string;
         subscription_id: string;
-        message: string;
         status: NotificationStatus;
         listing_id?: string;
+        message?: string; 
     }): Promise<Notification> {
+        let finalMessage: string;
+
+        if (data.listing_id) {
+            const listing = await prisma.listing.findUnique({
+                where: { id: data.listing_id },
+            });
+
+            if (!listing) {
+                throw new Error('Listing not found');
+            }
+
+            const cleanListingId = listing.id.replace(/[^a-zA-Z0-9-]/g, '');
+            if (!cleanListingId) {
+                throw new Error('Invalid listing ID after cleaning');
+            }
+
+            const baseUrl = process.env.APP_URL || 'http://localhost:5173';
+            const link = `${baseUrl}/listings/${cleanListingId}`;
+
+            finalMessage = `<b>Нове оголошення за вашою підпискою!</b> 🏠\n\n` +
+                `<b>Назва:</b> ${listing.title}\n` +
+                `<b>Ціна:</b> ${listing.price} грн\n` +
+                `<b>Площа:</b> ${listing.area} м²\n` +
+                `<a href="${link}">Переглянути оголошення</a>`;
+        } else if (data.message) {
+            finalMessage = data.message;
+        } else {
+            throw new Error('Either listing_id or message must be provided');
+        }
+
         const notification = await prisma.notification.create({
             data: {
                 user_id: data.user_id,
                 subscription_id: data.subscription_id,
-                message: data.message,
-                status: data.status, 
+                message: finalMessage,
+                status: data.status,
             },
         });
 
@@ -52,9 +82,9 @@ export class NotificationService {
                 }
 
                 await emailService.sendNotificationEmail(
-                    subscription.buyer.email, 
+                    subscription.buyer.email,
                     'Нове оголошення за вашою підпискою',
-                    `<p>${data.message}</p>`,
+                    `<p>${finalMessage}</p>`,
                 );
 
                 await this.updateNotificationStatus(notification.id, 'DELIVERED');
@@ -67,92 +97,40 @@ export class NotificationService {
                 }
 
                 if (!subscription.buyer.telegram_chat_id) {
-                    await this.updateNotificationStatus(
-                        notification.id,
-                        'FAILED',
-                        'Telegram chat ID not set. User must link their account.',
-                    );
+                    await this.updateNotificationStatus(notification.id, 'FAILED', 'Telegram chat ID not set.');
                     throw new TelegramChatNotLinkedError();
                 }
 
-                let listing;
-                if (data.listing_id) {
-                    listing = await prisma.listing.findUnique({
-                        where: { id: data.listing_id },
-                    });
-                }
-
-                let formattedMessage: string;
-
-                if (listing) {
-                    const title = listing.title;
-                    const cleanListingId = listing.id.replace(/[^a-zA-Z0-9-]/g, '');
-                    if (!cleanListingId) {
-                        await this.updateNotificationStatus(notification.id, 'FAILED', 'Invalid listing ID after cleaning');
-                        throw new Error('Invalid listing ID after cleaning');
-                    }
-                    const baseUrl = process.env.APP_URL || 'http://localhost:5173';
-                    const link = `${baseUrl}/listings/${cleanListingId}`;
-
-                    formattedMessage = `<b>Нове оголошення за вашою підпискою!</b> 🏠\n\n` +
-                        `<b>Назва:</b> ${title}\n` +
-                        `<b>Ціна:</b> ${listing.price} грн\n` +
-                        `<b>Площа:</b> ${listing.area} м²\n` +
-                        `<a href="${link}">Переглянути оголошення</a>`;
-                } else {
-                    formattedMessage = data.message;
-                }
-
-                console.log('Formatted Telegram message:', formattedMessage);
+                const listing = data.listing_id ? await prisma.listing.findUnique({ where: { id: data.listing_id } }) : null;
 
                 if (listing?.photos?.[0]) {
                     await this.telegramBotService.sendMessage(
                         subscription.buyer.telegram_chat_id,
                         { photo: listing.photos[0] },
                         {
-                            caption: formattedMessage,
+                            caption: finalMessage,
                             parse_mode: 'HTML',
                         }
                     );
                 } else {
                     await this.telegramBotService.sendMessage(
                         subscription.buyer.telegram_chat_id,
-                        formattedMessage,
+                        finalMessage,
                         { parse_mode: 'HTML' }
                     );
                 }
-
-                console.log('Telegram notification sent successfully to:', subscription.buyer.telegram_chat_id);
 
                 await this.updateNotificationStatus(notification.id, 'DELIVERED');
             }
         } catch (err) {
             console.error('Error sending notification:', err);
-            if (
-                (err as any)?.response?.body?.error_code === 400 &&
-                (err as any).response?.body?.description.includes('chat not found')
-            ) {
-                await this.updateNotificationStatus(
-                    notification.id,
-                    'FAILED',
-                    'Chat not found. User must start a chat with the bot.',
-                );
-                throw new TelegramChatNotFoundError();
-            } else if ((err as any)?.response?.body?.error_code === 400) {
-                await this.updateNotificationStatus(
-                    notification.id,
-                    'FAILED',
-                    `Telegram API error: ${(err as any).response?.body?.description}`,
-                );
-                throw new Error(`Telegram API error: ${(err as any).response?.body?.description}`);
-            } else {
-                await this.updateNotificationStatus(notification.id, 'FAILED', 'Failed to send notification');
-                throw err;
-            }
+            await this.updateNotificationStatus(notification.id, 'FAILED', 'Failed to send notification');
+            throw err;
         }
 
         return notification;
     }
+
 
     async getAllNotifications(): Promise<Notification[]> {
         return await prisma.notification.findMany({

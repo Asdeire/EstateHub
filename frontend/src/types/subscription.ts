@@ -1,5 +1,4 @@
-import type { Transport } from '@prisma/client';
-import type { User } from './user'; 
+import type { User } from './user';
 
 export interface Filters {
     category?: string;
@@ -27,4 +26,9 @@ export interface CreateSubscriptionDto {
     buyer_id: string;
     filters: Filters;
     transport: Transport;
+}
+
+enum Transport {
+    EMAIL = 'EMAIL',
+    TELEGRAM = 'TELEGRAM',
 }

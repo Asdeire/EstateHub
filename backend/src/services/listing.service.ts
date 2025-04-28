@@ -1,41 +1,19 @@
 import { PrismaClient, Listing, Prisma, Subscription } from '@prisma/client';
 import { NotificationService } from './notification.service';
+import { CreateListingDto, UpdateListingDto } from '../schemas/listing.schemas';
 
 const prisma = new PrismaClient();
 const notificationService = new NotificationService();
 
 class ListingService {
-    async createListing(data: {
-        user_id: string;
-        is_agent_listing: boolean;
-        type: string;
-        location: string;
-        price: number;
-        area: number;
-        description?: string;
-        photos: string[];
-        status: 'Active' | 'Archived';
-        category_id?: string;
-        tags: string[];
-        title: string;
-    }): Promise<Listing> {
-        const userListingsCount = await prisma.listing.count({
-            where: { user_id: data.user_id },
-        });
-
-        if (userListingsCount >= 10) {
-            throw new Error('Maximum listings — 10.');
-        }
-
+    async createListing(data: CreateListingDto): Promise<Listing> {
         const { tags, ...listingData } = data;
         const listing = await prisma.listing.create({
             data: {
                 ...listingData,
-                status: data.status === 'Active' ? 'Active' : 'Archived',
+                status: data.status,
                 tags: {
-                    connect: tags.map((tag: string | { id: string }) =>
-                        typeof tag === 'string' ? { id: tag } : { id: tag.id }
-                    ),
+                    connect: tags.map((tag: string) => ({ id: tag })),
                 },
             },
             include: { tags: true, category: true },
@@ -44,7 +22,16 @@ class ListingService {
         return listing;
     }
 
-    private matchesFilters(listing: Listing & { tags: { id: string }[], category?: { id: string } | null }, filters: any): boolean {
+    async countUserListings(user_id: string): Promise<number> {
+        return await prisma.listing.count({
+            where: { user_id },
+        });
+    }
+
+    private matchesFilters(
+        listing: Listing & { tags: { id: string }[]; category?: { id: string } | null },
+        filters: any
+    ): boolean {
         if (filters.category && (!listing.category || listing.category?.id !== filters.category)) return false;
         if (filters.type && listing.type !== filters.type) return false;
         if (filters.minPrice && listing.price < filters.minPrice) return false;
@@ -71,21 +58,22 @@ class ListingService {
             maxArea?: number;
             status?: string;
             tags?: string[];
+            location?: string;
         } = {}
-    ): Promise<{ listings: Listing[], totalPages: number }> {
+    ): Promise<{ listings: Listing[]; totalPages: number }> {
         const where: any = {};
 
-        if (filters.minPrice !== undefined && !isNaN(Number(filters.minPrice))) {
+        if (filters.minPrice !== undefined) {
             where.price = { gte: Number(filters.minPrice) };
         }
-        if (filters.maxPrice !== undefined && !isNaN(Number(filters.maxPrice))) {
+        if (filters.maxPrice !== undefined) {
             where.price = { ...where.price, lte: Number(filters.maxPrice) };
         }
 
-        if (filters.minArea !== undefined && !isNaN(Number(filters.minArea))) {
+        if (filters.minArea !== undefined) {
             where.area = { gte: Number(filters.minArea) };
         }
-        if (filters.maxArea !== undefined && !isNaN(Number(filters.maxArea))) {
+        if (filters.maxArea !== undefined) {
             where.area = { ...where.area, lte: Number(filters.maxArea) };
         }
 
@@ -104,8 +92,15 @@ class ListingService {
         if (filters.tags?.length) {
             where.tags = {
                 some: {
-                    id: { in: filters.tags }
-                }
+                    id: { in: filters.tags },
+                },
+            };
+        }
+
+        if (filters.location) {
+            where.location = {
+                contains: filters.location,
+                mode: 'insensitive',
             };
         }
 
@@ -118,9 +113,23 @@ class ListingService {
             skip,
             take: limit,
             where,
-            include: {
-                category: true,
-                tags: true,
+            select: {
+                id: true,
+                user_id: true,
+                is_agent_listing: true,
+                description: true,
+                photos: true,
+                category_id: true,
+                title: true,
+                location: true,
+                price: true,
+                area: true,
+                type: true,
+                status: true,
+                created_at: true,
+                updated_at: true,
+                category: { select: { id: true, name: true } },
+                tags: { select: { id: true, name: true } },
             },
         });
 
@@ -147,67 +156,62 @@ class ListingService {
         });
     }
 
-    async updateListing(
-        id: string,
-        data: Partial<Listing> & { tags?: string[]; category_id?: string }
-    ): Promise<Listing> {
+    async updateListing(id: string, data: UpdateListingDto): Promise<Listing> {
         const { tags, category_id, user_id, ...listingData } = data;
 
         const updateData: Prisma.ListingUpdateInput = {
             ...listingData,
-            category: category_id ? {
-                connect: { id: category_id },
-            } : undefined,
-            tags: tags ? {
-                set: tags.map((tag: string | { id: string }) =>
-                    typeof tag === 'string' ? { id: tag } : { id: tag.id }
-                ),
-            } : undefined,
-            user: user_id ? {
-                connect: { id: user_id },
-            } : undefined,
+            category: category_id
+                ? {
+                    connect: { id: category_id },
+                }
+                : undefined,
+            tags: tags
+                ? {
+                    set: tags.map((tag: string) => ({ id: tag })),
+                }
+                : undefined,
+            user: user_id
+                ? {
+                    connect: { id: user_id },
+                }
+                : undefined,
         };
 
-        try {
-            const updatedListing = await prisma.listing.update({
-                where: { id },
-                data: updateData,
-                include: { tags: true, category: true },
+        const updatedListing = await prisma.listing.update({
+            where: { id },
+            data: updateData,
+            include: { tags: true, category: true },
+        });
+
+        if (data.photos || data.title || data.price || data.area || data.status === 'Active') {
+            const subscriptions = await prisma.subscription.findMany({
+                include: { buyer: true },
             });
 
-            if (data.photos || data.title || data.price || data.area || data.status === 'Active') {
-                const subscriptions = await prisma.subscription.findMany({
-                    include: { buyer: true },
-                });
+            for (const subscription of subscriptions) {
+                const filters = subscription.filters as {
+                    category?: string;
+                    type?: string;
+                    minPrice?: number;
+                    maxPrice?: number;
+                    minArea?: number;
+                    maxArea?: number;
+                    tags?: string[];
+                };
 
-                for (const subscription of subscriptions) {
-                    const filters = subscription.filters as {
-                        category?: string;
-                        type?: string;
-                        minPrice?: number;
-                        maxPrice?: number;
-                        minArea?: number;
-                        maxArea?: number;
-                        tags?: string[];
-                    };
-
-                    if (this.matchesFilters(updatedListing, filters)) {
-                        await notificationService.createNotification({
-                            user_id: subscription.buyer_id,
-                            subscription_id: subscription.id,
-                            message: `Нове оголошення за вашою підпискою: "${updatedListing.title}" (Ціна: ${updatedListing.price}, Площа: ${updatedListing.area}) http://localhost:5173/listings/${updatedListing.id}`,
-                            status: 'SENT',
-                            listing_id: updatedListing.id,
-                        });
-                    }
+                if (this.matchesFilters(updatedListing, filters)) {
+                    await notificationService.createNotification({
+                        user_id: subscription.buyer_id,
+                        subscription_id: subscription.id,
+                        status: 'SENT',
+                        listing_id: updatedListing.id,
+                    });
                 }
             }
-
-            return updatedListing;
-        } catch (error) {
-            console.error('Error updating listing:', error);
-            throw new Error('Error: ' + error);
         }
+
+        return updatedListing;
     }
 
     async deleteListing(id: string): Promise<Listing> {
