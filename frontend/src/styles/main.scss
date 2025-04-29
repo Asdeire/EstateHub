@@ -13,3 +13,16 @@
 *{
     scrollbar-width: thin;
 }
+
+body {
+    font-family: $font-family;
+    background-color: $background-color;
+    color: $primary-color;
+    margin: 0;
+    padding: 0; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}

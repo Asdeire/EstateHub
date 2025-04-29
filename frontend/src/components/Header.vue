@@ -7,16 +7,14 @@
 
             <nav class="nav-links">
                 <router-link to="/" class="nav-item" :class="{ active: isActive('/') }">Головна</router-link>
-                <router-link to="/listings" class="nav-item"
-                    :class="{ active: isActive('/listings') }">Оголошення</router-link>
-                <router-link to="/mysubscriptions" class="nav-item"
-                    :class="{ active: isActive('/mysubscriptions') }">Підписка</router-link>
+                <router-link to="/listings" class="nav-item" :class="{ active: isActive('/listings') }">Оголошення</router-link>
+                <router-link to="/mysubscriptions" class="nav-item" :class="{ active: isActive('/mysubscriptions') }">Підписка</router-link>
                 <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }">Про нас</router-link>
             </nav>
 
             <div class="user-actions">
                 <template v-if="authStore.isAuthenticated">
-                    <div class="user-menu" @click="toggleUserMenu">
+                    <div class="user-menu" ref="userMenuRef" @click="toggleUserMenu">
                         {{ authStore.user?.name }}
                         <ul v-if="showUserMenu" class="dropdown-menu">
                             <li class="nav-item" @click="goTo('/profile')">Профіль</li>
@@ -36,26 +34,27 @@
 
                 <img src="../assets/translate.png" alt="Translate" class="icon" />
 
-                <img v-if="showMenuIcon" src="../assets/menu.png" alt="Menu" class="icon menu-icon"
-                    @click="toggleMenu" />
+                <img
+                    v-if="showMenuIcon"
+                    src="../assets/menu.png"
+                    alt="Menu"
+                    class="icon menu-icon"
+                    @click="toggleMenu"
+                />
             </div>
         </div>
 
-        <nav v-if="showMenu" class="mobile-nav-links">
-            <router-link to="/" class="nav-item" :class="{ active: isActive('/') }"
-                @click="toggleMenu">Головна</router-link>
-            <router-link to="/listings" class="nav-item" :class="{ active: isActive('/listings') }"
-                @click="toggleMenu">Оголошення</router-link>
-            <router-link to="/subscription" class="nav-item" :class="{ active: isActive('/subscription') }"
-                @click="toggleMenu">Підписка</router-link>
-            <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }" @click="toggleMenu">Про
-                нас</router-link>
+        <nav v-if="showMenu" class="mobile-nav-links" ref="mobileMenuRef">
+            <router-link to="/" class="nav-item" :class="{ active: isActive('/') }" @click="toggleMenu">Головна</router-link>
+            <router-link to="/listings" class="nav-item" :class="{ active: isActive('/listings') }" @click="toggleMenu">Оголошення</router-link>
+            <router-link to="/mysubscriptions" class="nav-item" :class="{ active: isActive('/subscription') }" @click="toggleMenu">Підписка</router-link>
+            <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }" @click="toggleMenu">Про нас</router-link>
         </nav>
     </header>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -69,6 +68,9 @@ const showMenu = ref(false);
 const showMenuIcon = ref(window.innerWidth <= 1000);
 const showUserMenu = ref(false);
 
+const userMenuRef = ref<HTMLElement | null>(null);
+const mobileMenuRef = ref<HTMLElement | null>(null);
+
 const toggleMenu = () => {
     showMenu.value = !showMenu.value;
 };
@@ -79,6 +81,8 @@ const toggleUserMenu = () => {
 
 const goTo = (path: string): void => {
     router.push(path);
+    showUserMenu.value = false;
+    showMenu.value = false;
 };
 
 const logout = () => {
@@ -86,7 +90,29 @@ const logout = () => {
     router.push('/');
 };
 
-window.addEventListener('resize', () => {
-    showMenuIcon.value = window.innerWidth <= 1000;
+const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+
+    if (target.closest('.menu-icon')) return;
+
+    if (showUserMenu.value && userMenuRef.value && !userMenuRef.value.contains(target)) {
+        showUserMenu.value = false;
+    }
+
+    if (showMenu.value && mobileMenuRef.value && !mobileMenuRef.value.contains(target)) {
+        showMenu.value = false;
+    }
+};
+
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+    window.addEventListener('resize', () => {
+        showMenuIcon.value = window.innerWidth <= 1000;
+    });
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
 });
 </script>

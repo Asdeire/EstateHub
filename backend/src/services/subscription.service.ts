@@ -33,7 +33,7 @@ export class SubscriptionService {
         });
 
         if (subscriptionCount >= 4) {
-            throw new Error('User already has the maximum number of subscriptions (4)');
+            throw new Error('Ви вже підписані на 4 розсилки. Скасуйте одну з них, щоб підписатися на нову.');
         }
 
         const subscription = await prisma.subscription.create({

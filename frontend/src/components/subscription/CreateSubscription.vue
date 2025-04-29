@@ -182,8 +182,15 @@ const handleSubmit = async () => {
         emit('close');
     } catch (err) {
         console.error('Error creating subscription:', err);
-        alert('Помилка при створенні підписки: ' + (err.message || 'Невідома помилка'));
-    } finally {
+
+        if (err.response?.status === 400 && err.response?.data?.message === 'Max subscriptions reached') {
+            errors.value.filters = 'Ви не можете мати більше 4 підписок';
+            return;
+        }
+
+        alert((err.response?.data?.message || err.message || 'Невідома помилка'));
+    }
+    finally {
         isLoading.value = false;
     }
 };

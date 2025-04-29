@@ -21,6 +21,8 @@
     </div>
 
     <CreateSubscription v-if="showModal" :showModal="showModal" @close="closeModal" @save="createNewSubscription" />
+
+    <Footer />
 </template>
 
 <script setup>
@@ -30,6 +32,7 @@ import { getSubscriptionsByUser, createSubscription, deleteSubscription } from '
 import Header from '../components/Header.vue';
 import CreateSubscription from '../components/subscription/CreateSubscription.vue';
 import SubscriptionCard from '../components/subscription/SubscriptionCard.vue';
+import Footer from '../components/Footer.vue';
 
 const authStore = useAuthStore();
 

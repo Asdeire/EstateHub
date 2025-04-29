@@ -1,9 +1,8 @@
 <template>
     <Header />
+    <div v-if="loading" class="loading-message" role="status" aria-live="polite">Завантаження...</div>
+    <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
     <div v-if="listing" class="listing-container">
-        <div v-if="loading" class="loading-message" role="status" aria-live="polite">Завантаження...</div>
-        <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
-
         <div class="listing-gallery">
             <img v-if="listing?.photos?.length" :src="listing.photos[0]" alt="Main Image of {{ listing.title }}"
                 class="main-image" loading="lazy" />
@@ -88,6 +87,7 @@
             <p v-else class="no-location">Дані про місцезнаходження відсутні.</p>
         </div>
     </div>
+    <Footer />
 </template>
 
 
@@ -105,6 +105,7 @@ import Header from '../components/Header.vue';
 import agentIcon from '../assets/agency.png';
 import userIconDefault from '../assets/user-icon.png';
 import defaultPhoto from '../assets/undefined.png';
+import Footer from '../components/Footer.vue';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
