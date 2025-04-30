@@ -32,7 +32,6 @@ export const getListings = async (
 
     try {
         const response = await api.get(`/listings?${queryParams.toString()}`);
-        console.log('Response from getListings:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching listings:', error);

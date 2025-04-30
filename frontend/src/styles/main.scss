@@ -9,9 +9,11 @@
 @import "components/profile";
 @import "components/notifications";
 @import "components/subscriptions";
+@import "components/home";
 
 *{
     scrollbar-width: thin;
+    box-sizing: border-box;
 }
 
 body {

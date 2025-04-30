@@ -1,5 +1,5 @@
 <template>
-    <header class="navbar">
+    <header :class="['navbar', { transparent: !isScrolled, scrolled: isScrolled }]">
         <div class="navbar-container">
             <router-link to="/" class="logo-link">
                 <img src="../assets/logo.png" alt="EstateHub" class="logo" />
@@ -7,8 +7,10 @@
 
             <nav class="nav-links">
                 <router-link to="/" class="nav-item" :class="{ active: isActive('/') }">Головна</router-link>
-                <router-link to="/listings" class="nav-item" :class="{ active: isActive('/listings') }">Оголошення</router-link>
-                <router-link to="/mysubscriptions" class="nav-item" :class="{ active: isActive('/mysubscriptions') }">Підписка</router-link>
+                <router-link to="/listings" class="nav-item"
+                    :class="{ active: isActive('/listings') }">Оголошення</router-link>
+                <router-link to="/mysubscriptions" class="nav-item"
+                    :class="{ active: isActive('/mysubscriptions') }">Підписка</router-link>
                 <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }">Про нас</router-link>
             </nav>
 
@@ -34,21 +36,20 @@
 
                 <img src="../assets/translate.png" alt="Translate" class="icon" />
 
-                <img
-                    v-if="showMenuIcon"
-                    src="../assets/menu.png"
-                    alt="Menu"
-                    class="icon menu-icon"
-                    @click="toggleMenu"
-                />
+                <img v-if="showMenuIcon" src="../assets/menu.png" alt="Menu" class="icon menu-icon"
+                    @click="toggleMenu" />
             </div>
         </div>
 
         <nav v-if="showMenu" class="mobile-nav-links" ref="mobileMenuRef">
-            <router-link to="/" class="nav-item" :class="{ active: isActive('/') }" @click="toggleMenu">Головна</router-link>
-            <router-link to="/listings" class="nav-item" :class="{ active: isActive('/listings') }" @click="toggleMenu">Оголошення</router-link>
-            <router-link to="/mysubscriptions" class="nav-item" :class="{ active: isActive('/subscription') }" @click="toggleMenu">Підписка</router-link>
-            <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }" @click="toggleMenu">Про нас</router-link>
+            <router-link to="/" class="nav-item" :class="{ active: isActive('/') }"
+                @click="toggleMenu">Головна</router-link>
+            <router-link to="/listings" class="nav-item" :class="{ active: isActive('/listings') }"
+                @click="toggleMenu">Оголошення</router-link>
+            <router-link to="/mysubscriptions" class="nav-item" :class="{ active: isActive('/subscription') }"
+                @click="toggleMenu">Підписка</router-link>
+            <router-link to="/about" class="nav-item" :class="{ active: isActive('/about') }" @click="toggleMenu">Про
+                нас</router-link>
         </nav>
     </header>
 </template>
@@ -70,6 +71,26 @@ const showUserMenu = ref(false);
 
 const userMenuRef = ref<HTMLElement | null>(null);
 const mobileMenuRef = ref<HTMLElement | null>(null);
+
+const isScrolled = ref(false);
+
+const handleScroll = () => {
+    isScrolled.value = window.scrollY > 10;
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+    window.addEventListener('resize', () => {
+        showMenuIcon.value = window.innerWidth <= 1000;
+    });
+    window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('scroll', handleScroll);
+});
+
 
 const toggleMenu = () => {
     showMenu.value = !showMenu.value;

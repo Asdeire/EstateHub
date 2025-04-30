@@ -226,6 +226,14 @@ onMounted(async () => {
             selectedTags.value = [tag.id];
         }
     }
+
+    const { location, price, area, type } = route.query;
+
+    if (location) searchQuery.value = location as string;
+    if (price) priceMax.value = Number(price);
+    if (area) areaMax.value = Number(area);
+    if (type) selectedType.value = type as string;
+
     applyFilters();
 });
 </script>
