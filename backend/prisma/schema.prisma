@@ -95,6 +95,16 @@ model Tag {
   listings      Listing[] @relation("ListingTags")
 }
 
+model VerificationCode {
+  id         String      @id @default(uuid())
+  email      String
+  code       String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([email])
+}
+
 enum Role { 
   User
   Makler

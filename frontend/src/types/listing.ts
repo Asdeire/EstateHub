@@ -1,4 +1,4 @@
-export interface Listing {
+export type Listing ={
     id: string;
     user_id: string;
     is_agent_listing: boolean;
@@ -12,10 +12,11 @@ export interface Listing {
     category_id?: string;
     tags: string[];
     title: string;
-    created_at: string;
+    updated_at: string;
+    isFavorite: boolean;
 }
 
-export interface CreateListingDto {
+export type CreateListingDto ={
     user_id: string;
     is_agent_listing: boolean;
     type: string;

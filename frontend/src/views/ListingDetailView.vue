@@ -101,10 +101,10 @@ import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite 
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
 import L from "leaflet";
-import Header from '../components/Header.vue';
 import agentIcon from '../assets/agency.png';
 import userIconDefault from '../assets/user-icon.png';
 import defaultPhoto from '../assets/undefined.png';
+import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
 
 delete L.Icon.Default.prototype._getIconUrl;

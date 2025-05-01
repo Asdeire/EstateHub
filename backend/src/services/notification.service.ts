@@ -23,7 +23,7 @@ export class NotificationService {
         subscription_id: string;
         status: NotificationStatus;
         listing_id?: string;
-        message?: string; 
+        message?: string;
     }): Promise<Notification> {
         let finalMessage: string;
 
@@ -81,8 +81,10 @@ export class NotificationService {
                     throw new Error('User must have an email address for EMAIL transport');
                 }
 
+                const exampleEmail = process.env.EMAIL || 'default@example.com';
+
                 await emailService.sendNotificationEmail(
-                    subscription.buyer.email,
+                    exampleEmail,
                     'Нове оголошення за вашою підпискою',
                     `<p>${finalMessage}</p>`,
                 );

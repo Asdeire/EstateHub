@@ -41,6 +41,7 @@
             </button>
         </div>
     </div>
+    <Footer />
 </template>
 
 <script setup lang="ts">
@@ -49,17 +50,11 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import Header from '../components/Header.vue';
+import Footer from '../components/Footer.vue';
 import Listings from '../components/listing/ListingCard.vue';
 import FilterModal from '../components/listing/FilterModal.vue';
 import { getListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
-
-interface Listing {
-    id: string;
-    location: string;
-    updated_at: string;
-    title: string;
-    isFavorite?: boolean;
-}
+import type { Listing } from '../types/listing';
 
 const router = useRouter();
 const route = useRoute();

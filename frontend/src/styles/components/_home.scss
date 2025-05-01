@@ -67,6 +67,10 @@
                         &::placeholder {
                             color: $secondary-color;
                         }
+
+                        &:focus {
+                            outline: none;
+                        }
                     }
 
                     select {
@@ -134,7 +138,7 @@
                             width: 100%;
                         }
 
-                        .input-with-icon{
+                        .input-with-icon {
                             width: 100%;
                         }
                     }
@@ -164,6 +168,135 @@
                 .search-button {
                     font-size: 14px;
                     padding: 10px;
+                }
+            }
+        }
+    }
+
+    .new-listings-section {
+        padding: 40px 150px;
+        text-align: center;
+
+        .section-title {
+            font-size: 56px;
+            font-weight: bold;
+            font-family: $home-font-family;
+            margin-bottom: 30px;
+        }
+
+        .listings-slider {
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 10px;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+
+            .listings-grid {
+                display: flex;
+                gap: 20px;
+                width: max-content;
+
+                .listing-card {
+                    flex: 0 0 380px;
+                    scroll-snap-align: start;
+                    background-color: #F3F6F5;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    padding: 15px;
+                    text-align: left;
+
+                    .listing-image {
+                        width: 100%;
+                        object-fit: cover;
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                    }
+
+                    .listing-title {
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }
+
+                    .listing-description {
+                        color: #666;
+                        margin-bottom: 5px;
+                    }
+
+                    .listing-price {
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+
+        .pagination-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+
+            .scroll-bar {
+                width: 100%;
+                height: 4px;
+                background-color: #d3e4e1;
+                border-radius: 2px;
+                position: relative;
+                overflow: hidden;
+                cursor: pointer;
+
+                .scroll-thumb {
+                    position: absolute;
+                    height: 100%;
+                    width: v-bind('thumbWidth + "%"');
+                    min-width: 20px;
+                    background-color: $primary-color;
+                    border-radius: 2px;
+                    transition: left 0.3s ease;
+                    cursor: grab;
+
+                    &:active {
+                        cursor: grabbing;
+                    }
+                }
+            }
+
+            .nav-controls {
+                display: flex;
+                gap: 20px;
+                align-self: flex-end;
+            }
+
+            .nav-button {
+                background: none;
+                border: none;
+                font-size: 18px;
+                color: #1a3c34;
+                cursor: pointer;
+                padding: 5px 10px;
+
+                &:disabled {
+                    color: #d3e4e1;
+                    cursor: not-allowed;
+                }
+            }
+
+            .view-all-button {
+                padding: 10px 20px;
+                background-color: $secondary-color;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                width: 150px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+
+                &:hover {
+                    background-color: #d0e4df;
                 }
             }
         }

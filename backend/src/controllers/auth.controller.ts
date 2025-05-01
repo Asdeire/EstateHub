@@ -1,7 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService } from '../services/auth.service';
+import { EmailService } from '../services/email.service';
 
-const authService = new AuthService();
+const emailService = new EmailService();
+const authService = new AuthService(emailService);
 
 interface LoginRequestBody {
     email: string;

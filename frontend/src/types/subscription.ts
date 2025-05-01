@@ -1,6 +1,6 @@
 import type { User } from './user';
 
-export interface Filters {
+export type Filters = {
     category?: string;
     type?: string;
     minPrice?: number;
@@ -11,7 +11,7 @@ export interface Filters {
     tags?: string[];
 }
 
-export interface Subscription {
+export type Subscription = {
     id: string;
     buyer_id: string;
     filters: Filters;
@@ -22,7 +22,7 @@ export interface Subscription {
     notifications?: Notification[];
 }
 
-export interface CreateSubscriptionDto {
+export type CreateSubscriptionDto ={
     buyer_id: string;
     filters: Filters;
     transport: Transport;
