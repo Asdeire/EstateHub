@@ -1,12 +1,6 @@
 import { api } from './config';
 import type { Subscription, CreateSubscriptionDto } from '../../types/subscription';
-import { getItem } from '../localStorageService';
-
-const getAuthHeaders = () => {
-    const token = getItem('authToken');
-    if (!token) throw new Error('User is not authenticated');
-    return { Authorization: `Bearer ${token}` };
-};
+import { getAuthHeaders } from './authHeaders';
 
 export const getSubscriptions = async (): Promise<Subscription[]> => {
     try {

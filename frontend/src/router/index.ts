@@ -9,7 +9,7 @@ import Favorites from '../views/FavoritesView.vue';
 import Profile from '../views/ProfileView.vue';
 import Notifications from '../views/NotificationsView.vue';
 import MySubscriptions from '../views/MySubscriptionsView.vue';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/authStore';
 
 const routes = [
     {

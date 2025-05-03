@@ -2,12 +2,12 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { getCategories, getTags } from '../services/api/index';
 
-export interface Category {
+export type Category ={
     id: string;
     name: string;
 }
 
-export interface Tag {
+export type Tag ={
     id: string;
     name: string;
 }

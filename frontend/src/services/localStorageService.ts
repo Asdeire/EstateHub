@@ -1,45 +1,45 @@
 /**
- * Отримує значення з localStorage за ключем
- * @param key Ключ для пошуку
- * @returns Значення або null, якщо ключ не знайдено
+ * Retrieves a value from localStorage by key
+ * @param key The key to look up
+ * @returns The value or null if the key is not found
  */
 export const getItem = (key: string): string | null => {
     try {
         return localStorage.getItem(key);
     } catch (error) {
-        console.error(`Помилка при отриманні ${key} з localStorage:`, error);
+        console.error(`Error retrieving ${key} from localStorage:`, error);
         return null;
     }
 };
 
 /**
- * Зберігає значення в localStorage
- * @param key Ключ
- * @param value Значення
+ * Stores a value in localStorage
+ * @param key The key
+ * @param value The value to store
  */
 export const setItem = (key: string, value: string): void => {
     try {
         localStorage.setItem(key, value);
     } catch (error) {
-        console.error(`Помилка при збереженні ${key} в localStorage:`, error);
+        console.error(`Error saving ${key} to localStorage:`, error);
     }
 };
 
 /**
- * Видаляє значення з localStorage за ключем
- * @param key Ключ для видалення
+ * Removes a value from localStorage by key
+ * @param key The key to remove
  */
 export const removeItem = (key: string): void => {
     try {
         localStorage.removeItem(key);
     } catch (error) {
-        console.error(`Помилка при видаленні ${key} з localStorage:`, error);
+        console.error(`Error removing ${key} from localStorage:`, error);
     }
 };
 
 /**
- * Отримує userId з токена в localStorage
- * @returns ID користувача або null, якщо токен недійсний
+ * Retrieves the user ID from the token stored in localStorage
+ * @returns The user ID or null if the token is invalid
  */
 export const getUserIdFromToken = (): string | null => {
     const token = getItem('authToken');
@@ -49,7 +49,7 @@ export const getUserIdFromToken = (): string | null => {
         const payload: { id?: string } = JSON.parse(atob(token.split('.')[1]));
         return payload.id ?? null;
     } catch (error) {
-        console.error('Помилка при декодуванні токена:', error);
+        console.error('Error decoding token:', error);
         removeItem('authToken');
         return null;
     }

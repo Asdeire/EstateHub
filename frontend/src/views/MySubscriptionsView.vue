@@ -27,7 +27,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/authStore';
 import { getSubscriptionsByUser, createSubscription, deleteSubscription } from '../services/api/index';
 import Header from '../components/Header.vue';
 import CreateSubscription from '../components/subscription/CreateSubscription.vue';

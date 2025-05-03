@@ -80,7 +80,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getTags, getCategories, createListing, updateListing, getListingById, getListingsByUserId } from '../../services/api/index';
-import { useAuthStore } from '../../store/useAuthStore';
+import { useAuthStore } from '../../stores/authStore';
 import { storage } from '../../services/utils/firebase.config';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 

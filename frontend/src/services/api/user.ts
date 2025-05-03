@@ -1,4 +1,5 @@
 import { api } from './config';
+import { getAuthHeaders } from './authHeaders';
 
 export const getUserById = async (id: string) => {
     try {
@@ -20,7 +21,7 @@ export const updateUser = async (
     }
 ) => {
     try {
-        const response = await api.put(`/user/${id}`, data);
+        const response = await api.put(`/user/${id}`, data, { headers: getAuthHeaders() });
         return response.data;
     } catch (error) {
         console.error(`Error updating user with ID ${id}:`, error);
@@ -30,7 +31,7 @@ export const updateUser = async (
 
 export const deleteUser = async (id: string) => {
     try {
-        const response = await api.delete(`/user/${id}`);
+        const response = await api.delete(`/user/${id}`, { headers: getAuthHeaders() });
         return response.data;
     } catch (error) {
         console.error(`Error deleting user with ID ${id}:`, error);

@@ -22,6 +22,7 @@
             </div>
         </div>
     </div>
+    <Footer />
 
     <CreateListing v-if="showModal" :showModal="showModal" @close="closeModal" @save="createNewListing" />
     <EditListing v-if="showEditModal" :showEditModal="showEditModal" :listing="currentListing" @close="closeEditModal"
@@ -31,9 +32,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/authStore';
 import { getListings, createListing, deleteListing, getListingById, updateListing } from '../services/api/index';
 import Header from '../components/Header.vue';
+import Footer from '../components/Footer.vue';
 import CreateListing from '../components/listing/CreateListing.vue';
 import EditListing from '../components/listing/EditListing.vue';
 import Listings from '../components/listing/ListingCard.vue';
@@ -127,7 +129,7 @@ const handleDeleteListing = async (id) => {
         archivedListings.value = archivedListings.value.filter(listing => listing.id !== id);
         alert("Оголошення успішно видалено!");
     } catch (err) {
-        console.error("Помилка видалення оголошення:", err);
+        console.error("Delete error:", err);
         alert("Помилка при видаленні оголошення.");
     }
 };
@@ -148,7 +150,7 @@ const toggleListingStatus = async (listing) => {
 
         alert(`Оголошення успішно ${newStatus === 'Active' ? 'активовано' : 'архівовано'}!`);
     } catch (err) {
-        console.error("Помилка зміни статусу:", err);
+        console.error("Status error:", err);
         alert("Помилка при зміні статусу оголошення.");
     }
 };
@@ -157,6 +159,10 @@ onMounted(fetchMyListings);
 </script>
 
 <style scoped>
+.my-listings-container{
+    width: 100vw;
+    justify-items: center;
+}
 .my-listings-header {
     margin: 70px 0 30px;
     display: flex;

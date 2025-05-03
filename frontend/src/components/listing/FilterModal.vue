@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { Category, Tag } from '../../store/useDataStore';
+import type { Category, Tag } from '../../stores/dataStore';
 
 const props = defineProps<{
     categories: Category[];

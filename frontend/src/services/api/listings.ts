@@ -1,4 +1,5 @@
 import { api } from './config';
+import { getAuthHeaders } from './authHeaders';
 import type { Listing, CreateListingDto } from '../../types/listing';
 
 export const getListings = async (
@@ -41,7 +42,9 @@ export const getListings = async (
 
 export const createListing = async (listingData: CreateListingDto): Promise<Listing> => {
     try {
-        const response = await api.post('/listings', listingData);
+        const response = await api.post('/listings', listingData, {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error('Error creating listing:', error);
@@ -61,7 +64,9 @@ export const getListingById = async (id: string): Promise<Listing | null> => {
 
 export const getListingsByUserId = async (user_id: string): Promise<Listing[]> => {
     try {
-        const response = await api.get(`/listings/user/${user_id}`);
+        const response = await api.get(`/listings/user/${user_id}`, {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error(`Error fetching listings for user ${user_id}:`, error);
@@ -71,9 +76,9 @@ export const getListingsByUserId = async (user_id: string): Promise<Listing[]> =
 
 export const updateListing = async (id: string, listingData: CreateListingDto): Promise<Listing> => {
     try {
-        console.log('Updating listing with data:', listingData);
-        const response = await api.put(`/listings/${id}`, listingData);
-        console.log("Response:", response);
+        const response = await api.put(`/listings/${id}`, listingData, {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error(`Error updating listing with ID ${id}:`, error);
@@ -83,7 +88,9 @@ export const updateListing = async (id: string, listingData: CreateListingDto): 
 
 export const deleteListing = async (id: string): Promise<Listing> => {
     try {
-        const response = await api.delete(`/listings/${id}`);
+        const response = await api.delete(`/listings/${id}`, {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error(`Error deleting listing with ID ${id}:`, error);

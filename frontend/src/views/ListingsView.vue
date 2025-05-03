@@ -47,8 +47,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '../store/useAuthStore';
-import { useDataStore } from '../store/useDataStore';
+import { useAuthStore } from '../stores/authStore';
+import { useDataStore } from '../stores/dataStore';
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
 import Listings from '../components/listing/ListingCard.vue';

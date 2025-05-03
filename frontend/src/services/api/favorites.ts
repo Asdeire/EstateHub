@@ -1,13 +1,11 @@
 import { api } from './config';
+import { getAuthHeaders } from './authHeaders';
 
 export const getFavorites = async () => {
     try {
-        const token = localStorage.getItem('authToken');
-        if (!token) throw new Error('User is not authenticated');
-        const headers = { Authorization: `Bearer ${token}` };
-
-        const response = await api.get('/favorites', { headers });
-
+        const response = await api.get('/favorites', {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error('Error fetching user-specific favorites:', error);
@@ -17,9 +15,6 @@ export const getFavorites = async () => {
 
 export const addFavorite = async (listingId: string) => {
     try {
-        const token = localStorage.getItem('authToken');
-        if (!token) throw new Error('User is not authenticated');
-
         const currentFavorites = await getFavorites();
         const favoriteCount = Array.isArray(currentFavorites) ? currentFavorites.length : 0;
 
@@ -28,7 +23,7 @@ export const addFavorite = async (listingId: string) => {
         }
 
         await api.post(`/favorites/${listingId}`, {}, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: getAuthHeaders(),
         });
     } catch (error) {
         console.error('Error adding favorite:', error);
@@ -38,11 +33,8 @@ export const addFavorite = async (listingId: string) => {
 
 export const removeFavorite = async (listingId: string) => {
     try {
-        const token = localStorage.getItem('authToken');
-        if (!token) throw new Error('User is not authenticated');
-
         await api.delete(`/favorites/${listingId}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: getAuthHeaders(),
         });
     } catch (error) {
         console.error('Error removing favorite:', error);

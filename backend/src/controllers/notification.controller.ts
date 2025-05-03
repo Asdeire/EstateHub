@@ -1,7 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { NotificationService } from '../services/notification.service';
 import { SubscriptionService } from '../services/subscription.service';
-import { authMiddleware } from '../middleware/auth.middleware';
 
 const notificationService = new NotificationService();
 const subscriptionService = new SubscriptionService();
@@ -17,7 +16,6 @@ export class NotificationController {
         }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const { subscription_id, message, status } = request.body;
 
@@ -41,7 +39,6 @@ export class NotificationController {
     }
 
     async getNotifications(request: FastifyRequest, reply: FastifyReply) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
 
         if (!userId) {
@@ -56,7 +53,6 @@ export class NotificationController {
         request: FastifyRequest<{ Params: { id: string } }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const notificationId = request.params.id;
 
@@ -76,7 +72,6 @@ export class NotificationController {
         request: FastifyRequest<{ Params: { subscriptionId: string } }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const subscriptionId = request.params.subscriptionId;
 
@@ -100,7 +95,6 @@ export class NotificationController {
         }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const notificationId = request.params.id;
         const { status } = request.body;
@@ -122,7 +116,6 @@ export class NotificationController {
         request: FastifyRequest<{ Params: { id: string } }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const notificationId = request.params.id;
 
@@ -140,7 +133,6 @@ export class NotificationController {
     }
 
     async clearUserNotifications(request: FastifyRequest, reply: FastifyReply) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
 
         if (!userId) {
@@ -148,6 +140,6 @@ export class NotificationController {
         }
 
         await notificationService.clearUserNotifications(userId);
-        return reply.send({ message: 'All notifications for the user have been deleted' });
+        return reply.send({ message: 'All user notifications deleted' });
     }
 }

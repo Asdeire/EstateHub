@@ -1,12 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SubscriptionService } from '../services/subscription.service';
-import { authMiddleware } from '../middleware/auth.middleware';
 
 const subscriptionService = new SubscriptionService();
 
 export class SubscriptionController {
     async getSubscriptions(request: FastifyRequest, reply: FastifyReply) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
 
         if (!userId) {
@@ -21,7 +19,6 @@ export class SubscriptionController {
         request: FastifyRequest<{ Params: { id: string } }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const subscriptionId = request.params.id;
 
@@ -41,7 +38,6 @@ export class SubscriptionController {
         request: FastifyRequest<{ Params: { buyer_id: string } }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const buyerId = request.params.buyer_id;
 
@@ -57,14 +53,12 @@ export class SubscriptionController {
         return reply.send(subscriptions);
     }
 
-
     async createSubscription(
         request: FastifyRequest<{
             Body: { filters: any; transport: 'EMAIL' | 'TELEGRAM' };
         }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const { filters, transport } = request.body;
 
@@ -88,7 +82,6 @@ export class SubscriptionController {
         }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const subscriptionId = request.params.id;
         const { filters, transport } = request.body;
@@ -114,7 +107,6 @@ export class SubscriptionController {
         request: FastifyRequest<{ Params: { id: string } }>,
         reply: FastifyReply
     ) {
-        await authMiddleware(request, reply);
         const userId = request.user?.id;
         const subscriptionId = request.params.id;
 

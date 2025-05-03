@@ -69,8 +69,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useDataStore } from '../../store/useDataStore';
-import { useAuthStore } from '../../store/useAuthStore';
+import { useDataStore } from '../../stores/dataStore';
+import { useAuthStore } from '../../stores/authStore';
 import { createSubscription } from '../../services/api/index';
 import { useRouter } from 'vue-router';
 

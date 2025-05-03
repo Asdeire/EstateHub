@@ -1,13 +1,11 @@
 import { api } from './config';
+import { getAuthHeaders } from './authHeaders';
 
 export const getNotifications = async () => {
     try {
-        const token = localStorage.getItem('authToken');
-        if (!token) throw new Error('User is not authenticated');
-        const headers = { Authorization: `Bearer ${token}` };
-
-        const response = await api.get('/notifications', { headers });
-
+        const response = await api.get('/notifications', {
+            headers: getAuthHeaders(),
+        });
         return response.data;
     } catch (error) {
         console.error('Error fetching user notifications:', error);
@@ -17,11 +15,9 @@ export const getNotifications = async () => {
 
 export const clearNotifications = async () => {
     try {
-        const token = localStorage.getItem('authToken');
-        if (!token) throw new Error('User is not authenticated');
-        const headers = { Authorization: `Bearer ${token}` };
-
-        await api.delete('/notifications', { headers });
+        await api.delete('/notifications', {
+            headers: getAuthHeaders(),
+        });
     } catch (error) {
         console.error('Error clearing user notifications:', error);
         throw error;

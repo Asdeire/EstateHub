@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useAuthStore } from './store/useAuthStore';
+import { useAuthStore } from './stores/authStore';
 import { getUserIdFromToken } from './services/localStorageService';
 
 const authStore = useAuthStore();

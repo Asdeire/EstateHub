@@ -20,7 +20,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { useDataStore } from '../../store/useDataStore'; 
+import { useDataStore } from '../../stores/dataStore'; 
 
 const props = defineProps({
     subscription: Object

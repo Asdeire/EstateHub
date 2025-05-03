@@ -96,7 +96,7 @@ import { ref, computed, onMounted } from 'vue';
 import { Carousel, Slide, Navigation, Pagination } from 'vue3-carousel';
 import 'vue3-carousel/dist/carousel.css';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/authStore';
 import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite } from '../services/api/index';
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";

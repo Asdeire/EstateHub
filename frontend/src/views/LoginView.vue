@@ -33,8 +33,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { loginUser } from '../services/api/index';
-import { useAuthStore } from '../store/useAuthStore';
-import { setItem, getUserIdFromToken } from '../services/localStorageService';
+import { useAuthStore } from '../stores/authStore';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -48,13 +47,7 @@ const error = ref<string | null>(null);
 
 const submitForm = async () => {
     try {
-        const response = await loginUser(form.value);
-        const token: string = response.token;
-
-        setItem('authToken', token);
-
-        const userId: string | null = getUserIdFromToken();
-        if (!userId) throw new Error('Не вдалося отримати ID користувача з токена');
+        const { userId } = await loginUser(form.value);
 
         await authStore.fetchUser(userId);
 

@@ -40,7 +40,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/authStore';
 import { getNotifications, clearNotifications } from '../services/api/index';
 import Header from '../components/Header.vue';
 

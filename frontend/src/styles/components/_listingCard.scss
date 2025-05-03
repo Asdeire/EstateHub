@@ -3,7 +3,8 @@
     justify-content: center;
     gap: 30px;
     grid-template-columns: repeat(4, minmax(340px, 1fr));
-    min-height: 80vh;
+    min-height: 80vh;    
+    width: fit-content;
 
     @media(max-width: 1700px) {
         grid-template-columns: repeat(3, 1fr);
@@ -20,9 +21,8 @@
 
 .listing-card {
     width: 340px;
-    min-height: 450px;
-    max-height: 500px;
     padding: 20px;
+    height: fit-content;
     background: #F5F4F1;
     border-radius: 12px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);

@@ -1,4 +1,5 @@
 import { api } from '../api';
+import { setItem, getUserIdFromToken } from '../localStorageService';
 
 export const registerUser = async (userData: {
     name: string;
@@ -10,7 +11,7 @@ export const registerUser = async (userData: {
         const response = await api.post('/register', userData);
         return response.data;
     } catch (error: any) {
-        console.error('Помилка при реєстрації:', error.response?.data || error.message);
+        console.error('Registration error:', error.response?.data || error.message);
         throw error;
     }
 };
@@ -31,5 +32,14 @@ export const loginUser = async (credentials: {
     password: string;
 }) => {
     const response = await api.post('/login', credentials);
-    return response.data;
+    const token = response.data.token;
+
+    setItem('authToken', token);
+
+    const userId = getUserIdFromToken();
+    if (!userId) {
+        throw new Error('Не вдалося отримати ID користувача з токена');
+    }
+
+    return { userId };
 };

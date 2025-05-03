@@ -15,13 +15,15 @@
         </div>
 
     </div>
+    <Footer />
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/authStore';
 import Header from "../components/Header.vue";
+import Footer from '../components/Footer.vue';
 import Listings from "../components/listing/ListingCard.vue";
 import { getFavorites, addFavorite, removeFavorite, getListings } from "../services/api/index";
 
@@ -100,7 +102,9 @@ onMounted(() => {
 <style scoped>
 .favourite-container {
     margin-top: 60px;
-    height: 90vh;
+    min-height: 90vh;
+    width: 100vw;
+    justify-items: center;
 
     h1 {
         text-align: center;

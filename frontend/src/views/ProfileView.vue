@@ -68,7 +68,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/authStore';
 import { getUserById, updateUser, deleteUser } from '../services/api/index';
 import Header from '../components/Header.vue';
 import agentIcon from '../assets/agency.png';
