@@ -44,7 +44,7 @@
         .nav-item {
             text-decoration: none;
             color: $primary-color;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 400;
             position: relative;
 
@@ -149,7 +149,7 @@
 
         .nav-item {
             padding: 5px 0;
-            border: 1px $primary-color solid;
+            border-bottom: 1px $primary-color solid;
             text-align: center;
             width: 100%;
             text-decoration: none;

@@ -45,13 +45,35 @@
                 </div>
                 <div class="nav-controls">
                     <button class="nav-button prev" @click="scrollPrev" :disabled="currentSlide === 0">
-                        <span><</span>
+                        <span>
+                            <</span>
                     </button>
                     <button class="nav-button next" @click="scrollNext" :disabled="currentSlide >= maxSlides - 1">
                         <span>></span>
                     </button>
                 </div>
                 <button class="view-all-button" @click="goToListings">Дивитись всі</button>
+            </div>
+        </section>
+
+        <section class="translation-section">
+            <h2 class="section-title">Наші перевати</h2>
+            <div class="translation-cards">
+                <div class="translation-card">
+                    <img src="../assets/check.png" alt="Перевірено" class="card-icon" />
+                    <h3>Перевірено житло</h3>
+                    <p>Кожне оголошення проходить ретельну перевірку.</p>
+                </div>
+                <div class="translation-card">
+                    <img src="../assets/cloud.png" alt="Безпека" class="card-icon" />
+                    <h3>Безліч оголошень</h3>
+                    <p>Ви зможете знайти нерухомість на любий смак.</p>
+                </div>
+                <div class="translation-card">
+                    <img src="../assets/headphones.png" alt="Служба підтримки" class="card-icon" />
+                    <h3>Служба підтримки</h3>
+                    <p>24/7 підтримка для наших клієнтів.</p>
+                </div>
             </div>
         </section>
     </div>

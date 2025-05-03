@@ -114,7 +114,7 @@
             }
 
             @media (max-width: 1000px) {
-                padding: 0 40px;
+                padding: 0 20px;
                 align-items: center;
 
                 .title {
@@ -149,7 +149,7 @@
                 }
             }
 
-            @media (max-width: 600px) {
+            @media (max-width: 768px) {
                 .title {
                     font-size: 38px;
                 }
@@ -275,7 +275,7 @@
                 background: none;
                 border: none;
                 font-size: 18px;
-                color: #1a3c34;
+                color: $primary-color;
                 cursor: pointer;
                 padding: 5px 10px;
 
@@ -297,6 +297,79 @@
 
                 &:hover {
                     background-color: #d0e4df;
+                }
+            }
+        }
+
+        @media (max-width: 1000px) {
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 36px;
+            }
+        }
+    }
+
+    .translation-section {
+        padding: 40px 150px;
+        text-align: center;
+
+        .section-title {
+            font-family: $home-font-family;
+            font-size: 56px;
+        }
+
+        .translation-cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .translation-card {
+            max-width: 350px;
+            padding: 20px;
+            border-radius: 10px;
+
+            h3 {
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
+
+            p {
+                font-size: 20px;
+            }
+        }
+
+        .card-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 1000px) {
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 36px;
+            }
+
+            .translation-cards {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .translation-card {
+                h3 {
+                    font-size: 26px;
+                    margin-bottom: 10px;
+                }
+
+                p {
+                    font-size: 18px;
                 }
             }
         }

@@ -1,7 +1,6 @@
 <template>
     <Header />
     <div v-if="loading" class="loading-message" role="status" aria-live="polite">Завантаження...</div>
-    <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
     <div v-if="listing" class="listing-container">
         <div class="listing-gallery">
             <img v-if="listing?.photos?.length" :src="listing.photos[0]" alt="Main Image of {{ listing.title }}"
@@ -65,7 +64,7 @@
             </div>
 
             <div class="listing-contact">
-                <div class="user-info">
+                <div class="user-info" >
                     <img :src="userIcon" alt="Іконка користувача" class="user-icon" />
                     <div class="user-details">
                         <p class="user-name">{{ user?.name }}</p>
@@ -87,6 +86,7 @@
             <p v-else class="no-location">Дані про місцезнаходження відсутні.</p>
         </div>
     </div>
+    <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
     <Footer />
 </template>
 
