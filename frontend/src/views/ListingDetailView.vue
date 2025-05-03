@@ -64,7 +64,7 @@
             </div>
 
             <div class="listing-contact">
-                <div class="user-info" >
+                <div class="user-info">
                     <img :src="userIcon" alt="Іконка користувача" class="user-icon" />
                     <div class="user-details">
                         <p class="user-name">{{ user?.name }}</p>
@@ -101,6 +101,7 @@ import { getListingById, getUserById, getFavorites, addFavorite, removeFavorite 
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
 import L from "leaflet";
+import Swal from 'sweetalert2';
 import agentIcon from '../assets/agency.png';
 import userIconDefault from '../assets/user-icon.png';
 import defaultPhoto from '../assets/undefined.png';
@@ -171,7 +172,11 @@ const fetchFavorites = async () => {
 
 const toggleFavorite = async () => {
     if (!authStore.isAuthenticated) {
-        alert("Будь ласка, увійдіть, щоб додати до улюблених!");
+        await Swal.fire({
+            icon: 'warning',
+            title: 'Увійдіть',
+            text: 'Будь ласка, увійдіть, щоб додати до улюблених!',
+        });
         return;
     }
     try {
@@ -219,10 +224,18 @@ const userIcon = computed(() => user.value?.role === 'Makler' ? agentIcon : user
 
 const contactUser = () => {
     if (!authStore.isAuthenticated) {
-        alert("Будь ласка, увійдіть, щоб зв'язатися з власником!");
+        Swal.fire({
+            icon: 'warning',
+            title: 'Увійдіть',
+            text: 'Будь ласка, увійдіть, щоб зв\'язатися з власником!',
+        });
         return;
     }
-    alert(`Зв'язок із ${user.value?.name}`);
+    Swal.fire({
+        icon: 'info',
+        title: 'Контакт',
+        text: `Зв'язок із ${user.value?.name}`,
+    });
 };
 
 const router = useRouter();

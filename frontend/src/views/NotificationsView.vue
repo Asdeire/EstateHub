@@ -43,6 +43,7 @@ import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { getNotifications, clearNotifications } from '../services/api/index';
 import Header from '../components/Header.vue';
+import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const notifications = ref([]);
@@ -62,14 +63,27 @@ const fetchNotifications = async () => {
 };
 
 const clearAllNotifications = async () => {
-    if (!confirm('Ви впевнені, що хочете очистити всі повідомлення? Цю дію не можна скасувати.')) {
+    const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Ви впевнені?',
+        text: 'Ви хочете очистити всі повідомлення? Цю дію не можна скасувати.',
+        showCancelButton: true,
+        confirmButtonText: 'Так, очистити',
+        cancelButtonText: 'Скасувати',
+    });
+
+    if (!result.isConfirmed) {
         return;
     }
 
     try {
         await clearNotifications();
         notifications.value = [];
-        alert('Усі повідомлення успішно очищено');
+        await Swal.fire({
+            icon: 'success',
+            title: 'Успіх',
+            text: 'Усі повідомлення успішно очищено',
+        });
     } catch (err) {
         error.value = err.response?.data?.message || 'Не вдалося очистити повідомлення';
     }

@@ -87,6 +87,7 @@ import { ref, onMounted } from 'vue';
 import { getTags, getCategories, updateListing } from '../../services/api/index';
 import { storage } from '../../services/utils/firebase.config';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     showEditModal: Boolean,
@@ -209,7 +210,11 @@ const handleSubmit = async () => {
         emit('close');
     } catch (err) {
         console.error('Помилка оновлення оголошення:', err);
-        alert('Помилка при оновленні оголошення: ' + (err.message || 'Невідома помилка'));
+        await Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Помилка при оновленні оголошення: ' + (err.message || 'Невідома помилка'),
+        });
     } finally {
         isLoading.value = false;
     }

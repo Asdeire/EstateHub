@@ -79,10 +79,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getTags, getCategories, createListing, updateListing, getListingById, getListingsByUserId } from '../../services/api/index';
+import { getTags, getCategories, createListing, updateListing, getListingsByUserId } from '../../services/api/index';
 import { useAuthStore } from '../../stores/authStore';
 import { storage } from '../../services/utils/firebase.config';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import Swal from 'sweetalert2';
 
 const props = defineProps({ showModal: Boolean });
 const emit = defineEmits(['close', 'save']);
@@ -186,7 +187,11 @@ const handleFileUpload = (event) => {
 
 const handleSubmit = async () => {
     if (userListingsCount.value >= 10) {
-        alert('Ви досягли ліміту у 10 оголошень.');
+        await Swal.fire({
+            icon: 'warning',
+            title: 'Ліміт досягнуто',
+            text: 'Ви досягли ліміту у 10 оголошень.',
+        });
         return;
     }
 
@@ -208,7 +213,11 @@ const handleSubmit = async () => {
         emit('close');
     } catch (err) {
         console.error('Error adding listing:', err);
-        alert('Помилка при створенні оголошення: ' + (err.message || 'Невідома помилка'));
+        await Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Помилка при створенні оголошення: ' + (err.message || 'Невідома помилка'),
+        });
     }
 };
 
@@ -237,5 +246,4 @@ const updateListingPhotos = async (listingId, fileUrls) => {
         console.error('Помилка оновлення фото в базі:', error);
     }
 };
-
 </script>

@@ -11,7 +11,7 @@ onMounted(async () => {
     try {
       await authStore.fetchUser(userId);
     } catch (error) {
-      console.error('Помилка при завантаженні користувача:', error);
+      console.error('Error fetching user:', error);
     }
   }
 });

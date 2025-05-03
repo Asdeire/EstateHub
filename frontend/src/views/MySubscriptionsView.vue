@@ -33,6 +33,7 @@ import Header from '../components/Header.vue';
 import CreateSubscription from '../components/subscription/CreateSubscription.vue';
 import SubscriptionCard from '../components/subscription/SubscriptionCard.vue';
 import Footer from '../components/Footer.vue';
+import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 
@@ -57,7 +58,6 @@ const fetchSubscriptions = async () => {
     }
 };
 
-
 const openCreateModal = () => {
     showModal.value = true;
 };
@@ -69,24 +69,49 @@ const closeModal = () => {
 const createNewSubscription = async (newSubscription) => {
     try {
         subscriptions.value.push(newSubscription);
-        alert("Підписку успішно додано!");
+        await Swal.fire({
+            icon: 'success',
+            title: 'Успіх',
+            text: 'Підписку успішно додано!',
+        });
         closeModal();
     } catch (err) {
         console.error('Error creating subscription:', err);
-        alert("Помилка при додаванні підписки.");
+        await Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Помилка при додаванні підписки.',
+        });
     }
 };
 
 const handleDeleteSubscription = async (id) => {
-    if (!confirm("Ви впевнені, що хочете видалити цю підписку?")) return;
+    const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Ви впевнені?',
+        text: 'Ви хочете видалити цю підписку?',
+        showCancelButton: true,
+        confirmButtonText: 'Так, видалити',
+        cancelButtonText: 'Скасувати',
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
         await deleteSubscription(id);
         subscriptions.value = subscriptions.value.filter(sub => sub.id !== id);
-        alert("Підписку успішно видалено!");
+        await Swal.fire({
+            icon: 'success',
+            title: 'Успіх',
+            text: 'Підписку успішно видалено!',
+        });
     } catch (err) {
         console.error("Помилка видалення підписки:", err);
-        alert("Помилка при видаленні підписки.");
+        await Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Помилка при видаленні підписки.',
+        });
     }
 };
 
@@ -101,5 +126,4 @@ onMounted(() => {
         { immediate: true }
     );
 });
-
 </script>

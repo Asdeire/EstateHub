@@ -56,6 +56,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { registerUser, verifyCode } from '../services/api/index';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const form = ref({
@@ -83,7 +84,11 @@ const submitForm = async () => {
                 password: form.value.password,
                 role: form.value.isAgent ? 'Makler' : 'User',
             });
-            console.log('Код підтвердження відправлено на пошту ' + form.value.email);
+            Swal.fire({
+                icon: 'info',
+                title: 'Підтвердження',
+                text: 'Код підтвердження надіслано на вашу електронну пошту.',
+            });
             step.value = 2;
         } else if (step.value === 2) {
             await verifyCode({
@@ -93,13 +98,27 @@ const submitForm = async () => {
                 password: form.value.password,
                 role: form.value.isAgent ? 'Makler' : 'User',
             });
-            router.push('/login');
+            Swal.fire({
+                icon: 'success',
+                title: 'Успішно!',
+                text: 'Ваш акаунт підтверджено. Виконайте вхід.',
+            }).then(() => {
+                router.push('/login');
+            });
         }
     } catch (err) {
         if (err.response && err.response.data.message === 'Email is already in use') {
-            alert('Ця електронна пошта вже використовується. Спробуйте іншу.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Помилка',
+                text: 'Ця електронна пошта вже використовується. Спробуйте іншу.',
+            });
         } else {
-            alert('Помилка реєстрації або підтвердження коду!');
+            Swal.fire({
+                icon: 'error',
+                title: 'Помилка',
+                text: 'Помилка реєстрації або підтвердження коду!',
+            });
         }
     }
 };

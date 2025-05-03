@@ -17,7 +17,7 @@
                 <h1>Архівовані оголошення</h1>
                 <Listings :listings="archivedListings" :toggleListingStatus="toggleListingStatus" />
             </div>
-            <div v-else>
+            <div v-else-if="activeListings.length === 0 && archivedListings.length === 0">
                 <div class="no-listings">Немає оголошень.</div>
             </div>
         </div>
@@ -39,6 +39,7 @@ import Footer from '../components/Footer.vue';
 import CreateListing from '../components/listing/CreateListing.vue';
 import EditListing from '../components/listing/EditListing.vue';
 import Listings from '../components/listing/ListingCard.vue';
+import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -86,7 +87,11 @@ const editListing = async (listing) => {
         showEditModal.value = true;
     } catch (err) {
         console.error('Error loading listing data:', err);
-        alert("Помилка при завантаженні даних оголошення.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Не вдалося завантажити дані оголошення.',
+        });
     }
 };
 
@@ -101,41 +106,82 @@ const handleUpdateListing = async (updatedListing) => {
         if (index !== -1) {
             activeListings.value[index] = { ...activeListings.value[index], ...updatedListing };
         }
-        alert("Оголошення успішно оновлено!");
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Оновлено!',
+            text: 'Оголошення успішно оновлено!',
+        });
+
         closeEditModal();
     } catch (err) {
         console.error('Error updating listing:', err);
-        alert("Помилка при оновленні оголошення.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Не вдалося оновити оголошення.',
+        });
     }
 };
 
 const createNewListing = async (newListing) => {
     try {
         activeListings.value.push(newListing);
-        alert("Оголошення успішно додано!");
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Додано!',
+            text: 'Оголошення успішно додано!',
+        });
+
         closeModal();
     } catch (err) {
         console.error('Error in createNewListing:', err);
-        alert("Помилка при додаванні оголошення: " + (err.message || 'Невідома помилка'));
+        Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Помилка при додаванні оголошення: ' + (err.message || 'Невідома помилка'),
+        });
     }
 };
 
 const handleDeleteListing = async (id) => {
-    if (!confirm("Ви впевнені, що хочете видалити це оголошення?")) return;
+    const result = await Swal.fire({
+        title: 'Ви впевнені?',
+        text: 'Це оголошення буде видалено назавжди!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Так, видалити!',
+        cancelButtonText: 'Скасувати',
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
         await deleteListing(id);
         activeListings.value = activeListings.value.filter(listing => listing.id !== id);
         archivedListings.value = archivedListings.value.filter(listing => listing.id !== id);
-        alert("Оголошення успішно видалено!");
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Видалено!',
+            text: 'Оголошення успішно видалено!',
+        });
     } catch (err) {
         console.error("Delete error:", err);
-        alert("Помилка при видаленні оголошення.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Не вдалося видалити оголошення.',
+        });
     }
 };
 
 const toggleListingStatus = async (listing) => {
     const newStatus = listing.status === 'Active' ? 'Archived' : 'Active';
+
     try {
         await updateListing(listing.id, { status: newStatus });
         listing.status = newStatus;
@@ -148,21 +194,31 @@ const toggleListingStatus = async (listing) => {
             archivedListings.value.push(listing);
         }
 
-        alert(`Оголошення успішно ${newStatus === 'Active' ? 'активовано' : 'архівовано'}!`);
+        Swal.fire({
+            icon: 'success',
+            title: 'Статус змінено!',
+            text: `Оголошення успішно ${newStatus === 'Active' ? 'активовано' : 'архівовано'}!`,
+        });
     } catch (err) {
         console.error("Status error:", err);
-        alert("Помилка при зміні статусу оголошення.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Не вдалося змінити статус оголошення.',
+        });
     }
 };
 
 onMounted(fetchMyListings);
 </script>
 
+
 <style scoped>
-.my-listings-container{
+.my-listings-container {
     width: 100vw;
     justify-items: center;
 }
+
 .my-listings-header {
     margin: 70px 0 30px;
     display: flex;

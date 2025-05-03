@@ -8,7 +8,7 @@ export const createListingSchema = z.object({
     price: z.number().positive('Price must be positive'),
     area: z.number().positive('Area must be positive'),
     description: z.string().optional(),
-    photos: z.array(z.string().url('Invalid URL')).min(1, 'At least one photo is required'),
+    photos: z.array(z.string().url('Invalid URL')),
     status: z.enum(['Active', 'Archived']),
     category_id: z.string().uuid().optional(),
     tags: z.array(z.string().uuid('Invalid tag ID')),

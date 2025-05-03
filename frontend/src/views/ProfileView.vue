@@ -46,7 +46,7 @@
                         <label for="confirm-password">Підтвердження пароля</label>
                         <input id="confirm-password" v-model="form.confirmPassword" type="password"
                             placeholder="Підтвердіть пароль" class="form-input" />
-                        <p v-if="confirmPasswordError" class="error-text">
+                        <p v-ifRefresh="confirmPasswordError" class="error-text">
                             Паролі не збігаються
                         </p>
                     </div>
@@ -71,6 +71,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 import { getUserById, updateUser, deleteUser } from '../services/api/index';
 import Header from '../components/Header.vue';
+import Swal from 'sweetalert2';
 import agentIcon from '../assets/agency.png';
 import userIconDefault from '../assets/user-icon.png';
 
@@ -129,13 +130,21 @@ const getUpdateData = () => {
 
 const updateProfile = async () => {
     if (form.value.password && (passwordError.value || confirmPasswordError.value)) {
-        alert('Будь ласка, виправте помилки в паролі');
+        await Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: 'Будь ласка, виправте помилки в паролі',
+        });
         return;
     }
 
     const updateData = getUpdateData();
     if (Object.keys(updateData).length === 0) {
-        alert('Немає змін для збереження');
+        await Swal.fire({
+            icon: 'info',
+            title: 'Без змін',
+            text: 'Немає змін для збереження',
+        });
         return;
     }
 
@@ -146,7 +155,11 @@ const updateProfile = async () => {
         user.value = await getUserById(userId);
         form.value.password = '';
         form.value.confirmPassword = '';
-        alert('Профіль успішно оновлено!');
+        await Swal.fire({
+            icon: 'success',
+            title: 'Успіх',
+            text: 'Профіль успішно оновлено!',
+        });
     } catch (err) {
         if ('telegram_username' in updateData) {
             telegramError.value = true;
@@ -156,19 +169,45 @@ const updateProfile = async () => {
     }
 };
 
+const confirmDelete = async () => {
+    const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Ви впевнені?',
+        text: 'Ви хочете видалити акаунт? Цю дію не можна скасувати.',
+        showCancelButton: true,
+        confirmButtonText: 'Так, видалити',
+        cancelButtonText: 'Скасувати',
+    });
 
-const confirmDelete = () => {
-    if (!confirm('Ви впевнені, що хочете видалити акаунт? Цю дію не можна скасувати.')) {
+    if (!result.isConfirmed) {
         return;
     }
 
-    const confirmation = prompt('Введіть ваш поточний пароль для підтвердження видалення акаунту:');
-    if (!confirmation) {
-        alert('Підтвердження паролем скасовано');
+    const { value: currentPassword } = await Swal.fire({
+        title: 'Підтвердження паролем',
+        input: 'password',
+        inputLabel: 'Введіть ваш поточний пароль для підтвердження видалення акаунту',
+        inputPlaceholder: 'Введіть пароль',
+        showCancelButton: true,
+        confirmButtonText: 'Підтвердити',
+        cancelButtonText: 'Скасувати',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Пароль обов’язковий!';
+            }
+        },
+    });
+
+    if (!currentPassword) {
+        await Swal.fire({
+            icon: 'info',
+            title: 'Скасовано',
+            text: 'Підтвердження паролем скасовано',
+        });
         return;
     }
 
-    deleteAccount(confirmation);
+    deleteAccount(currentPassword);
 };
 
 const deleteAccount = async (currentPassword) => {
@@ -176,7 +215,11 @@ const deleteAccount = async (currentPassword) => {
         const userId = authStore.user.id;
         await deleteUser(userId, { currentPassword });
         authStore.logout();
-        alert('Акаунт успішно видалено');
+        await Swal.fire({
+            icon: 'success',
+            title: 'Успіх',
+            text: 'Акаунт успішно видалено',
+        });
         router.push({ name: 'Home' });
     } catch (err) {
         error.value = err.response?.data?.message || 'Не вдалося видалити акаунт';

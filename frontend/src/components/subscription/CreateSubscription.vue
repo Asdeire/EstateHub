@@ -73,6 +73,7 @@ import { useDataStore } from '../../stores/dataStore';
 import { useAuthStore } from '../../stores/authStore';
 import { createSubscription } from '../../services/api/index';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
 const props = defineProps({ showModal: Boolean });
 const emit = defineEmits(['close', 'save']);
@@ -188,7 +189,11 @@ const handleSubmit = async () => {
             return;
         }
 
-        alert((err.response?.data?.message || err.message || 'Невідома помилка'));
+        await Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: err.response?.data?.message || err.message || 'Невідома помилка',
+        });
     }
     finally {
         isLoading.value = false;

@@ -54,6 +54,7 @@ import Footer from '../components/Footer.vue';
 import Listings from '../components/listing/ListingCard.vue';
 import FilterModal from '../components/listing/FilterModal.vue';
 import { getListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
+import Swal from 'sweetalert2';
 import type { Listing } from '../types/listing';
 
 const router = useRouter();
@@ -124,7 +125,11 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
 
 const toggleFavorite = async (listing: Listing) => {
     if (!authStore.isAuthenticated) {
-        alert('Будь ласка, увійдіть, щоб додати до улюблених!');
+        await Swal.fire({
+            icon: 'warning',
+            title: 'Увійдіть',
+            text: 'Будь ласка, увійдіть, щоб додати до улюблених!',
+        });
         return;
     }
 
@@ -142,7 +147,11 @@ const toggleFavorite = async (listing: Listing) => {
     } catch (error: any) {
         listing.isFavorite = originalState;
         console.error('Error toggling favorite:', error);
-        alert(error.message || 'Сталася помилка при зміні улюблених.');
+        await Swal.fire({
+            icon: 'error',
+            title: 'Помилка',
+            text: error.message || 'Сталася помилка при зміні улюблених.',
+        });
     }
 };
 
@@ -198,7 +207,6 @@ const handleApplyFilters = (filters: Record<string, any>) => {
     searchQuery.value = filters.search || '';
     applyFilters();
 };
-
 
 const clearFilters = () => {
     selectedType.value = '';

@@ -26,6 +26,7 @@ import Header from "../components/Header.vue";
 import Footer from '../components/Footer.vue';
 import Listings from "../components/listing/ListingCard.vue";
 import { getFavorites, addFavorite, removeFavorite, getListings } from "../services/api/index";
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -62,7 +63,11 @@ const fetchFavorites = async (page = 1) => {
 
 const toggleFavorite = async (listing) => {
     if (!authStore.isAuthenticated) {
-        alert("Будь ласка, увійдіть, щоб керувати улюбленими!");
+        await Swal.fire({
+            icon: 'warning',
+            title: 'Увійдіть',
+            text: 'Будь ласка, увійдіть, щоб керувати улюбленими!',
+        });
         return;
     }
 
