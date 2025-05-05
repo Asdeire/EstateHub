@@ -29,7 +29,8 @@
             <h2 class="section-title">Нові оголошення</h2>
             <div class="listings-slider" ref="slider" @scroll="updateScrollPosition">
                 <div class="listings-grid">
-                    <div v-for="listing in recentListings" :key="listing.id" class="listing-card">
+                    <div v-for="listing in recentListings" :key="listing.id" class="listing-card"
+                        @click="goToListingDetail(listing.id)">
                         <img :src="listing.image" alt="Listing image" class="listing-image" />
                         <h3 class="listing-title">{{ listing.title }}</h3>
                         <p class="listing-description">{{ listing.description }}</p>
@@ -45,8 +46,7 @@
                 </div>
                 <div class="nav-controls">
                     <button class="nav-button prev" @click="scrollPrev" :disabled="currentSlide === 0">
-                        <span>
-                            <</span>
+                        <span><</span>
                     </button>
                     <button class="nav-button next" @click="scrollNext" :disabled="currentSlide >= maxSlides - 1">
                         <span>></span>
@@ -106,6 +106,10 @@ const isDragging = ref(false);
 let dragStartX = 0;
 
 const router = useRouter();
+
+const goToListingDetail = (listingId) => {
+    router.push({ name: 'ListingDetail', params: { id: listingId } });
+};
 
 const debounce = (func, wait) => {
     let timeout;

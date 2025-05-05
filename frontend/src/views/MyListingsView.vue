@@ -33,7 +33,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
-import { getListings, createListing, deleteListing, getListingById, updateListing } from '../services/api/index';
+import { getListingsByUserId, createListing, deleteListing, getListingById, updateListing } from '../services/api/index'; // імпортуємо новий метод
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
 import CreateListing from '../components/listing/CreateListing.vue';
@@ -55,11 +55,9 @@ const archivedListings = ref([]);
 
 const fetchMyListings = async () => {
     try {
-        const data = await getListings(1, 12, { status: 'Active' });
-        activeListings.value = data.listings.filter(listing => listing.user_id === authStore.user.id);
-
-        const archivedData = await getListings(1, 12, { status: 'Archived' });
-        archivedListings.value = archivedData.listings.filter(listing => listing.user_id === authStore.user.id);
+        const data = await getListingsByUserId(authStore.user.id);
+        activeListings.value = data.filter(listing => listing.status === 'Active');
+        archivedListings.value = data.filter(listing => listing.status === 'Archived');
     } catch (err) {
         console.error('Error loading listings:', err);
         error.value = 'Помилка завантаження оголошень.';

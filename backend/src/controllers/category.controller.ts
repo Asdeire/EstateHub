@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { categoryService } from '../services/category.service';
 
-interface CreateCategoryDto {
+type CreateCategoryDto = {
     name: string;
     description?: string;
 }

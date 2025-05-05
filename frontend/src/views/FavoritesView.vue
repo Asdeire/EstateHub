@@ -25,7 +25,7 @@ import { useAuthStore } from '../stores/authStore';
 import Header from "../components/Header.vue";
 import Footer from '../components/Footer.vue';
 import Listings from "../components/listing/ListingCard.vue";
-import { getFavorites, addFavorite, removeFavorite, getListings } from "../services/api/index";
+import {addFavorite, removeFavorite, getFavoriteListings } from "../services/api/index";
 import Swal from 'sweetalert2';
 
 const router = useRouter();
@@ -42,14 +42,10 @@ const fetchFavorites = async (page = 1) => {
     try {
         loading.value = true;
 
-        const favData = await getFavorites();
-        const favoriteIds = new Set(favData.map(fav => fav.listing_id));
-        console.log("Favorite IDs:", Array.from(favoriteIds));
+        const favData = await getFavoriteListings(authStore.user.id);
+        const favoriteIds = new Set(favData.map(fav => fav.id));
 
-        const data = await getListings(page, listingsPerPage);
-        console.log("All listings:", data.listings);
-
-        favoritesListings.value = (data.listings || []).filter(listing => favoriteIds.has(listing.id));
+        favoritesListings.value = favData;
 
         favoritesListings.value.forEach(listing => listing.isFavorite = true);
 
@@ -60,6 +56,7 @@ const fetchFavorites = async (page = 1) => {
         loading.value = false;
     }
 };
+
 
 const toggleFavorite = async (listing) => {
     if (!authStore.isAuthenticated) {

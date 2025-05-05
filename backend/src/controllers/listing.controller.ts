@@ -66,6 +66,28 @@ class ListingController {
         }
     }
 
+    async getFavoriteListings(
+        req: FastifyRequest<{ Params: { user_id: string } }>,
+        res: FastifyReply
+    ): Promise<void> {
+        const { user_id } = req.params;
+    
+        try {
+            z.string().uuid().parse(user_id);
+    
+            const listings = await listingService.getFavoriteListings(user_id);
+            res.status(200).send(listings);
+        } catch (error: unknown) {
+            if (error instanceof z.ZodError) {
+                res.status(400).send({ message: 'Invalid user ID', errors: error.errors });
+            } else if (error instanceof Error) {
+                res.status(500).send({ message: error.message });
+            } else {
+                res.status(500).send({ message: 'An unknown error occurred' });
+            }
+        }
+    }    
+
     async getById(
         req: FastifyRequest<{ Params: { id: string } }>,
         res: FastifyReply

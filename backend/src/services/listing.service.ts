@@ -136,6 +136,44 @@ class ListingService {
         return { listings, totalPages };
     }
 
+    async getFavoriteListings(userId: string): Promise<(Listing & { isFavorite: true })[]> {
+        const favorites = await prisma.favorite.findMany({
+            where: { user_id: userId },
+            select: { listing_id: true },
+        });
+    
+        const favoriteIds = favorites.map(f => f.listing_id);
+    
+        if (favoriteIds.length === 0) return [];
+    
+        const listings = await prisma.listing.findMany({
+            where: { id: { in: favoriteIds } },
+            select: {
+                id: true,
+                user_id: true,
+                is_agent_listing: true,
+                description: true,
+                photos: true,
+                category_id: true,
+                title: true,
+                location: true,
+                price: true,
+                area: true,
+                type: true,
+                status: true,
+                created_at: true,
+                updated_at: true,
+                category: { select: { id: true, name: true } },
+                tags: { select: { id: true, name: true } },
+            },
+        });
+    
+        return listings.map(listing => ({
+            ...listing,
+            isFavorite: true,
+        }));
+    }    
+
     async getListingById(id: string): Promise<Listing | null> {
         return await prisma.listing.findUnique({
             where: { id },

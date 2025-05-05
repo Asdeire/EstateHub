@@ -5,12 +5,12 @@ import { EmailService } from '../services/email.service';
 const emailService = new EmailService();
 const authService = new AuthService(emailService);
 
-interface LoginRequestBody {
+type LoginRequestBody = {
     email: string;
     password: string;
 }
 
-interface RegisterRequestBody {
+type RegisterRequestBody = {
     name: string;
     code: string;
     email: string;

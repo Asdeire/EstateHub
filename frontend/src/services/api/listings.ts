@@ -97,3 +97,15 @@ export const deleteListing = async (id: string): Promise<Listing> => {
         throw error;
     }
 };
+
+export const getFavoriteListings = async (user_id: string): Promise<Listing[]> => {
+    try {
+        const response = await api.get(`/listings/favorites/${user_id}`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching favorite listings for user ${user_id}:`, error);
+        throw error;
+    }
+};

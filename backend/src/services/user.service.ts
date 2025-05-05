@@ -8,6 +8,9 @@ export class UserService {
             const user = await prisma.user.findUnique({
                 where: { id: userId },
             });
+            if (!user) {
+                throw new Error('User not found');
+            }
             return user;
         } catch (error) {
             console.error(error);
@@ -26,6 +29,9 @@ export class UserService {
                 where: { id: userId },
                 data,
             });
+            if (!updatedUser) {
+                throw new Error('User not found or no changes made');
+            }
             return updatedUser;
         } catch (error) {
             console.error(error);
@@ -35,9 +41,34 @@ export class UserService {
 
     async deleteUser(userId: string) {
         try {
+            await prisma.listing.deleteMany({
+                where: {
+                    user_id: userId,
+                },
+            });
+
+            await prisma.notification.deleteMany({
+                where: {
+                    subscription: {
+                        buyer_id: userId,
+                    },
+                },
+            });
+
+            await prisma.subscription.deleteMany({
+                where: {
+                    buyer_id: userId,
+                },
+            });
+
             const deletedUser = await prisma.user.delete({
                 where: { id: userId },
             });
+
+            if (!deletedUser) {
+                throw new Error('User not found');
+            }
+
             return deletedUser;
         } catch (error) {
             console.error(error);

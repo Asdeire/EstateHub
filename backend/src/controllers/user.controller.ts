@@ -72,27 +72,24 @@ export class UserController {
             return reply.send(updatedUser);
         } catch (error: any) {
             console.error(error);
-
-            if (error.code === 'P2002') {
-                return reply.status(409).send({
-                    message: `Unique constraint failed on the field: ${error.meta?.target?.join(', ')}`,
-                });
-            }
-
-            return reply.status(500).send({ message: 'Error updating user data' });
+            return reply.status(500).send({ message: error.message || 'Error updating user data' });
         }
     }
 
-
     async deleteUser(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            const userId = request.params.id;
+            const userIdFromParams = request.params.id;
+            const userIdFromToken = (request as any).user?.id;
 
-            if (!userId) {
-                return reply.status(400).send({ message: 'User ID is required' });
+            if (!userIdFromToken) {
+                return reply.status(401).send({ message: 'Unauthorized: No token provided' });
             }
 
-            const deletedUser = await userService.deleteUser(userId);
+            if (userIdFromParams !== userIdFromToken) {
+                return reply.status(403).send({ message: 'Forbidden: You can only delete your own account' });
+            }
+
+            const deletedUser = await userService.deleteUser(userIdFromParams);
 
             if (!deletedUser) {
                 return reply.status(404).send({ message: 'User not found' });

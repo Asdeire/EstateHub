@@ -91,10 +91,15 @@ const onSearchInput = () => {
 
 const updateFavorites = async () => {
     if (!authStore.isAuthenticated) return;
-    const favData = await getFavorites();
-    favorites.value = new Set(favData.map((fav: { listing_id: string }) => fav.listing_id));
-    listings.value.forEach((listing) => (listing.isFavorite = favorites.value.has(listing.id)));
+    try {
+        const favData = await getFavorites();
+        favorites.value = new Set(favData.map((fav: { listing_id: string }) => fav.listing_id));
+        listings.value.forEach((listing) => (listing.isFavorite = favorites.value.has(listing.id)));
+    } catch (error) {
+        console.error('Error loading favorites:', error);
+    }
 };
+
 
 const cache = ref<Map<string, { listings: Listing[], totalPages: number }>>(new Map());
 
@@ -105,6 +110,9 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
         listings.value = cached.listings;
         totalPages.value = cached.totalPages;
         loading.value = false;
+        if (authStore.isAuthenticated) {
+            await updateFavorites();
+        }
         return;
     }
     try {
@@ -114,7 +122,9 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
         cache.value.set(cacheKey, data);
         listings.value = data.listings;
         totalPages.value = data.totalPages;
-        await updateFavorites();
+        if (authStore.isAuthenticated) {
+            await updateFavorites();
+        }
     } catch (err) {
         console.error('Error loading listings:', err);
         error.value = 'Не вдалося завантажити оголошення.';
@@ -122,6 +132,7 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
         loading.value = false;
     }
 };
+
 
 const toggleFavorite = async (listing: Listing) => {
     if (!authStore.isAuthenticated) {
