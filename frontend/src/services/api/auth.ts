@@ -43,3 +43,27 @@ export const loginUser = async (credentials: {
 
     return { userId };
 };
+
+export const requestPasswordReset = async (email: string) => {
+    try {
+        const response = await api.post('/password-reset', { email });
+        return response.data;
+    } catch (error: any) {
+        console.error('Password reset request error:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const resetPassword = async (resetData: {
+    email: string;
+    code: string;
+    newPassword: string;
+}) => {
+    try {
+        const response = await api.post('/password-reset/confirm', resetData);
+        return response.data;
+    } catch (error: any) {
+        console.error('Password reset error:', error.response?.data || error.message);
+        throw error;
+    }
+};

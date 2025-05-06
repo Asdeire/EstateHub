@@ -1,5 +1,5 @@
 <template>
-    <div class="register-page">
+    <div class="auth-page">
         <div class="register-container">
             <div class="logo">
                 <a href="/">

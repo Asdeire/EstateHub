@@ -1,5 +1,5 @@
 <template>
-    <div class="login-page">
+    <div class="auth-page">
         <div class="login-container">
             <div class="logo">
                 <a href="/">
@@ -19,7 +19,8 @@
 
                 <button type="submit">Увійти</button>
             </form>
-            <p class="terms">Якщо ви ще не маєте аккаунту <a href="register">зареєструйтесь</a></p>
+            <p class="terms">Якщо ви ще не маєте аккаунту <a href="register">зареєструйтесь</a><br>Забули пароль? <a
+                    href="password-reset">Скинути</a></p>
 
             <p v-if="error" class="error-text">{{ error }}</p>
         </div>

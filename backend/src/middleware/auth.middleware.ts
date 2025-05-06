@@ -9,6 +9,8 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     const publicRoutes: { path: string; methods: string[] }[] = [
         { path: '/login', methods: ['POST'] },
         { path: '/register', methods: ['POST'] },
+        { path: '/password-reset', methods: ['POST'] },
+        { path: '/password-reset/confirm', methods: ['POST'] },
         { path: '/verify', methods: ['POST'] },
         { path: '/categories', methods: ['GET'] },
         { path: '/listings', methods: ['GET'] },

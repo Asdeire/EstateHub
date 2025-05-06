@@ -1,0 +1,156 @@
+@mixin responsive-font($min, $max) {
+    font-size: clamp(#{$min}, 2.5vw, #{$max});
+}
+
+.auth-page {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: $border-radius;
+    background-color: white;
+
+    .logo {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+
+        img {
+            max-width: 200px;
+            height: auto;
+        }
+    }
+
+    .form-group {
+        width: 25rem;
+        margin-bottom: 15px;
+        text-align: center;
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid $input-border-color;
+            border-radius: $border-radius;
+            font-size: 16px;
+            background: transparent;
+            color: $primary-color;
+            box-sizing: border-box;
+            transition: border 0.3s ease;
+
+            &:focus {
+                border-color: darken($input-border-color, 10%);
+                outline: none;
+            }
+        }
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        width: 100%;
+
+        label {
+            font-weight: normal;
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border: 1px solid $primary-color;
+            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+
+            &:checked {
+                background-color: $primary-color;
+
+                &::before {
+                    content: "\2713";
+                    font-size: 16px;
+                    color: white;
+                }
+            }
+        }
+    }
+
+    
+
+    .error-text {
+        color: red;
+        font-size: 12px;
+    }
+
+    .terms {
+        margin-top: 10px;
+        font-size: 14px;
+        text-align: center;
+
+        a {
+            color: $primary-color;
+            transition: font-weight 0.3s ease;
+
+            &:hover {
+                font-weight: bold;
+            }
+        }
+    }
+
+    .translate-button {
+        width: 20px;
+        display: inline-block;
+        background: none;
+        cursor: pointer;
+        padding: 0;
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 1.5rem;
+
+        input,
+        button {
+            @include responsive-font(14px, 16px);
+        }
+
+        .logo img {
+            max-width: 150px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        padding: 1rem;
+
+        .form-group {
+            width: 20rem;
+        }
+
+        input,
+        button {
+            @include responsive-font(12px, 14px);
+        }
+
+        .logo img {
+            max-width: 120px;
+        }
+    }
+}

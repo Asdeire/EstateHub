@@ -19,6 +19,15 @@ type RegisterRequestBody = {
 }
 
 export class AuthController {
+
+    private handleError(reply: FastifyReply, error: unknown) {
+        if (error instanceof Error) {
+            return reply.status(500).send({ message: error.message });
+        }
+        console.error('Unexpected error:', error);
+        return reply.status(500).send({ message: 'An unknown error occurred' });
+    }
+
     async login(request: FastifyRequest<{ Body: LoginRequestBody }>, reply: FastifyReply) {
         try {
             const { email, password } = request.body;
@@ -31,11 +40,7 @@ export class AuthController {
 
             return reply.status(200).send({ token });
         } catch (error) {
-            if (error instanceof Error) {
-                return reply.status(401).send({ message: error.message });
-            }
-            console.error('Unexpected error:', error);
-            return reply.status(500).send({ message: 'An unknown error occurred' });
+            return this.handleError(reply, error);
         }
     }
 
@@ -43,8 +48,8 @@ export class AuthController {
         try {
             const { name, email, password, role } = request.body;
 
-            if (!name || !email || !password) {
-                return reply.status(400).send({ message: 'Name, email, and password are required' });
+            if (!name || !email || !password || !role) {
+                return reply.status(400).send({ message: 'Name, email, password, and role are required' });
             }
 
             const existingUser = await authService.findUserByEmail(email);
@@ -52,9 +57,57 @@ export class AuthController {
                 return reply.status(400).send({ message: 'Email is already in use' });
             }
 
-            await authService.sendVerificationCode(email);
+            await authService.sendVerificationCode(email, 'registration');
 
-            return reply.status(201).send({ message: 'Verification code sent successfully to ' + email });
+            return reply.status(201).send({ message: `Verification code sent to ${email}` });
+        } catch (error) {
+            return this.handleError(reply, error);
+        }
+    }
+
+    async verify(request: FastifyRequest<{ Body: RegisterRequestBody }>, reply: FastifyReply) {
+        try {
+            const { email, code, name, password, role } = request.body;
+
+            if (!email || !code || !name || !password || !role) {
+                return reply.status(400).send({ message: 'Email, verification code, name, password, and role are required' });
+            }
+
+            const user = await authService.verifyCodeAndRegisterUser(email, code, name, password, role);
+
+            return reply.status(201).send({ message: 'User registered successfully', user });
+        } catch (error) {
+            return this.handleError(reply, error);
+        }
+    }
+
+    async sendPasswordResetCode(request: FastifyRequest<{ Body: { email: string } }>, reply: FastifyReply) {
+        try {
+            const { email } = request.body;
+
+            if (!email) {
+                return reply.status(400).send({ message: 'Email is required' });
+            }
+
+            await authService.sendPasswordResetCode(email);
+
+            return reply.status(200).send({ message: `Password reset code sent to ${email}` });
+        } catch (error) {
+            return this.handleError(reply, error);
+        }
+    }
+
+    async requestPasswordReset(request: FastifyRequest<{ Body: { email: string } }>, reply: FastifyReply) {
+        try {
+            const { email } = request.body;
+
+            if (!email) {
+                return reply.status(400).send({ message: 'Email is required' });
+            }
+
+            await authService.sendPasswordResetCode(email);
+
+            return reply.status(200).send({ message: 'Password reset code sent to your email' });
         } catch (error) {
             if (error instanceof Error) {
                 return reply.status(500).send({ message: error.message });
@@ -64,19 +117,19 @@ export class AuthController {
         }
     }
 
-    async verify(request: FastifyRequest<{ Body: RegisterRequestBody }>, reply: FastifyReply) {
+    async resetPassword(request: FastifyRequest<{ Body: { email: string, code: string, newPassword: string } }>, reply: FastifyReply) {
         try {
-            const { email, code, name, password, role } = request.body;
+            const { email, code, newPassword } = request.body;
 
-            const user = await authService.verifyCodeAndRegisterUser(email, code, name, password, role);
-
-            return reply.status(201).send({ message: 'User registered successfully', user });
-        } catch (error) {
-            if (error instanceof Error) {
-                return reply.status(400).send({ message: error.message });
+            if (!email || !code || !newPassword) {
+                return reply.status(400).send({ message: 'Email, verification code, and new password are required' });
             }
-            console.error('Unexpected error:', error);
-            return reply.status(500).send({ message: 'An unknown error occurred' });
+
+            await authService.resetPassword(email, code, newPassword);
+
+            return reply.status(200).send({ message: 'Password reset successfully' });
+        } catch (error) {
+            return this.handleError(reply, error);
         }
     }
 }

@@ -2,29 +2,11 @@
 @import "components/header";
 @import "components/modal";
 @import "components/listingCard";
-@import "components/register";
-@import "components/login";
 @import "components/listing";
 @import "components/listings";
 @import "components/profile";
 @import "components/notifications";
 @import "components/subscriptions";
 @import "components/home";
-
-*{
-    scrollbar-width: thin;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: $font-family;
-    background-color: $background-color;
-    color: $primary-color;
-    margin: 0;
-    padding: 0; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    overflow-x: hidden;
-}
+@import "components/auth";
+@import "base/global";

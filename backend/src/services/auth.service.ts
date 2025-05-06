@@ -57,7 +57,7 @@ export class AuthService {
         return await prisma.user.findUnique({ where: { email } });
     }
 
-    async sendVerificationCode(email: string): Promise<void> {
+    async sendVerificationCode(email: string, purpose: 'registration' | 'password-reset'): Promise<void> {
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = addMinutes(new Date(), 5);
 
@@ -65,8 +65,12 @@ export class AuthService {
             data: { email, code, expiresAt },
         });
 
-        const html = `<p>Your verification code is: <strong>${code}</strong></p>`;
-        const subject = 'Verification Code for Registration';
+        const subject = purpose === 'registration'
+            ? 'Verification Code for Registration'
+            : 'Password Reset Code';
+
+        const html = `<p>Your ${purpose === 'registration' ? 'verification' : 'password reset'} code is: <strong>${code}</strong></p>`;
+
         await this.emailService.sendNotificationEmail(config.emailService.senderEmail, subject, html);
     }
 
@@ -86,5 +90,35 @@ export class AuthService {
         await prisma.verificationCode.delete({ where: { id: record.id } });
 
         return await this.register(name, email, password, role);
+    }
+
+    async sendPasswordResetCode(email: string): Promise<void> {
+        const user = await this.findUserByEmail(email);
+        if (!user) throw new Error('User not found');
+
+        await this.sendVerificationCode(email, 'password-reset');
+    }
+
+    async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+        const record = await prisma.verificationCode.findFirst({
+            where: {
+                email,
+                code,
+                expiresAt: { gt: new Date() },
+            },
+        });
+
+        if (!record) {
+            throw new Error('Invalid or expired password reset code');
+        }
+
+        await prisma.verificationCode.delete({ where: { id: record.id } });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: { email },
+            data: { password_hash: hashedPassword },
+        });
     }
 }
