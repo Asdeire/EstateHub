@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
+import { config } from '../utils/config';  
 
-const resend = new Resend(process.env.RESEND_API_KEY || 'default_api_key');
+const resend = new Resend(config.emailService.resendApiKey); 
 
 export class EmailService {
     async sendNotificationEmail(to: string, subject: string, html: string): Promise<void> {

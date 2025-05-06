@@ -1,3 +1,4 @@
+import { config } from '../utils/config';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -8,9 +9,8 @@ import cron from 'node-cron';
 const prisma = new PrismaClient();
 
 export class AuthService {
-    private jwtSecret = process.env.JWT_SECRET || 'default_secret';
-    private jwtExpiresIn = process.env.JWT_EXPIRES_IN || '1h';
-    private verificationCodes: { [email: string]: string } = {};
+    private jwtSecret = config.jwtSecret;
+    private jwtExpiresIn = config.jwtExpiresIn;
 
     constructor(private emailService: EmailService) {
         this.startCronJob();
@@ -43,7 +43,7 @@ export class AuthService {
         const isPasswordValid = await bcrypt.compare(password, user.password_hash);
         if (!isPasswordValid) throw new Error('Invalid email or password');
 
-        return jwt.sign({ id: user.id, email: user.email }, this.jwtSecret, { expiresIn: '24h' });
+        return jwt.sign({ id: user.id, email: user.email }, this.jwtSecret, { expiresIn: "24h" });
     }
 
     async register(name: string, email: string, password: string, role: 'User' | 'Makler') {
@@ -67,8 +67,7 @@ export class AuthService {
 
         const html = `<p>Your verification code is: <strong>${code}</strong></p>`;
         const subject = 'Verification Code for Registration';
-        const exampleEmail = process.env.EMAIL || 'default@example.com';
-        await this.emailService.sendNotificationEmail(exampleEmail, subject, html);
+        await this.emailService.sendNotificationEmail(config.emailService.senderEmail, subject, html);
     }
 
     async verifyCodeAndRegisterUser(email: string, code: string, name: string, password: string, role: 'User' | 'Makler') {

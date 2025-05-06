@@ -7,6 +7,7 @@ import {
     TelegramChatNotFoundError,
     SubscriptionNotFoundError,
 } from './errors';
+import { config } from '../utils/config';
 
 const prisma = new PrismaClient();
 const emailService = new EmailService();
@@ -41,7 +42,7 @@ export class NotificationService {
                 throw new Error('Invalid listing ID after cleaning');
             }
 
-            const baseUrl = process.env.APP_URL || 'http://localhost:5173';
+            const baseUrl = config.appUrl;
             const link = `${baseUrl}/listings/${cleanListingId}`;
 
             finalMessage = `<b>Нове оголошення за вашою підпискою!</b> 🏠\n\n` +
@@ -81,7 +82,7 @@ export class NotificationService {
                     throw new Error('User must have an email address for EMAIL transport');
                 }
 
-                const exampleEmail = process.env.EMAIL || 'default@example.com';
+                const exampleEmail = config.emailService.senderEmail;
 
                 await emailService.sendNotificationEmail(
                     exampleEmail,

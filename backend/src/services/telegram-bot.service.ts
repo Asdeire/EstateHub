@@ -1,13 +1,14 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { SubscriptionService } from './subscription.service';
 import { MissingTelegramUsernameError } from './errors';
+import { config } from '../utils/config';
 
 export class TelegramBotService {
     private bot: TelegramBot;
     private subscriptionService: SubscriptionService;
 
     constructor() {
-        this.bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN || 'default_telegram_token', { polling: true });
+        this.bot = new TelegramBot(config.telegramBotService.telegramToken, { polling: true });
         this.subscriptionService = new SubscriptionService();
         this.setupBot();
     }

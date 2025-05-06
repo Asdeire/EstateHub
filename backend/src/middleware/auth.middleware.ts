@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
+import { config } from '../utils/config';
 
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
     const url = request.url.split('?')[0];
@@ -34,7 +35,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
 
         const token = authHeader.replace('Bearer ', '');
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as { id: string };
+        const decoded = jwt.verify(token, config.jwtSecret) as { id: string };
 
         request.user = { id: decoded.id };
     } catch (error) {
