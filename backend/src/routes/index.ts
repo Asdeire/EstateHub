@@ -7,6 +7,7 @@ import { tagRoutes } from './tag.routes';
 import { categoryRoutes } from './category.routes';
 import { subscriptionRoutes } from './subscription.routes';
 import { notificationRoutes } from './notification.routes';
+import {webhookRoutes} from './webhook.routes';
 
 export const registerRoutes = (app: FastifyInstance) => {
     app.register(userRoutes);
@@ -17,4 +18,5 @@ export const registerRoutes = (app: FastifyInstance) => {
     app.register(categoryRoutes);
     app.register(subscriptionRoutes);
     app.register(notificationRoutes);
+    app.register(webhookRoutes);
 };

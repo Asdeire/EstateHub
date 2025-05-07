@@ -8,6 +8,7 @@ export const config = {
     appUrl: process.env.APP_URL || 'http://localhost:5173',
     jwtSecret: process.env.JWT_SECRET || 'default_secret',
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1h',
+    baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     emailService: {
         senderEmail: process.env.EMAIL || 'default@example.com',
         resendApiKey: process.env.RESEND_API_KEY || 'default_api_key',
