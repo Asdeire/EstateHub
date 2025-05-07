@@ -1,17 +1,21 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { tagService } from '../services/tag.service';
+import { z } from 'zod';
 
-interface CreateTagDto {
-    name: string;
-}
+export const createTagSchema = z.object({
+    name: z.string().min(1, 'Name is required'),
+});
 
 class TagController {
-    async create(req: FastifyRequest<{ Body: CreateTagDto }>, res: FastifyReply): Promise<void> {
+    async create(req: FastifyRequest, res: FastifyReply): Promise<void> {
         try {
-            const tag = await tagService.createTag(req.body);
+            const parsed = createTagSchema.parse(req.body);
+            const tag = await tagService.createTag(parsed);
             res.status(201).send(tag);
         } catch (error: unknown) {
-            if (error instanceof Error) {
+            if (error instanceof z.ZodError) {
+                res.status(400).send({ message: error.errors });
+            } else if (error instanceof Error) {
                 res.status(500).send({ message: error.message });
             } else {
                 res.status(500).send({ message: 'An unknown error occurred' });
@@ -51,18 +55,21 @@ class TagController {
         }
     }
 
-    async update(req: FastifyRequest<{ Params: { id: string }, Body: CreateTagDto }>, res: FastifyReply): Promise<void> {
+    async update(req: FastifyRequest<{ Params: { id: string } }>, res: FastifyReply): Promise<void> {
         const { id } = req.params;
 
         try {
-            const updatedTag = await tagService.updateTag(id, req.body);
+            const parsed = createTagSchema.partial().parse(req.body);
+            const updatedTag = await tagService.updateTag(id, parsed);
             if (!updatedTag) {
                 res.status(404).send({ message: 'Tag not found for update' });
                 return;
             }
             res.status(200).send(updatedTag);
         } catch (error: unknown) {
-            if (error instanceof Error) {
+            if (error instanceof z.ZodError) {
+                res.status(400).send({ message: error.errors });
+            } else if (error instanceof Error) {
                 res.status(500).send({ message: error.message });
             } else {
                 res.status(500).send({ message: 'An unknown error occurred' });

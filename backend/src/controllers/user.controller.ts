@@ -1,55 +1,36 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/user.service';
+import { userIdParamSchema, updateUserBodySchema } from '../schemas/user.schemas';
 import bcrypt from 'bcrypt';
 
 const userService = new UserService();
 
 export class UserController {
+
     async getUser(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            const userId = request.params.id;
+            const { id } = userIdParamSchema.parse(request.params);
 
-            if (!userId) {
-                return reply.status(400).send({ message: 'User ID is required' });
-            }
-
-            const user = await userService.getUserById(userId);
-            if (!user) {
-                return reply.status(404).send({ message: 'User not found' });
-            }
-
+            const user = await userService.getUserById(id);
             return reply.send(user);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            return reply.status(500).send({ message: 'Error retrieving user data' });
+            return reply.status(400).send({ message: error.message || 'Invalid input' });
         }
     }
 
-    async updateUser(
-        request: FastifyRequest<{
-            Params: { id: string },
-            Body: {
-                name?: string;
-                email?: string;
-                password?: string;
-                telegram_username?: string;
-            }
-        }>,
-        reply: FastifyReply
-    ) {
+    async updateUser(request: FastifyRequest<{
+        Params: { id: string },
+        Body: {
+            name?: string;
+            email?: string;
+            password?: string;
+            telegram_username?: string;
+        }
+    }>, reply: FastifyReply) {
         try {
-            const userId = request.params.id;
-            const { name, email, password, telegram_username } = request.body;
-
-            if (!userId) {
-                return reply.status(400).send({ message: 'User ID is required' });
-            }
-
-            if (!name && !email && !password && !telegram_username) {
-                return reply.status(400).send({
-                    message: 'At least one field (name, email, password, telegram_username) must be provided to update',
-                });
-            }
+            const { id } = userIdParamSchema.parse(request.params);
+            const parsedBody = updateUserBodySchema.parse(request.body);
 
             const dataToUpdate: {
                 name?: string;
@@ -58,47 +39,39 @@ export class UserController {
                 telegram_username?: string;
             } = {};
 
-            if (name) dataToUpdate.name = name;
-            if (email) dataToUpdate.email = email;
-            if (telegram_username) dataToUpdate.telegram_username = telegram_username;
-            if (password) dataToUpdate.password_hash = await bcrypt.hash(password, 10);
+            if (parsedBody.name) dataToUpdate.name = parsedBody.name;
+            if (parsedBody.email) dataToUpdate.email = parsedBody.email;
+            if (parsedBody.telegram_username) dataToUpdate.telegram_username = parsedBody.telegram_username;
+            if (parsedBody.password) dataToUpdate.password_hash = await bcrypt.hash(parsedBody.password, 10);
 
-            const updatedUser = await userService.updateUser(userId, dataToUpdate);
-
-            if (!updatedUser) {
-                return reply.status(404).send({ message: 'User not found or no changes made' });
-            }
-
+            const updatedUser = await userService.updateUser(id, dataToUpdate);
             return reply.send(updatedUser);
         } catch (error: any) {
             console.error(error);
-            return reply.status(500).send({ message: error.message || 'Error updating user data' });
+            return reply.status(400).send({ message: error.message });
         }
     }
 
+
     async deleteUser(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            const userIdFromParams = request.params.id;
+            const { id } = userIdParamSchema.parse(request.params);
             const userIdFromToken = (request as any).user?.id;
 
             if (!userIdFromToken) {
                 return reply.status(401).send({ message: 'Unauthorized: No token provided' });
             }
 
-            if (userIdFromParams !== userIdFromToken) {
+            if (id !== userIdFromToken) {
                 return reply.status(403).send({ message: 'Forbidden: You can only delete your own account' });
             }
 
-            const deletedUser = await userService.deleteUser(userIdFromParams);
-
-            if (!deletedUser) {
-                return reply.status(404).send({ message: 'User not found' });
-            }
-
+            const deletedUser = await userService.deleteUser(id);
             return reply.status(200).send({ message: 'User successfully deleted' });
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            return reply.status(500).send({ message: 'Error deleting user' });
+            return reply.status(400).send({ message: error.message || 'Invalid input' });
         }
     }
+
 }

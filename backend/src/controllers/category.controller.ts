@@ -4,7 +4,9 @@ import { categoryService } from '../services/category.service';
 type CreateCategoryDto = {
     name: string;
     description?: string;
-}
+};
+
+type CategoryParams = { id: string };
 
 class CategoryController {
     async create(req: FastifyRequest<{ Body: CreateCategoryDto }>, res: FastifyReply): Promise<void> {
@@ -33,7 +35,7 @@ class CategoryController {
         }
     }
 
-    async getById(req: FastifyRequest<{ Params: { id: string } }>, res: FastifyReply): Promise<void> {
+    async getById(req: FastifyRequest<{ Params: CategoryParams }>, res: FastifyReply): Promise<void> {
         const { id } = req.params;
 
         try {
@@ -52,7 +54,7 @@ class CategoryController {
         }
     }
 
-    async update(req: FastifyRequest<{ Params: { id: string }, Body: CreateCategoryDto }>, res: FastifyReply): Promise<void> {
+    async update(req: FastifyRequest<{ Params: CategoryParams, Body: CreateCategoryDto }>, res: FastifyReply): Promise<void> {
         const { id } = req.params;
 
         try {
@@ -71,7 +73,7 @@ class CategoryController {
         }
     }
 
-    async delete(req: FastifyRequest<{ Params: { id: string } }>, res: FastifyReply): Promise<void> {
+    async delete(req: FastifyRequest<{ Params: CategoryParams }>, res: FastifyReply): Promise<void> {
         const { id } = req.params;
 
         try {

@@ -1,22 +1,11 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService } from '../services/auth.service';
 import { EmailService } from '../services/email.service';
+import { loginSchema, registerSchema, verifySchema, passwordResetSchema } from '../schemas/auth.schemas';
+import { z } from 'zod';
 
 const emailService = new EmailService();
 const authService = new AuthService(emailService);
-
-type LoginRequestBody = {
-    email: string;
-    password: string;
-}
-
-type RegisterRequestBody = {
-    name: string;
-    code: string;
-    email: string;
-    password: string;
-    role: 'User' | 'Makler';
-}
 
 export class AuthController {
 
@@ -28,13 +17,11 @@ export class AuthController {
         return reply.status(500).send({ message: 'An unknown error occurred' });
     }
 
-    async login(request: FastifyRequest<{ Body: LoginRequestBody }>, reply: FastifyReply) {
+    async login(request: FastifyRequest, reply: FastifyReply) {
         try {
-            const { email, password } = request.body;
+            const parsedBody = loginSchema.parse(request.body);
 
-            if (!email || !password) {
-                return reply.status(400).send({ message: 'Email and password are required' });
-            }
+            const { email, password } = parsedBody;
 
             const token = await authService.login(email, password);
 
@@ -44,13 +31,11 @@ export class AuthController {
         }
     }
 
-    async register(request: FastifyRequest<{ Body: RegisterRequestBody }>, reply: FastifyReply) {
+    async register(request: FastifyRequest, reply: FastifyReply) {
         try {
-            const { name, email, password, role } = request.body;
+            const parsedBody = registerSchema.parse(request.body);
 
-            if (!name || !email || !password || !role) {
-                return reply.status(400).send({ message: 'Name, email, password, and role are required' });
-            }
+            const { name, email, password, role } = parsedBody;
 
             const existingUser = await authService.findUserByEmail(email);
             if (existingUser) {
@@ -65,13 +50,11 @@ export class AuthController {
         }
     }
 
-    async verify(request: FastifyRequest<{ Body: RegisterRequestBody }>, reply: FastifyReply) {
+    async verify(request: FastifyRequest, reply: FastifyReply) {
         try {
-            const { email, code, name, password, role } = request.body;
+            const parsedBody = verifySchema.parse(request.body);
 
-            if (!email || !code || !name || !password || !role) {
-                return reply.status(400).send({ message: 'Email, verification code, name, password, and role are required' });
-            }
+            const { email, code, name, password, role } = parsedBody;
 
             const user = await authService.verifyCodeAndRegisterUser(email, code, name, password, role);
 
@@ -81,13 +64,11 @@ export class AuthController {
         }
     }
 
-    async sendPasswordResetCode(request: FastifyRequest<{ Body: { email: string } }>, reply: FastifyReply) {
+    async sendPasswordResetCode(request: FastifyRequest, reply: FastifyReply) {
         try {
-            const { email } = request.body;
+            const parsedBody = z.object({ email: z.string().email() }).parse(request.body);
 
-            if (!email) {
-                return reply.status(400).send({ message: 'Email is required' });
-            }
+            const { email } = parsedBody;
 
             await authService.sendPasswordResetCode(email);
 

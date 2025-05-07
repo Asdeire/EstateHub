@@ -1,3 +1,4 @@
+import { createNotificationSchema, updateNotificationStatusSchema } from '../schemas/notification.schemas';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { NotificationService } from '../services/notification.service';
 import { SubscriptionService } from '../services/subscription.service';
@@ -16,6 +17,12 @@ export class NotificationController {
         }>,
         reply: FastifyReply
     ) {
+        try {
+            createNotificationSchema.parse(request.body);
+        } catch (error) {
+            return reply.status(400).send({ message: 'Invalid data format' });
+        }
+
         const userId = request.user?.id;
         const { subscription_id, message, status } = request.body;
 
@@ -95,6 +102,12 @@ export class NotificationController {
         }>,
         reply: FastifyReply
     ) {
+        try {
+            updateNotificationStatusSchema.parse(request.body);
+        } catch (error) {
+            return reply.status(400).send({ message: 'Invalid status format' });
+        }
+
         const userId = request.user?.id;
         const notificationId = request.params.id;
         const { status } = request.body;

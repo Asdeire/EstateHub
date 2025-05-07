@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SubscriptionService } from '../services/subscription.service';
+import { createSubscriptionSchema, updateSubscriptionSchema } from '../schemas/subscription.schemas';
 
 const subscriptionService = new SubscriptionService();
 
@@ -54,17 +55,22 @@ export class SubscriptionController {
     }
 
     async createSubscription(
-        request: FastifyRequest<{
-            Body: { filters: any; transport: 'EMAIL' | 'TELEGRAM' };
-        }>,
+        request: FastifyRequest,
         reply: FastifyReply
     ) {
         const userId = request.user?.id;
-        const { filters, transport } = request.body;
 
         if (!userId) {
             return reply.status(401).send({ message: 'User not found' });
         }
+
+        const parseResult = createSubscriptionSchema.safeParse(request.body);
+
+        if (!parseResult.success) {
+            return reply.status(400).send({ message: 'Validation failed', errors: parseResult.error.flatten() });
+        }
+
+        const { filters, transport } = parseResult.data;
 
         const subscription = await subscriptionService.createSubscription({
             buyer_id: userId,
@@ -76,19 +82,23 @@ export class SubscriptionController {
     }
 
     async updateSubscription(
-        request: FastifyRequest<{
-            Params: { id: string };
-            Body: { filters?: any; transport?: 'EMAIL' | 'TELEGRAM' };
-        }>,
+        request: FastifyRequest<{ Params: { id: string } }>,
         reply: FastifyReply
     ) {
         const userId = request.user?.id;
         const subscriptionId = request.params.id;
-        const { filters, transport } = request.body;
 
         if (!userId) {
             return reply.status(401).send({ message: 'User not found' });
         }
+
+        const parseResult = updateSubscriptionSchema.safeParse(request.body);
+
+        if (!parseResult.success) {
+            return reply.status(400).send({ message: 'Validation failed', errors: parseResult.error.flatten() });
+        }
+
+        const { filters, transport } = parseResult.data;
 
         const subscription = await subscriptionService.getSubscriptionById(subscriptionId);
         if (!subscription || subscription.buyer_id !== userId) {
