@@ -7,6 +7,8 @@
                     @input="onSearchInput" />
             </div>
 
+            <div class="divider"></div>
+
             <select v-model="sortBy">
                 <option value="newest">Новіші</option>
                 <option value="oldest">Старіші</option>

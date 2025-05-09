@@ -121,15 +121,22 @@ const closeGallery = () => {
         border-radius: 10px;
 
         &:hover {
-            background: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.7);
         }
+    }
+
+    .gallery-button {
+        border-radius: 10px;
+        background-color: #07484AB2;
+        font-size: 14px;
+        font-weight: 600;;
     }
 
     @media (max-width:1000px) {
         .main-image {
             width: 100%;
             height: 500px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .thumbnail-container {
@@ -145,6 +152,76 @@ const closeGallery = () => {
         .main-image {
             height: 300px;
         }
+    }
+}
+
+.gallery-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gallery-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.carousel {
+    width: 100%;
+    height: 500px;
+
+    --vc-nav-background: rgba(0, 0, 0, 0.3);
+    --vc-nav-color: white;
+    --vc-nav-color-hover: #e5e5e5;
+    --vc-nav-border-radius: 50%;
+    --vc-nav-width: 40px;
+    --vc-nav-height: 40px;
+}
+
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .gallery-modal-content {
+        width: 95%;
+        padding: 10px;
+    }
+
+    .carousel {
+        height: 400px;
+    }
+
+    :deep(.carousel__prev),
+    :deep(.carousel__next) {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel {
+        height: 300px;
+    }
+
+    .close-button {
+        font-size: 20px;
     }
 }
 </style>

@@ -5,7 +5,7 @@
 
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
-        <div v-else-if="favoritesListings.length === 0" class="no-favorites">
+        <div v-else-if="favoritesListings.length === 0" class="no-listings">
             У вас поки немає улюблених оголошень
         </div>
 

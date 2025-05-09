@@ -14,7 +14,7 @@
 
     &.scrolled {
         background-color: $background-color;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .navbar-container {
@@ -116,6 +116,10 @@
             }
         }
 
+        a {
+            height: 24px;
+        }
+
         .icon {
             width: 24px;
             height: 24px;
@@ -143,18 +147,30 @@
         flex-direction: column;
         align-items: center;
         background-color: $background-color;
-        position: absolute;
-        width: 100%;
-        left: 0;
+        position: fixed;
+        width: 95%;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        border: $secondary-color 2px solid;
+        padding: 15px 20px;
+        gap: 10px;
+        border-radius: 15px;
 
         .nav-item {
             padding: 5px 0;
-            border-bottom: 1px $primary-color solid;
             text-align: center;
             width: 100%;
             text-decoration: none;
             color: $primary-color;
-            font-size: 18px;
+            font-size: 20px;
+            border: $secondary-color 2px solid;
+            border-radius: 10px;
+
+            &.active {
+                background-color: $secondary-color;
+                color: #fff;
+            }
         }
     }
 }
