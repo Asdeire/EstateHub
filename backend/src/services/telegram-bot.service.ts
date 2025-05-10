@@ -1,6 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { SubscriptionService } from './subscription.service';
-import { MissingTelegramUsernameError } from './errors';
 import { config } from '../utils/config';
 
 export class TelegramBotService {
@@ -14,10 +13,14 @@ export class TelegramBotService {
     }
 
     private setupWebhook() {
-        const url = `${config.baseUrl}/webhook/${config.telegramBotService.telegramToken}`;
-        this.bot.setWebHook(url);
+        const url = `${config.baseUrl}/webhook`;
+        console.log('Setting webhook to:', url);
+        this.bot.setWebHook(url).catch((error) => {
+            console.error('Error setting webhook:', error);
+        });
 
         this.bot.on('message', async (msg) => {
+            console.log('Received Telegram message:', msg);
             const chatId = msg.chat.id.toString();
 
             if (msg.text === '/start') {
@@ -25,9 +28,7 @@ export class TelegramBotService {
                     chatId,
                     'Welcome to EstateHub! Send /link to connect your Telegram account using your Telegram username.',
                 );
-            }
-
-            else if (msg.text === '/link') {
+            } else if (msg.text === '/link') {
                 const telegramUsername = msg.from?.username;
 
                 if (!telegramUsername) {
@@ -50,6 +51,10 @@ export class TelegramBotService {
                 }
             }
         });
+
+        this.bot.on('webhook_error', (error) => {
+            console.error('Webhook error:', error);
+        });
     }
 
     async sendMessage(
@@ -57,9 +62,8 @@ export class TelegramBotService {
         message: string | { photo: string },
         options: { caption?: string; parse_mode?: string } = {}
     ): Promise<void> {
-        await this.bot.getChat(chatId);
-
         try {
+            await this.bot.getChat(chatId);
             if (typeof message === 'string') {
                 await this.bot.sendMessage(chatId, message, {
                     ...options,
@@ -72,16 +76,15 @@ export class TelegramBotService {
                 });
             }
         } catch (err) {
-            if ((err as any).code === 'ETELEGRAM' && (err as any).response.error_code === 429) {
-                const retryAfter = (err as any).response.parameters.retry_after * 1000; 
+            if ((err as any).code === 'ETELEGRAM' && (err as any).response?.error_code === 429) {
+                const retryAfter = (err as any).response.parameters.retry_after * 1000;
                 console.log(`Rate limit reached. Retrying after ${retryAfter / 1000} seconds.`);
                 await new Promise(resolve => setTimeout(resolve, retryAfter));
-                await this.sendMessage(chatId, message, options); 
+                await this.sendMessage(chatId, message, options);
             } else {
                 console.error('Telegram error:', err);
                 throw err;
             }
         }
     }
-
 }

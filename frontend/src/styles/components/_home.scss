@@ -201,8 +201,7 @@
                 width: max-content;
 
                 .listing-card {
-                    flex: 0 0 380px;
-                    scroll-snap-align: start;
+                    width: 380px;
                     background-color: #F3F6F5;
                     border-radius: 10px;
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -212,6 +211,7 @@
 
                     .listing-image {
                         width: 100%;
+                        height: 300px;
                         object-fit: cover;
                         border-radius: 8px;
                         margin-bottom: 10px;
@@ -313,7 +313,7 @@
         }
     }
 
-    .translation-section {
+    .advantages-section {
         padding: 40px 150px;
         text-align: center;
 
@@ -322,12 +322,12 @@
             font-size: 56px;
         }
 
-        .translation-cards {
+        .advantages-cards {
             display: flex;
             justify-content: space-between;
         }
 
-        .translation-card {
+        .advantages-card {
             max-width: 350px;
             padding: 20px;
             border-radius: 10px;
@@ -357,13 +357,13 @@
                 font-size: 36px;
             }
 
-            .translation-cards {
+            .advantages-cards {
                 flex-direction: column;
                 align-items: center;
                 gap: 20px;
             }
 
-            .translation-card {
+            .advantages-card {
                 h3 {
                     font-size: 26px;
                     margin-bottom: 10px;

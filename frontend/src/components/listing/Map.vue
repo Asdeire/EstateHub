@@ -62,16 +62,16 @@ const openMap = () => {
 <style scoped>
 .map-container {
     width: 70%;
-    height: 450px;
+    height: fit-content;
 
     .map-title {
-        height: 10%;
+        height: auto;
         margin: 0;
     }
 
     .map {
         border-radius: 10px;
-        height: 90%;
+        height: 400px;
     }
 
     @media (max-width: 768px) {

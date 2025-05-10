@@ -12,7 +12,10 @@
                         <label for="email">Електронна пошта</label>
                         <input v-model="form.email" type="email" id="email" required />
                     </div>
-                    <button type="submit">Відправити код для скидання паролю</button>
+                    <button type="submit" :disabled="isLoading">
+                        {{ isLoading ? 'Завантаження...' : 'Відправити код для скидання паролю' }}
+                    </button>
+
                 </div>
 
                 <div v-if="step === 2">
@@ -27,7 +30,9 @@
                             числі
                             одну цифру і одну велику літеру.</p>
                     </div>
-                    <button type="submit" :disabled="passwordError">Змінити пароль</button>
+                    <button type="submit" :disabled="passwordError || isLoading">
+                        {{ isLoading ? 'Завантаження...' : 'Змінити пароль' }}
+                    </button>
                 </div>
             </form>
 
@@ -59,8 +64,10 @@ const passwordError = computed(() => {
 });
 
 const step = ref(1);
+const isLoading = ref(false);
 
 const submitForm = async () => {
+    isLoading.value = true;
     try {
         if (step.value === 1) {
             await requestPasswordReset(form.value.email);
@@ -90,6 +97,8 @@ const submitForm = async () => {
             title: 'Помилка',
             text: err.response?.data?.message || 'Помилка скидання паролю!',
         });
+    } finally {
+        isLoading.value = false;
     }
 };
 </script>

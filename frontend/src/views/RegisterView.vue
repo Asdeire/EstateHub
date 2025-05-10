@@ -31,7 +31,10 @@
                         <label for="isAgent">Я посередник</label>
                     </div>
 
-                    <button type="submit" :disabled="passwordError">Зареєструватись</button>
+                    <button type="submit" :disabled="passwordError || isLoading">
+                        {{ isLoading ? 'Завантаження...' : 'Зареєструватись' }}
+                    </button>
+
                 </div>
 
                 <div v-if="step === 2">
@@ -39,7 +42,9 @@
                         <label for="verificationCode">Код підтвердження</label>
                         <input v-model="form.verificationCode" type="text" id="verificationCode" required />
                     </div>
-                    <button type="submit">Підтвердити</button>
+                    <button type="submit" :disabled="isLoading">
+                        {{ isLoading ? 'Завантаження...' : 'Підтвердити' }}
+                    </button>
                 </div>
             </form>
 
@@ -74,8 +79,10 @@ const passwordError = computed(() => {
 });
 
 const step = ref(1);
+const isLoading = ref(false);
 
 const submitForm = async () => {
+    isLoading.value = true;
     try {
         if (step.value === 1) {
             await registerUser({
@@ -120,6 +127,8 @@ const submitForm = async () => {
                 text: 'Помилка реєстрації або підтвердження коду!',
             });
         }
+    } finally {
+        isLoading.value = false;
     }
 };
 

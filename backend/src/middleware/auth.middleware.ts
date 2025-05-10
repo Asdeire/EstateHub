@@ -12,6 +12,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
         { path: '/password-reset', methods: ['POST'] },
         { path: '/password-reset/confirm', methods: ['POST'] },
         { path: '/verify', methods: ['POST'] },
+        { path: '/webhook', methods: ['POST'] },
         { path: '/categories', methods: ['GET'] },
         { path: '/listings', methods: ['GET'] },
         { path: '/tags', methods: ['GET'] },

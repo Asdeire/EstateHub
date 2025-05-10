@@ -17,7 +17,10 @@
                     <input v-model="form.password" type="password" id="password" required />
                 </div>
 
-                <button type="submit">Увійти</button>
+                <button type="submit" :disabled="isLoading">
+                    {{ isLoading ? 'Завантаження...' : 'Увійти' }}
+                </button>
+
             </form>
             <p class="terms">Якщо ви ще не маєте аккаунту <a href="register">зареєструйтесь</a><br>Забули пароль? <a
                     href="password-reset">Скинути</a></p>
@@ -46,16 +49,20 @@ const form = ref({
 
 const error = ref<string | null>(null);
 
+const isLoading = ref(false);
+
 const submitForm = async () => {
+    isLoading.value = true;
     try {
         const { userId } = await loginUser(form.value);
-
         await authStore.fetchUser(userId);
-
         error.value = null;
         router.push('/');
     } catch (err: any) {
         error.value = err.response?.data?.message || 'Помилка входу';
+    } finally {
+        isLoading.value = false;
     }
 };
+
 </script>

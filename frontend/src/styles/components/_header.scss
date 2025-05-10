@@ -149,13 +149,14 @@
         background-color: $background-color;
         position: fixed;
         width: 95%;
-        bottom: 0;
+        top: 0;
         left: 50%;
         transform: translateX(-50%);
         border: $secondary-color 2px solid;
         padding: 15px 20px;
         gap: 10px;
         border-radius: 15px;
+        margin-top: 60px;
 
         .nav-item {
             padding: 5px 0;
