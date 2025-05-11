@@ -27,9 +27,6 @@
 
             <p v-if="error" class="error-text">{{ error }}</p>
         </div>
-        <div class="translate-button">
-            <img src="../assets/translate.png" alt="Лого">
-        </div>
     </div>
 </template>
 

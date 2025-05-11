@@ -18,6 +18,26 @@ export class UserService {
         }
     }
 
+    async getAllUsers() {
+        try {
+            const users = await prisma.user.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    telegram_username: true,
+                    created_at: true,
+                    updated_at: true,
+                },
+            });
+            return users;
+        } catch (error) {
+            console.error(error);
+            throw new Error('Error fetching users');
+        }
+    }
+
     async updateUser(userId: string, data: {
         name?: string;
         email?: string;

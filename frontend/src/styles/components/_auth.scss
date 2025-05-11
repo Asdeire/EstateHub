@@ -111,19 +111,6 @@
         }
     }
 
-    .translate-button {
-        width: 20px;
-        display: inline-block;
-        background: none;
-        cursor: pointer;
-        padding: 0;
-
-        img {
-            width: 100%;
-            height: auto;
-        }
-    }
-
     @media (max-width: 768px) {
         padding: 1.5rem;
 

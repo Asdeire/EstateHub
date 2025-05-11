@@ -38,9 +38,6 @@
 
             <p class="terms">Пам'ятаєте пароль? <a href="login">Увійти</a></p>
         </div>
-        <div class="translate-button">
-            <img src="../assets/translate.png" alt="Лого">
-        </div>
     </div>
 </template>
 

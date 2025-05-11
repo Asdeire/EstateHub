@@ -8,6 +8,7 @@ import { categoryRoutes } from './category.routes';
 import { subscriptionRoutes } from './subscription.routes';
 import { notificationRoutes } from './notification.routes';
 import {webhookRoutes} from './webhook.routes';
+import { adminRoutes } from './admin.routes';
 
 export const registerRoutes = (app: FastifyInstance) => {
     app.register(userRoutes);
@@ -19,4 +20,5 @@ export const registerRoutes = (app: FastifyInstance) => {
     app.register(subscriptionRoutes);
     app.register(notificationRoutes);
     app.register(webhookRoutes);
+    app.register(adminRoutes, { prefix: '/admin' });
 };

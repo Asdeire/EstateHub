@@ -43,7 +43,11 @@ export class AuthService {
         const isPasswordValid = await bcrypt.compare(password, user.password_hash);
         if (!isPasswordValid) throw new Error('Invalid email or password');
 
-        return jwt.sign({ id: user.id, email: user.email }, this.jwtSecret, { expiresIn: "24h" });
+        return jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            this.jwtSecret,
+            { expiresIn: '24h' }
+        );
     }
 
     async register(name: string, email: string, password: string, role: 'User' | 'Makler') {

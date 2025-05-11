@@ -16,7 +16,7 @@ export class TelegramBotService {
         const url = `${config.baseUrl}/webhook`;
         console.log('Setting webhook to:', url);
         this.bot.setWebHook(url).catch((error) => {
-            console.error('Error setting webhook:', error);
+            console.error('Error setting webhook');
         });
 
         this.bot.on('message', async (msg) => {

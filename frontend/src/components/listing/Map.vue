@@ -66,7 +66,7 @@ const openMap = () => {
 
     .map-title {
         height: auto;
-        margin: 0;
+        margin-bottom: 10px;
     }
 
     .map {

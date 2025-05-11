@@ -207,7 +207,22 @@ const toggleListingStatus = async (listing) => {
     }
 };
 
-onMounted(fetchMyListings);
+onMounted(async () => {
+    const waitForUser = () => new Promise(resolve => {
+        const check = () => {
+            if (authStore.user && authStore.user.id) {
+                resolve();
+            } else {
+                setTimeout(check, 100);
+            }
+        };
+        check();
+    });
+
+    await waitForUser();
+    fetchMyListings();
+});
+
 </script>
 
 

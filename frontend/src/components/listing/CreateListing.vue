@@ -159,7 +159,7 @@ onMounted(async () => {
     }
 });
 
-const maxFileSizeMB = 2;
+const maxFileSizeMB = 5;
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 const handleFileUpload = (event) => {

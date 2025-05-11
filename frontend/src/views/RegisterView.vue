@@ -51,9 +51,6 @@
             <p class="terms">Вже є аккаунт? <a href="login">Увійти</a></p>
 
         </div>
-        <div class="translate-button">
-            <img src="../assets/translate.png" alt="Лого">
-        </div>
     </div>
 </template>
 

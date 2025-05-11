@@ -23,6 +23,7 @@
                             <li class="nav-item" @click="goTo('/notifications')">Повідомлення</li>
                             <li class="nav-item" @click="goTo('/favourites')">Улюблені</li>
                             <li class="nav-item" @click="goTo('/mylistings')">Мої оголошення</li>
+                            <li v-if="authStore.isAdmin" class="nav-item" @click="goTo('/admin')">Адмін-панель</li>
                             <li class="nav-item logout-item" @click="logout">Вийти</li>
                         </ul>
                     </div>
@@ -33,8 +34,6 @@
                         <img src="../assets/user-icon.png" alt="User" class="icon" />
                     </router-link>
                 </template>
-
-                <img src="../assets/translate.png" alt="Translate" class="icon" />
 
                 <img v-if="showMenuIcon" src="../assets/menu.png" alt="Menu" class="icon menu-icon"
                     @click="toggleMenu" />

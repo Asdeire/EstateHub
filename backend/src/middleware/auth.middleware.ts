@@ -37,10 +37,8 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
         }
 
         const token = authHeader.replace('Bearer ', '');
-
-        const decoded = jwt.verify(token, config.jwtSecret) as { id: string };
-
-        request.user = { id: decoded.id };
+        const decoded = jwt.verify(token, config.jwtSecret) as { id: string; role: string };
+        request.user = { id: decoded.id, role: decoded.role };
     } catch (error) {
         reply.hijack();
         return reply.code(401).send({ error: 'Invalid or expired token' });

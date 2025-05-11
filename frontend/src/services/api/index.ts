@@ -6,3 +6,4 @@ export * from './favorites';
 export * from './filter';
 export * from './notifications'
 export * from './subscriptions';
+export * from './admin'

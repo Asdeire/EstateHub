@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { getUserById } from '../services/api/user';
 import type { User } from '../types/user';
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null);
     const isAuthenticated = ref<boolean>(false);
+
+    const isAdmin = computed(() => user.value?.role === 'Admin');
 
     const isTokenValid = (): boolean => {
         const token = localStorage.getItem('authToken');
@@ -19,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
     const fetchUser = async (userId: string) => {
         try {
             if (!userId || !isTokenValid()) {
-                logout(); 
+                logout();
                 return;
             }
 
@@ -28,7 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
             isAuthenticated.value = true;
         } catch (error: any) {
             console.error('Failed to fetch user:', error.message || error);
-            logout(); 
+            logout();
         }
     };
 
@@ -38,5 +40,5 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated.value = false;
     };
 
-    return { user, isAuthenticated, fetchUser, logout };
+    return { user, isAuthenticated, fetchUser, logout, isAdmin };
 });
