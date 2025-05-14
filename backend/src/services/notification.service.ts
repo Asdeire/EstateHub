@@ -82,10 +82,8 @@ export class NotificationService {
                     throw new Error('User must have an email address for EMAIL transport');
                 }
 
-                const exampleEmail = config.emailService.senderEmail;
-
                 await emailService.sendNotificationEmail(
-                    exampleEmail,
+                    subscription.buyer.email,
                     'Нове оголошення за вашою підпискою',
                     `<p>${finalMessage}</p>`,
                 );

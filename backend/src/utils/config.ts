@@ -10,8 +10,9 @@ export const config = {
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1h',
     baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     emailService: {
-        senderEmail: process.env.EMAIL || 'default@example.com',
-        resendApiKey: process.env.RESEND_API_KEY || 'default_api_key',
+        senderEmail: process.env.SENDER_EMAIL || 'default@example.com',
+        mailjetApiKey: process.env.MAILJET_API_KEY || 'default_api_key',
+        mailjetSecretKey: process.env.MAILJET_SECRET_KEY || 'default_secret_key',
     },
     telegramBotService: {
         apiKey: process.env.TELEGRAM_API_KEY || 'default_telegram_api_key',

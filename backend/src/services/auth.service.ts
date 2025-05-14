@@ -75,7 +75,7 @@ export class AuthService {
 
         const html = `<p>Your ${purpose === 'registration' ? 'verification' : 'password reset'} code is: <strong>${code}</strong></p>`;
 
-        await this.emailService.sendNotificationEmail(config.emailService.senderEmail, subject, html);
+        await this.emailService.sendNotificationEmail(email, subject, html);
     }
 
     async verifyCodeAndRegisterUser(email: string, code: string, name: string, password: string, role: 'User' | 'Makler') {
