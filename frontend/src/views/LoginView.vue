@@ -34,7 +34,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { loginUser } from '../services/api/index';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../stores/authDataStore';
 
 const router = useRouter();
 const authStore = useAuthStore();

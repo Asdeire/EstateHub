@@ -68,7 +68,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../stores/authDataStore';
 import { getUserById, updateUser, deleteUser } from '../services/api/index';
 import Header from '../components/Header.vue';
 import Swal from 'sweetalert2';

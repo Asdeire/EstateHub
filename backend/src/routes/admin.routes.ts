@@ -3,8 +3,6 @@ import { adminController } from '../controllers/admin.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { adminAuthMiddleware } from '../middleware/adminAuth.middleware';
 
-console.log('adminController:', adminController);
-
 export async function adminRoutes(fastify: FastifyInstance) {
     const opts: RouteShorthandOptions = {
         preHandler: [authMiddleware, adminAuthMiddleware],

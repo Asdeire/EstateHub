@@ -70,7 +70,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useDataStore } from '../../stores/dataStore';
-import { useAuthStore } from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authDataStore';
 import { createSubscription } from '../../services/api/index';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';

@@ -40,7 +40,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../stores/authDataStore';
 import { getNotifications, clearNotifications } from '../services/api/index';
 import Header from '../components/Header.vue';
 import Swal from 'sweetalert2';

@@ -21,7 +21,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../stores/authDataStore';
 import Header from "../components/Header.vue";
 import Footer from '../components/Footer.vue';
 import Listings from "../components/listing/ListingCard.vue";

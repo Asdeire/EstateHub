@@ -11,7 +11,8 @@ import Favorites from '../views/FavoritesView.vue';
 import Profile from '../views/ProfileView.vue';
 import Notifications from '../views/NotificationsView.vue';
 import MySubscriptions from '../views/MySubscriptionsView.vue';
-import { useAuthStore } from '../stores/authStore';
+import AdminView from '../views/AdminView.vue';
+import { useAuthStore } from '../stores/authDataStore';
 
 const routes = [
     {
@@ -77,6 +78,12 @@ const routes = [
         path: '/mysubscriptions',
         name: 'MySubscriptions',
         component: MySubscriptions,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/admin',
+        name: 'Admin',
+        component: AdminView,
         meta: { requiresAuth: true },
     }
 ];

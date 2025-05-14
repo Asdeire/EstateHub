@@ -32,7 +32,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../stores/authDataStore';
 import { getListingsByUserId, createListing, deleteListing, getListingById, updateListing } from '../services/api/index'; // імпортуємо новий метод
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';

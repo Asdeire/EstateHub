@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useAuthStore } from './stores/authStore';
+import { useAuthStore } from './stores/authDataStore';
 import { getUserIdFromToken } from './services/localStorageService';
+import { NConfigProvider } from 'naive-ui';
+import { ukUA } from 'naive-ui';
+
+const locale = ukUA;
+const themeOverrides = {
+  common: {
+    primaryColor: '#07484a',
+  },
+};
 
 const authStore = useAuthStore();
 
@@ -20,7 +29,9 @@ onMounted(async () => {
 <template>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <div id="app">
-    <router-view />
+    <n-config-provider :locale="locale" :theme-overrides="themeOverrides">
+      <router-view />
+    </n-config-provider>
   </div>
 </template>
 

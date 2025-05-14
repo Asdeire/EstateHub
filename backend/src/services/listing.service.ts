@@ -4,6 +4,24 @@ import { CreateListingDto, UpdateListingDto } from '../schemas/listing.schemas';
 
 const prisma = new PrismaClient();
 const notificationService = new NotificationService();
+const listingSelectFields = {
+    id: true,
+    user_id: true,
+    is_agent_listing: true,
+    description: true,
+    photos: true,
+    category_id: true,
+    title: true,
+    location: true,
+    price: true,
+    area: true,
+    type: true,
+    status: true,
+    created_at: true,
+    updated_at: true,
+    category: { select: { id: true, name: true } },
+    tags: { select: { id: true, name: true } },
+};
 
 class ListingService {
     async createListing(data: CreateListingDto): Promise<Listing> {
@@ -113,24 +131,7 @@ class ListingService {
             skip,
             take: limit,
             where,
-            select: {
-                id: true,
-                user_id: true,
-                is_agent_listing: true,
-                description: true,
-                photos: true,
-                category_id: true,
-                title: true,
-                location: true,
-                price: true,
-                area: true,
-                type: true,
-                status: true,
-                created_at: true,
-                updated_at: true,
-                category: { select: { id: true, name: true } },
-                tags: { select: { id: true, name: true } },
-            },
+            select: listingSelectFields,  // Використовуємо спільний select
         });
 
         return { listings, totalPages };
@@ -141,38 +142,34 @@ class ListingService {
             where: { user_id: userId },
             select: { listing_id: true },
         });
-    
+
         const favoriteIds = favorites.map(f => f.listing_id);
-    
+
         if (favoriteIds.length === 0) return [];
-    
+
         const listings = await prisma.listing.findMany({
             where: { id: { in: favoriteIds } },
-            select: {
-                id: true,
-                user_id: true,
-                is_agent_listing: true,
-                description: true,
-                photos: true,
-                category_id: true,
-                title: true,
-                location: true,
-                price: true,
-                area: true,
-                type: true,
-                status: true,
-                created_at: true,
-                updated_at: true,
-                category: { select: { id: true, name: true } },
-                tags: { select: { id: true, name: true } },
-            },
+            select: listingSelectFields,
         });
-    
+
         return listings.map(listing => ({
             ...listing,
             isFavorite: true,
         }));
-    }    
+    }
+
+    async getAllListingsWithoutFilters(): Promise<Listing[]> {
+        try {
+            const listings = await prisma.listing.findMany({
+                select: listingSelectFields,
+            });
+
+            return listings;
+        } catch (error) {
+            console.error(error);
+            throw new Error('Error fetching listings');
+        }
+    }
 
     async getListingById(id: string): Promise<Listing | null> {
         return await prisma.listing.findUnique({

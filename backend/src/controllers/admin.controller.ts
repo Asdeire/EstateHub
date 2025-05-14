@@ -86,7 +86,7 @@ class AdminController {
 
     getAllListings = async (req: FastifyRequest, res: FastifyReply): Promise<void> => {
         try {
-            const listings = await this.listingService.getAllListings();
+            const listings = await this.listingService.getAllListingsWithoutFilters();
             res.status(200).send(listings);
         } catch (error: unknown) {
             if (error instanceof Error) {

@@ -8,7 +8,6 @@ export const updateUserSchema = z.object({
     name: z.string().optional(),
     email: z.string().email().optional(),
     role: z.enum(['User', 'Makler', 'Admin']).optional(),
-    telegram_username: z.string().optional(),
 });
 
 export const updateListingSchema = z.object({

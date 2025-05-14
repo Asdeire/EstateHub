@@ -22,7 +22,6 @@ export const deleteAdminUser = async (id: string): Promise<User> => {
     return res.data;
 };
 
-// Listings
 export const getAdminListings = async (): Promise<Listing[]> => {
     const res = await api.get('/admin/listings', { headers: getAuthHeaders() });
     return res.data;
