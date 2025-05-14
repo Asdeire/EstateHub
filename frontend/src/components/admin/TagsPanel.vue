@@ -2,7 +2,7 @@
     <div>
         <h1>Теги</h1>
         <n-button type="primary" @click="openCreateTagModal">Додати тег</n-button>
-        <n-data-table :columns="tagColumns" :data="tags" :pagination="{ pageSize: 10 }" :bordered="true"
+        <n-data-table :columns="tagColumns" :data="adminStore.tags" :pagination="{ pageSize: 10 }" :bordered="true"
             :loading="isLoading" class="admin-table" />
         <n-modal v-model:show="showCreateTagModal" preset="dialog" title="Створити тег">
             <n-form :model="newTag" :rules="tagRules" ref="tagForm">
@@ -23,8 +23,9 @@
             </n-form>
             <template #action>
                 <n-button @click="showEditTagModal = false">Скасувати</n-button>
-                <n-button type="primary" @click="handleUpdateTag" :loading="isUpdating"
-                    :disabled="!currentTag">Зберегти</n-button>
+                <n-button type="primary" @click="handleUpdateTag" :loading="isUpdating" :disabled="!currentTag">
+                    Зберегти
+                </n-button>
             </template>
         </n-modal>
     </div>
@@ -34,38 +35,52 @@
 import { ref, h, onMounted } from 'vue';
 import { NButton, NDataTable, NModal, NForm, NFormItem, NInput } from 'naive-ui';
 import Swal from 'sweetalert2';
-import { getAdminTags, createAdminTag, updateAdminTag, deleteAdminTag } from '../../services/api/index';
+import { createAdminTag, updateAdminTag, deleteAdminTag } from '../../services/api/admin';
+import { useAdminStore } from '../../stores/adminDataStore';
 import type { Tag } from '../../types/tag';
 import type { FormRules, FormInst } from 'naive-ui';
 
-const emit = defineEmits(['fetch-data']);
-const tags = ref<Tag[]>([]);
+const adminStore = useAdminStore();
+const isLoading = ref(false);
 const showCreateTagModal = ref(false);
 const showEditTagModal = ref(false);
 const newTag = ref({ name: '' });
 const currentTag = ref<Tag | null>(null);
-const isLoading = ref(false);
 const isCreating = ref(false);
 const isUpdating = ref(false);
 const tagForm = ref<FormInst | null>(null);
 const editTagForm = ref<FormInst | null>(null);
 
 const tagColumns = [
-    { title: 'ID', key: 'id', minWidth: 100, sortable: true, sorter: (rowA: Tag, rowB: Tag) => rowA.id.localeCompare(rowB.id) },
-    { title: 'Назва', key: 'name', minWidth: 200, sortable: true, sorter: (rowA: Tag, rowB: Tag) => rowA.name.localeCompare(rowB.name) },
-    { title: 'Кількість оголошень', key: 'listings_count', minWidth: 200, sortable: true, sorter: (rowA: Tag, rowB: Tag) => rowA.listings_count - rowB.listings_count },
+    {
+        title: 'ID',
+        key: 'id',
+        minWidth: 100,
+        sortable: true,
+        sorter: (rowA: Tag, rowB: Tag) => rowA.id.localeCompare(rowB.id),
+    },
+    {
+        title: 'Назва',
+        key: 'name',
+        minWidth: 200,
+        sortable: true,
+        sorter: (rowA: Tag, rowB: Tag) => rowA.name.localeCompare(rowB.name),
+    },
+    {
+        title: 'Кількість оголошень',
+        key: 'listings_count',
+        minWidth: 200,
+        sortable: true,
+        sorter: (rowA: Tag, rowB: Tag) => rowA.listings_count - rowB.listings_count,
+    },
     {
         title: 'Дії',
         key: 'actions',
         render(row: Tag) {
-            return h(
-                'div',
-                { class: 'action-buttons' },
-                [
-                    h(NButton, { size: 'small', onClick: () => handleEditTag(row) }, { default: () => 'Редагувати' }),
-                    h(NButton, { size: 'small', type: 'error', onClick: () => handleDeleteTag(row.id) }, { default: () => 'Видалити' }),
-                ]
-            );
+            return h('div', { class: 'action-buttons' }, [
+                h(NButton, { size: 'small', onClick: () => handleEditTag(row) }, { default: () => 'Редагувати' }),
+                h(NButton, { size: 'small', type: 'error', onClick: () => handleDeleteTag(row.id) }, { default: () => 'Видалити' }),
+            ]);
         },
     },
 ];
@@ -77,8 +92,7 @@ const tagRules: FormRules = {
 const fetchTags = async () => {
     isLoading.value = true;
     try {
-        const response = await getAdminTags();
-        tags.value = Array.isArray(response) ? response : (response as any).data || [];
+        await adminStore.fetchTags();
     } catch (err) {
         Swal.fire('Помилка', 'Не вдалося завантажити теги', 'error');
     } finally {
@@ -99,7 +113,7 @@ const handleCreateTag = async () => {
         isCreating.value = true;
         await form.validate();
         await createAdminTag(newTag.value);
-        await fetchTags();
+        await adminStore.fetchTags(true);
         Swal.fire('Успіх', 'Тег створено', 'success');
         showCreateTagModal.value = false;
     } catch (err) {
@@ -124,7 +138,7 @@ const handleUpdateTag = async () => {
         isUpdating.value = true;
         await form.validate();
         await updateAdminTag(currentTag.value.id, currentTag.value);
-        await fetchTags();
+        await adminStore.fetchTags(true);
         Swal.fire('Успіх', 'Тег оновлено', 'success');
         showEditTagModal.value = false;
     } catch (err) {
@@ -147,7 +161,7 @@ const handleDeleteTag = async (id: string) => {
     if (result.isConfirmed) {
         try {
             await deleteAdminTag(id);
-            tags.value = tags.value.filter((tag) => tag.id !== id);
+            await adminStore.fetchTags(true);
             Swal.fire('Успіх', 'Тег видалено', 'success');
         } catch (err) {
             Swal.fire('Помилка', 'Не вдалося видалити тег', 'error');

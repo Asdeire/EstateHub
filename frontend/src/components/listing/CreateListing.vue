@@ -79,7 +79,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getTags, getCategories, createListing, updateListing, getListingsByUserId } from '../../services/api/index';
+import { getTags, getCategories, createListing, updateListing, getActiveListingsByUserId } from '../../services/api/index';
 import { useAuthStore } from '../../stores/authDataStore';
 import { storage } from '../../services/utils/firebase.config';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -152,7 +152,7 @@ onMounted(async () => {
 
         formData.value.is_agent_listing = authStore.user?.role === 'agent';
 
-        const listings = await getListingsByUserId(authStore.user?.id);
+        const listings = await getActiveListingsByUserId(authStore.user?.id);
         userListingsCount.value = listings.length;
     } catch (err) {
         console.error('Error: ', err);

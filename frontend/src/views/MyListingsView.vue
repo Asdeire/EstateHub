@@ -33,7 +33,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authDataStore';
-import { getListingsByUserId, createListing, deleteListing, getListingById, updateListing } from '../services/api/index'; // імпортуємо новий метод
+import { getActiveListingsByUserId, getArchivedListingsByUserId, createListing, deleteListing, getListingById, updateListing } from '../services/api/index';
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
 import CreateListing from '../components/listing/CreateListing.vue';
@@ -55,9 +55,8 @@ const archivedListings = ref([]);
 
 const fetchMyListings = async () => {
     try {
-        const data = await getListingsByUserId(authStore.user.id);
-        activeListings.value = data.filter(listing => listing.status === 'Active');
-        archivedListings.value = data.filter(listing => listing.status === 'Archived');
+        activeListings.value = await getActiveListingsByUserId(authStore.user.id);
+        archivedListings.value = await getArchivedListingsByUserId(authStore.user.id);
     } catch (err) {
         console.error('Error loading listings:', err);
         error.value = 'Помилка завантаження оголошень.';
@@ -218,11 +217,9 @@ onMounted(async () => {
         };
         check();
     });
-
     await waitForUser();
     fetchMyListings();
 });
-
 </script>
 
 

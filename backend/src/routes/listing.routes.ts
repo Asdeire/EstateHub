@@ -8,7 +8,8 @@ export async function listingRoutes(fastify: FastifyInstance) {
 
     fastify.get('/listings/:id', listingController.getById);
 
-    fastify.get('/listings/user/:user_id', listingController.getByUserId);
+    fastify.get('/listings/:userId/active', listingController.getActiveListingsByUser);
+    fastify.get('/listings/:userId/archived', listingController.getArchivedListingsByUser);
 
     fastify.get('/listings/favorites/:user_id', listingController.getFavoriteListings);
 

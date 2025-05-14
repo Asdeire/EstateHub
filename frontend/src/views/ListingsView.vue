@@ -78,7 +78,6 @@ const areaMin = ref<number | null>(null);
 const areaMax = ref<number | null>(null);
 const sortBy = ref<string>('newest');
 const showFilters = ref<boolean>(false);
-const selectedStatus = ref<string>('Active');
 
 const currentPage = ref<number>(1);
 const listingsPerPage = 12;
@@ -119,7 +118,7 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
     }
     try {
         loading.value = true;
-        filters.status = selectedStatus.value;
+        filters.status = 'Active';
         const data = await getListings(page, listingsPerPage, filters);
         cache.value.set(cacheKey, data);
         listings.value = data.listings;
@@ -134,7 +133,6 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
         loading.value = false;
     }
 };
-
 
 const toggleFavorite = async (listing: Listing) => {
     if (!authStore.isAuthenticated) {

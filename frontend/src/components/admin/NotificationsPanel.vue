@@ -1,7 +1,7 @@
 <template>
     <div>
         <h1>Повідомлення</h1>
-        <n-data-table :columns="notificationColumns" :data="notifications" :pagination="{ pageSize: 10 }"
+        <n-data-table :columns="notificationColumns" :data="adminStore.notifications" :pagination="{ pageSize: 10 }"
             :loading="isLoading" :bordered="true" class="admin-table" />
     </div>
 </template>
@@ -10,29 +10,47 @@
 import { ref, h, onMounted } from 'vue';
 import { NButton, NDataTable } from 'naive-ui';
 import Swal from 'sweetalert2';
-import { getAdminNotifications, deleteAdminNotification } from '../../services/api/index';
+import { deleteAdminNotification } from '../../services/api/admin';
+import { useAdminStore } from '../../stores/adminDataStore';
 import type { Notification } from '../../types/notification';
 
-const emit = defineEmits(['fetch-data']);
-const notifications = ref<Notification[]>([]);
+const adminStore = useAdminStore();
 const isLoading = ref(false);
 
 const notificationColumns = [
-    { title: 'ID', key: 'id', minWidth: 100, sortable: true, sorter: (rowA: Notification, rowB: Notification) => rowA.id.localeCompare(rowB.id) },
+    {
+        title: 'ID',
+        key: 'id',
+        minWidth: 100,
+        sortable: true,
+        sorter: (rowA: Notification, rowB: Notification) => rowA.id.localeCompare(rowB.id),
+    },
     { title: 'Повідомлення', key: 'message', minWidth: 300 },
-    { title: 'Статус', key: 'status', minWidth: 150, sortable: true, sorter: (rowA: Notification, rowB: Notification) => rowA.status.localeCompare(rowB.status) },
-    { title: 'Отримувач (ID)', key: 'user_id', minWidth: 100, sortable: true, sorter: (rowA: Notification, rowB: Notification) => rowA.user_id.localeCompare(rowB.user_id) },
+    {
+        title: 'Статус',
+        key: 'status',
+        minWidth: 150,
+        sortable: true,
+        sorter: (rowA: Notification, rowB: Notification) => rowA.status.localeCompare(rowB.status),
+    },
+    {
+        title: 'Отримувач (ID)',
+        key: 'user_id',
+        minWidth: 100,
+        sortable: true,
+        sorter: (rowA: Notification, rowB: Notification) => rowA.user_id.localeCompare(rowB.user_id),
+    },
     {
         title: 'Дії',
         key: 'actions',
         render(row: Notification) {
-            return h(
-                'div',
-                { class: 'action-buttons' },
-                [
-                    h(NButton, { size: 'small', type: 'error', onClick: () => handleDeleteNotification(row.id) }, { default: () => 'Видалити' }),
-                ]
-            );
+            return h('div', { class: 'action-buttons' }, [
+                h(
+                    NButton,
+                    { size: 'small', type: 'error', onClick: () => handleDeleteNotification(row.id) },
+                    { default: () => 'Видалити' }
+                ),
+            ]);
         },
     },
 ];
@@ -40,15 +58,13 @@ const notificationColumns = [
 const fetchNotifications = async () => {
     isLoading.value = true;
     try {
-        const response = await getAdminNotifications();
-        notifications.value = Array.isArray(response) ? response : (response as any).data || [];
+        await adminStore.fetchNotifications();
     } catch (err) {
         Swal.fire('Помилка', 'Не вдалося завантажити повідомлення', 'error');
     } finally {
         isLoading.value = false;
     }
 };
-
 
 const handleDeleteNotification = async (id: string) => {
     const result = await Swal.fire({
@@ -62,10 +78,10 @@ const handleDeleteNotification = async (id: string) => {
     if (result.isConfirmed) {
         try {
             await deleteAdminNotification(id);
-            notifications.value = notifications.value.filter((notification) => notification.id !== id);
+            await adminStore.fetchNotifications(true);
             Swal.fire('Успіх', 'Повідомлення видалено', 'success');
         } catch (err) {
-            Swal.fire('Помилка', 'Не вдалося видалити повідом Facet', 'error');
+            Swal.fire('Помилка', 'Не вдалося видалити повідомлення', 'error');
         }
     }
 };

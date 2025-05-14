@@ -62,16 +62,18 @@ export const getListingById = async (id: string): Promise<Listing | null> => {
     }
 };
 
-export const getListingsByUserId = async (user_id: string): Promise<Listing[]> => {
-    try {
-        const response = await api.get(`/listings/user/${user_id}`, {
-            headers: getAuthHeaders(),
-        });
-        return response.data;
-    } catch (error) {
-        console.error(`Error fetching listings for user ${user_id}:`, error);
-        throw error;
-    }
+export const getActiveListingsByUserId = async (userId: string) => {
+    const response = await api.get(`/listings/${userId}/active`, {
+        headers: getAuthHeaders(),
+    });
+    return response.data;
+};
+
+export const getArchivedListingsByUserId = async (userId: string) => {
+    const response = await api.get(`/listings/${userId}/archived`, {
+        headers: getAuthHeaders(),
+    });
+    return response.data;
 };
 
 export const updateListing = async (id: string, listingData: CreateListingDto): Promise<Listing> => {

@@ -139,7 +139,7 @@ const calculateSliderMetrics = () => {
 
 onMounted(async () => {
     try {
-        const data = await getListings(1, 8);
+        const data = await getListings(1, 8, { status: 'Active' });
         recentListings.value = data.listings.map(listing => ({
             id: listing.id,
             image: listing.photos && listing.photos.length > 0 ? listing.photos[0] : 'https://via.placeholder.com/300x200',

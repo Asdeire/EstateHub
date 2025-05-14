@@ -131,7 +131,7 @@ class ListingService {
             skip,
             take: limit,
             where,
-            select: listingSelectFields,  // Використовуємо спільний select
+            select: listingSelectFields,
         });
 
         return { listings, totalPages };
@@ -181,9 +181,25 @@ class ListingService {
         });
     }
 
-    async getListingsByUserId(user_id: string): Promise<Listing[]> {
+    async getActiveListingsByUserId(userId: string) {
         return await prisma.listing.findMany({
-            where: { user_id },
+            where: {
+                user_id: userId,
+                status: 'Active',
+            },
+            include: {
+                category: true,
+                tags: true,
+            },
+        });
+    }
+
+    async getArchivedListingsByUserId(userId: string) {
+        return await prisma.listing.findMany({
+            where: {
+                user_id: userId,
+                status: 'Archived',
+            },
             include: {
                 category: true,
                 tags: true,

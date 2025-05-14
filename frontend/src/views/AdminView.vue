@@ -24,7 +24,7 @@
         </n-layout>
     </div>
 
-    <div v-else class="error-message">
+    <div v-else-if="!authStore.isAuthenticated || authStore.user?.role === 'User'" class="error-message">
         <n-alert type="error" title="Доступ заборонено" description="Потрібна роль адміністратора." />
     </div>
 </template>

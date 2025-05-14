@@ -1,7 +1,7 @@
 <template>
     <div>
         <h1>Користувачі</h1>
-        <n-data-table :columns="userColumns" :data="users" :pagination="{ pageSize: 10 }" :bordered="true"
+        <n-data-table :columns="userColumns" :data="adminStore.users" :pagination="{ pageSize: 10 }" :bordered="true"
             :loading="isLoading" class="admin-table" />
         <n-modal v-model:show="showEditUserModal" preset="dialog" title="Редагувати користувача">
             <n-form v-if="currentUser" :model="currentUser" :rules="userEditRules" ref="editUserForm">
@@ -17,7 +17,9 @@
             </n-form>
             <template #action>
                 <n-button @click="showEditUserModal = false">Скасувати</n-button>
-                <n-button type="primary" :loading="isUpdating" @click="handleUpdateUser" :disabled="!currentUser ">Зберегти</n-button>
+                <n-button type="primary" :loading="isUpdating" @click="handleUpdateUser" :disabled="!currentUser">
+                    Зберегти
+                </n-button>
             </template>
         </n-modal>
     </div>
@@ -27,25 +29,46 @@
 import { ref, h, onMounted } from 'vue';
 import { NButton, NDataTable, NModal, NForm, NFormItem, NInput, NSelect } from 'naive-ui';
 import Swal from 'sweetalert2';
-import { getAdminUsers, updateAdminUser, deleteAdminUser } from '../../services/api/index';
+import { updateAdminUser, deleteAdminUser } from '../../services/api/admin';
+import { useAdminStore } from '../../stores/adminDataStore';
 import type { User } from '../../types/user';
 import type { FormRules } from 'naive-ui';
 
-const emit = defineEmits(['fetch-data']);
-const users = ref<User[]>([]);
+const adminStore = useAdminStore();
+const isLoading = ref(false);
 const showEditUserModal = ref(false);
 const currentUser = ref<User | null>(null);
-
-const isLoading = ref(false);
 const isUpdating = ref(false);
 
 const userColumns = [
-    { title: 'ID', key: 'id', minWidth: 100, sortable: true, sorter: (rowA: User, rowB: User) => rowA.id.localeCompare(rowB.id) },
-    { title: 'Ім’я', key: 'name', minWidth: 150, sortable: true, sorter: (rowA: User, rowB: User) => rowA.name.localeCompare(rowB.name) },
-    { title: 'Email', key: 'email', minWidth: 200, sortable: true, sorter: (rowA: User, rowB: User) => rowA.email.localeCompare(rowB.email) },
-    { title: 'Роль', key: 'role', minWidth: 120, sortable: true, sorter: (rowA: User, rowB: User) => rowA.role.localeCompare(rowB.role) },
-
-
+    {
+        title: 'ID',
+        key: 'id',
+        minWidth: 100,
+        sortable: true,
+        sorter: (rowA: User, rowB: User) => rowA.id.localeCompare(rowB.id),
+    },
+    {
+        title: "Ім'я",
+        key: 'name',
+        minWidth: 150,
+        sortable: true,
+        sorter: (rowA: User, rowB: User) => rowA.name.localeCompare(rowB.name),
+    },
+    {
+        title: 'Email',
+        key: 'email',
+        minWidth: 200,
+        sortable: true,
+        sorter: (rowA: User, rowB: User) => rowA.email.localeCompare(rowB.email),
+    },
+    {
+        title: 'Роль',
+        key: 'role',
+        minWidth: 120,
+        sortable: true,
+        sorter: (rowA: User, rowB: User) => rowA.role.localeCompare(rowB.role),
+    },
     {
         title: 'Дії',
         key: 'actions',
@@ -54,18 +77,24 @@ const userColumns = [
                 'div',
                 { class: 'action-buttons' },
                 [
-                    h(NButton, { size: 'small', onClick: () => handleEditUser(row) }, { default: () => 'Редагувати' }),
-                    h(NButton, { size: 'small', type: 'error', onClick: () => handleDeleteUser(row.id) }, { default: () => 'Видалити' }),
+                    h(
+                        NButton,
+                        { size: 'small', onClick: () => handleEditUser(row) },
+                        { default: () => 'Редагувати' }
+                    ),
+                    h(
+                        NButton,
+                        { size: 'small', type: 'error', onClick: () => handleDeleteUser(row.id) },
+                        { default: () => 'Видалити' }
+                    ),
                 ]
             );
-
         },
     },
 ];
 
-
 const userEditRules: FormRules = {
-    name: [{ required: true, message: 'Введіть ім’я', trigger: 'blur' }],
+    name: [{ required: true, message: "Введіть ім'я", trigger: 'blur' }],
     email: [{ required: true, type: 'email', message: 'Введіть коректний email', trigger: 'blur' }],
     role: [{ required: true, message: 'Виберіть роль', trigger: 'change' }],
 };
@@ -76,22 +105,8 @@ const roleOptions = [
     { label: 'Адмін', value: 'Admin' },
 ];
 
-const fetchUsers = async () => {
-    isLoading.value = true;
-    try {
-        const response = await getAdminUsers();
-        users.value = Array.isArray(response) ? response : (response as any).data || [];
-    } catch (err) {
-        Swal.fire('Помилка', 'Не вдалося завантажити користувачів', 'error');
-    } finally {
-        isLoading.value = false;
-    }
-};
-
 const handleEditUser = (user: User) => {
-    currentUser.value = {
-        ...user,
-    };
+    currentUser.value = { ...user };
     showEditUserModal.value = true;
 };
 
@@ -101,7 +116,7 @@ const handleUpdateUser = async () => {
 
     try {
         await updateAdminUser(currentUser.value.id, currentUser.value);
-        await fetchUsers();
+        await adminStore.fetchUsers(true);
         Swal.fire('Успіх', 'Користувача оновлено', 'success');
         showEditUserModal.value = false;
     } catch (err) {
@@ -111,7 +126,6 @@ const handleUpdateUser = async () => {
     } finally {
         isUpdating.value = false;
     }
-
 };
 
 const handleDeleteUser = async (id: string) => {
@@ -126,7 +140,7 @@ const handleDeleteUser = async (id: string) => {
     if (result.isConfirmed) {
         try {
             await deleteAdminUser(id);
-            users.value = users.value.filter((user) => user.id !== id);
+            await adminStore.fetchUsers(true);
             Swal.fire('Успіх', 'Користувача видалено', 'success');
         } catch (err) {
             Swal.fire('Помилка', 'Не вдалося видалити користувача', 'error');
@@ -134,5 +148,14 @@ const handleDeleteUser = async (id: string) => {
     }
 };
 
-onMounted(fetchUsers);
+onMounted(async () => {
+    isLoading.value = true;
+    try {
+        await adminStore.fetchUsers();
+    } catch (err) {
+        Swal.fire('Помилка', 'Не вдалося завантажити користувачів', 'error');
+    } finally {
+        isLoading.value = false;
+    }
+});
 </script>

@@ -23,6 +23,7 @@
     "fastify-postgres": "^3.6.0",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",
+    "node-mailjet": "^6.0.8",
     "node-telegram-bot-api": "^0.66.0",
     "prisma": "^6.2.1",
     "resend": "^4.1.2",
