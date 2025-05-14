@@ -1,6 +1,8 @@
 import { PrismaClient, Listing, Prisma, Subscription } from '@prisma/client';
 import { NotificationService } from './notification.service';
 import { CreateListingDto, UpdateListingDto } from '../schemas/listing.schemas';
+import { tagService } from './tag.service';
+import { categoryService } from './category.service';
 
 const prisma = new PrismaClient();
 const notificationService = new NotificationService();
@@ -26,6 +28,7 @@ const listingSelectFields = {
 class ListingService {
     async createListing(data: CreateListingDto): Promise<Listing> {
         const { tags, ...listingData } = data;
+
         const listing = await prisma.listing.create({
             data: {
                 ...listingData,
@@ -36,6 +39,22 @@ class ListingService {
             },
             include: { tags: true, category: true },
         });
+
+        const updateOperations = [];
+
+        if (listing.category_id) {
+            updateOperations.push(
+                categoryService.incrementListingsCount(listing.category_id)
+            );
+        }
+
+        if (listing.tags.length > 0) {
+            for (const tag of listing.tags) {
+                updateOperations.push(tagService.incrementListingsCount(tag.id));
+            }
+        }
+
+        await Promise.allSettled(updateOperations); 
 
         return listing;
     }
@@ -210,30 +229,42 @@ class ListingService {
     async updateListing(id: string, data: UpdateListingDto): Promise<Listing> {
         const { tags, category_id, user_id, ...listingData } = data;
 
-        const updateData: Prisma.ListingUpdateInput = {
-            ...listingData,
-            category: category_id
-                ? {
-                    connect: { id: category_id },
-                }
-                : undefined,
-            tags: tags
-                ? {
-                    set: tags.map((tag: string) => ({ id: tag })),
-                }
-                : undefined,
-            user: user_id
-                ? {
-                    connect: { id: user_id },
-                }
-                : undefined,
-        };
+        const old = await prisma.listing.findUnique({
+            where: { id },
+            include: { tags: true, category: true },
+        });
+        if (!old) throw new Error('Listing not found');
 
         const updatedListing = await prisma.listing.update({
             where: { id },
-            data: updateData,
+            data: {
+                ...listingData,
+                category: category_id ? { connect: { id: category_id } } : undefined,
+                tags: tags ? { set: tags.map((tag: string) => ({ id: tag })) } : undefined,
+                user: user_id ? { connect: { id: user_id } } : undefined,
+            },
             include: { tags: true, category: true },
         });
+
+        if (category_id && old.category_id !== category_id) {
+            if (old.category_id) {
+                await categoryService.decrementListingsCount(old.category_id);
+            }
+            await categoryService.incrementListingsCount(category_id);
+        }
+
+        if (tags) {
+            const oldTagIds = old.tags.map(t => t.id);
+            const newTagIds = tags;
+
+            const toDecrement = oldTagIds.filter(id => !newTagIds.includes(id));
+            const toIncrement = newTagIds.filter(id => !oldTagIds.includes(id));
+
+            await Promise.all([
+                ...toDecrement.map(id => tagService.decrementListingsCount(id)),
+                ...toIncrement.map(id => tagService.incrementListingsCount(id)),
+            ]);
+        }
 
         if (data.photos || data.title || data.price || data.area || data.status === 'Active') {
             const subscriptions = await prisma.subscription.findMany({
@@ -266,10 +297,27 @@ class ListingService {
     }
 
     async deleteListing(id: string): Promise<Listing> {
-        return await prisma.listing.delete({
+        const listing = await prisma.listing.findUnique({
+            where: { id },
+            include: { tags: true, category: true },
+        });
+        if (!listing) throw new Error('Listing not found');
+
+        if (listing.category_id) {
+            await categoryService.decrementListingsCount(listing.category_id);
+        }
+
+        await Promise.all(
+            listing.tags.map(tag =>
+                tagService.decrementListingsCount(tag.id)
+            )
+        );
+
+        return prisma.listing.delete({
             where: { id },
         });
     }
+
 }
 
 export const listingService = new ListingService();

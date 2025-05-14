@@ -199,15 +199,16 @@ const handleSubmit = async () => {
 
     try {
         isLoading.value = true;
-        const data = { ...formData.value, is_agent_listing: true, photos: [] };
+
+        const fileUrls = await uploadFilesToStorage(selectedFiles.value);
+
+        const data = {
+            ...formData.value,
+            is_agent_listing: true,
+            photos: fileUrls,
+        };
+
         const createdListing = await createListing(data);
-
-        if (!createdListing || !createdListing.id) {
-            throw new Error('Помилка створення оголошення.');
-        }
-
-        const fileUrls = await uploadFilesToStorage(selectedFiles.value, createdListing.id);
-        await updateListingPhotos(createdListing.id, fileUrls);
 
         emit('save', createdListing);
         emit('close');
@@ -221,23 +222,19 @@ const handleSubmit = async () => {
     }
 };
 
-const uploadFilesToStorage = async (files, listingId) => {
-    const fileUrls = [];
-    for (const file of files) {
-        const storagePath = `images/${listingId}/${Date.now()}_${file.name}`;
+const uploadFilesToStorage = async (files) => {
+    const uploadTasks = files.map(async (file) => {
+        const storagePath = `images/${Date.now()}_${file.name}`;
         const storageReference = storageRef(storage, storagePath);
         const uploadTask = uploadBytesResumable(storageReference, file);
 
-        try {
-            await uploadTask;
-            const fileURL = await getDownloadURL(storageReference);
-            fileUrls.push(fileURL);
-        } catch (error) {
-            console.error('Помилка завантаження фото:', error);
-        }
-    }
-    return fileUrls;
+        await uploadTask;
+        return await getDownloadURL(storageReference);
+    });
+
+    return Promise.all(uploadTasks);
 };
+
 
 const updateListingPhotos = async (listingId, fileUrls) => {
     try {
