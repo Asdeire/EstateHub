@@ -1,116 +1,215 @@
-# Real Estate Platform
+# EstateHub
 
-Welcome to the Real Estate Platform! This project is designed to connect real estate agents, property owners, and potential buyers by offering a user-friendly platform for listing, browsing, and managing property advertisements.
+🔗 [Live Demo](https://your-deployed-site.com)
 
-## 🌟 Features
+**EstateHub** is a modern web-based platform designed to streamline real estate listings, search, and user communication between buyers, agents, and administrators. The system provides a fully functional listing engine with support for subscriptions, notifications (email & Telegram), user management, and an admin interface.
 
-### For Users
-- **Registration & Authentication**: Secure login and signup using JWT authentication.
-- **Property Listings**: Browse through property listings with filtering and sorting options.
-- **Favorites**: Save interesting properties to your favorites.
-- **Subscriptions**: Subscribe to new property notifications based on your criteria.
-- **Interactive Maps**: View property locations using Google Maps or Leaflet integrations.
+---
 
-### For Agents
-- **Manage Listings**: Create, edit, and delete property listings.
-- **Profile Management**: Update personal details and manage contact information.
+## Features
 
-### Admin Panel
-- **User Management**: Admins can manage users, agents, and their roles.
-- **Content Moderation**: Ensure listings comply with platform rules.
+* **Authentication & Roles**
 
-## 🏗️ Tech Stack
+  * Supports role-based access: `User`, `Makler` (Agent), and `Admin`
+  * Secure registration, login, verification, and password reset using JWT and email codes
+
+* **Real Estate Listings**
+
+  * CRUD operations on property listings with images, location, pricing, type, area, and status
+  * Tagging and categorization system
+  * Agent vs. private owner listings
+
+* **Favorites**
+
+  * Users can add or remove favorite listings
+  * Uniqueness enforced (one user can favorite a listing once)
+
+* **Subscriptions & Filters**
+
+  * Users can create filtered subscriptions (by category, location, price, area, etc.)
+  * Each subscription can use email or Telegram as a transport
+
+* **Notifications**
+
+  * Automatic notification delivery when listings match user subscriptions
+  * Notification tracking by status: SENT, DELIVERED, FAILED
+
+* **Admin Panel**
+
+  * Administrative interface for managing users, listings, categories, tags, subscriptions, and notifications
+  * Data table interface with editing capabilities
+
+* **Telegram Bot Integration**
+
+  * Telegram linking via chat ID and username
+  * Direct message sending using `node-telegram-bot-api`
+
+* **Email Integration**
+
+  * Email notifications via Mailjet
+  * Verification and password reset flow via email codes
+
+* **Map Integration**
+
+  * Frontend includes Leaflet/OpenStreetMap component for property location display
+
+---
+
+## Technologies Used
 
 ### Backend
-- **Programming Language**: TypeScript (Node.js)
-- **Framework**: Fastify
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: JWT / OAuth 2.0
+
+* **Runtime**: Node.js with TypeScript
+* **Framework**: Fastify
+* **Database**: PostgreSQL (via Prisma ORM)
+* **Messaging**: Mailjet, Telegram Bot
+* **Security**: JWT, bcrypt
+* **Task Scheduling**: node-cron for cleaning expired codes
 
 ### Frontend
-- **Framework**: Vue.js 3
-- **Styling**: SCSS, responsive design
-- **State Management**: Pinia
-- **Routing**: Vue Router
 
-### Integrations
-- **Maps**: OpenStreetMap (Leaflet)
-- **Notifications**: Email and Telegram bot for subscription updates
+* **Framework**: Vue 3 with Composition API
+* **UI Kit**: Naive UI
+* **Styling**: SCSS (modular)
+* **Routing**: Vue Router
+* **State Management**: Pinia
+* **Build Tool**: Vite
 
-## 🚀 Getting Started
+---
+
+## Project Structure
+
+```plaintext
+backend/
+  ├─ prisma/
+  ├─ src/
+      ├─ controllers/
+      ├─ services/
+      ├─ schemas/
+      ├─ routes/
+      ├─ middleware/
+      ├─ utils/
+      └─ index.ts
+
+frontend/
+  ├─ src/
+      ├─ components/
+      ├─ views/
+      ├─ services/
+      ├─ stores/
+      ├─ router/
+      ├─ types/
+      ├─ styles/
+      └─ main.ts
+
+  ├─ public/
+  ├─ index.html
+  └─ vite.config.ts
+```
+
+---
+
+## Getting Started
 
 ### Prerequisites
-Ensure you have the following installed:
-- Node.js (v18+)
-- PostgreSQL (v14+)
+
+* Node.js ≥ 18.x
+* PostgreSQL ≥ 14
+* Telegram Bot API token
+* Mailjet API credentials
 
 ### Backend Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/real-estate-platform.git
-   cd real-estate-platform/backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Configure environment variables:
-   Create a `.env` file and add the following:
-   ```plaintext
-   DATABASE_URL=postgresql://username:password@localhost:5432/realestate
-   JWT_SECRET=your_jwt_secret
-   ```
-
-4. Run Prisma migrations:
-   ```bash
-   npx prisma migrate dev
-   ```
-
-5. Start the server:
-   ```bash
-   npm run dev
-   ```
+```bash
+cd backend
+npm install
+cp .env
+npx prisma migrate dev --name init
+npm run dev
+```
 
 ### Frontend Setup
 
-1. Navigate to the frontend folder:
-   ```bash
-   cd ../frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-## 🧪 Testing
-
-To run tests for the backend:
 ```bash
-npm run test
+cd frontend
+npm install
+cp .env
+npm run dev
 ```
 
-## 📦 Deployment
+### Environment Variables (Backend)
 
-For production builds, follow these steps:
+Create a `.env` file inside the `backend/` folder with the following values:
 
-### Backend
-```bash
-npm run build
-npm run start
+```env
+APP_URL=https://yourdomain.com
+BASE_URL=https://example.onrender.com
+DATABASE_URL=postgresql://user:password@localhost:5432/estatehub
+JWT_SECRET=your_jwt_secret
+MAILJET_API_KEY=your_mailjet_key
+MAILJET_API_SECRET=your_mailjet_secret
+TELEGRAM_BOT_TOKEN=your_telegram_token
 ```
 
-### Frontend
-```bash
-npm run build
-```
-The built files will be in the `dist` folder, ready for deployment.
+Create a `.env` file inside the `frontend/` folder as well:
 
+```env
+VITE_API_URL=http://localhost:3000
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_firebase_app_id
+```
+
+---
+
+## API Overview
+
+The backend exposes a RESTful API:
+
+* `POST /auth/register`
+* `POST /auth/login`
+* `POST /auth/verify`
+* `GET /listings`, `POST`, `PUT`, `DELETE`
+* `GET /users`, `PUT`, `DELETE`
+* `GET /favorites`, `POST`, `DELETE`
+* `GET /subscriptions`, `POST`, `DELETE`
+* `GET /notifications`, `POST`, `PUT`, `DELETE`
+* `GET /tags`, `POST`, `PUT`, `DELETE`
+* `GET /categories`, `POST`, `PUT`, `DELETE`
+* `GET /admin/*` endpoints for administrative control
+
+---
+
+## Admin Interface
+
+* Accessible via `/admin` (frontend)
+* Includes:
+
+  * Listings Panel
+  * Users Panel
+  * Categories and Tags
+  * Subscriptions & Notifications Management
+
+---
+
+## Deployment
+
+* **Backend**:
+
+  * Built with (`npm run build`)
+  * Run migrations with Prisma CLI
+  * Deploy via Render or Heroku
+* **Frontend**:
+
+  * Built with Vite (`npm run build`)
+  * Deploy via Vercel or Netlify
+
+---
+
+## License
+
+This project is licensed under the **MIT License**.
+See the `LICENSE` file for full details.
