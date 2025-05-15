@@ -234,13 +234,4 @@ const uploadFilesToStorage = async (files) => {
 
     return Promise.all(uploadTasks);
 };
-
-
-const updateListingPhotos = async (listingId, fileUrls) => {
-    try {
-        await updateListing(listingId, { photos: fileUrls });
-    } catch (error) {
-        console.error('Помилка оновлення фото в базі:', error);
-    }
-};
 </script>

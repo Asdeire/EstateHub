@@ -54,7 +54,32 @@ class ListingService {
             }
         }
 
-        await Promise.allSettled(updateOperations); 
+        await Promise.allSettled(updateOperations);
+
+        const subscriptions = await prisma.subscription.findMany({
+            include: { buyer: true },
+        });
+
+        for (const subscription of subscriptions) {
+            const filters = subscription.filters as {
+                category?: string;
+                type?: string;
+                minPrice?: number;
+                maxPrice?: number;
+                minArea?: number;
+                maxArea?: number;
+                tags?: string[];
+            };
+
+            if (this.matchesFilters(listing, filters)) {
+                await notificationService.createNotification({
+                    user_id: subscription.buyer_id,
+                    subscription_id: subscription.id,
+                    status: 'SENT',
+                    listing_id: listing.id,
+                });
+            }
+        }
 
         return listing;
     }
