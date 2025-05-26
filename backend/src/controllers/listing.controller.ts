@@ -66,6 +66,42 @@ class ListingController {
         }
     }
 
+    async getActiveListings(
+        req: FastifyRequest<{
+            Querystring: GetAllFiltersDto;
+        }>,
+        res: FastifyReply
+    ): Promise<void> {
+        try {
+            const query = getAllFiltersSchema.parse(req.query);
+
+            const filters = {
+                ...query,
+                tags: query.tags ? query.tags.split(',') : undefined,
+            };
+
+            if (filters.minPrice && filters.maxPrice && filters.minPrice > filters.maxPrice) {
+                res.status(400).send({ message: 'minPrice cannot be greater than maxPrice' });
+                return;
+            }
+            if (filters.minArea && filters.maxArea && filters.minArea > filters.maxArea) {
+                res.status(400).send({ message: 'minArea cannot be greater than maxArea' });
+                return;
+            }
+
+            const result = await listingService.getActiveListings(query.page, query.limit, filters);
+            res.status(200).send(result);
+        } catch (error: unknown) {
+            if (error instanceof z.ZodError) {
+                res.status(400).send({ message: 'Invalid query parameters', errors: error.errors });
+            } else if (error instanceof Error) {
+                res.status(500).send({ message: error.message });
+            } else {
+                res.status(500).send({ message: 'An unknown error occurred' });
+            }
+        }
+    }
+
     async getFavoriteListings(
         req: FastifyRequest<{ Params: { user_id: string } }>,
         res: FastifyReply

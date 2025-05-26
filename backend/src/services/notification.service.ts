@@ -47,7 +47,7 @@ export class NotificationService {
 
             finalMessage = `<b>Нове оголошення за вашою підпискою!</b> 🏠\n\n` +
                 `<b>Назва:</b> ${listing.title}\n` +
-                `<b>Ціна:</b> ${listing.price} грн\n` +
+                `<b>Ціна:</b> ${listing.price} $\n` +
                 `<b>Площа:</b> ${listing.area} м²\n` +
                 `<a href="${link}">Переглянути оголошення</a>`;
         } else if (data.message) {

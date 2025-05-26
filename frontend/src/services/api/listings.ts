@@ -2,7 +2,7 @@ import { api } from './config';
 import { getAuthHeaders } from './authHeaders';
 import type { Listing, CreateListingDto } from '../../types/listing';
 
-export const getListings = async (
+export const getActiveListings = async (
     page = 1,
     limit = 12,
     filters: {
@@ -12,7 +12,6 @@ export const getListings = async (
         maxPrice?: number,
         minArea?: number,
         maxArea?: number,
-        status?: string,
         tags?: string[],
         search?: string,
     } = {}
@@ -26,16 +25,15 @@ export const getListings = async (
         ...(filters.maxPrice && { maxPrice: String(filters.maxPrice) }),
         ...(filters.minArea && { minArea: String(filters.minArea) }),
         ...(filters.maxArea && { maxArea: String(filters.maxArea) }),
-        ...(filters.status && { status: filters.status }),
         ...(filters.tags?.length && { tags: filters.tags.join(',') }),
         ...(filters.search && { location: filters.search }),
     });
 
     try {
-        const response = await api.get(`/listings?${queryParams.toString()}`);
+        const response = await api.get(`/listings/active?${queryParams.toString()}`);
         return response.data;
     } catch (error) {
-        console.error('Error fetching listings:', error);
+        console.error('Error fetching active listings:', error);
         throw error;
     }
 };

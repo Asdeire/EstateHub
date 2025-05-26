@@ -1,14 +1,41 @@
 import { FastifyInstance } from 'fastify';
 import { tagController } from '../controllers/tag.controller';
+import { swaggerSchemas } from '../schemas/swagger.schemas';
 
 export async function tagRoutes(fastify: FastifyInstance) {
-    fastify.post('/tags', tagController.create);
 
-    fastify.get('/tags', tagController.getAll);
+    for (const [key, schema] of Object.entries(swaggerSchemas)) {
+        fastify.addSchema({ $id: key, ...schema });
+    }
 
-    fastify.get('/tags/:id', tagController.getById);
+    fastify.get('/tags', {
+        schema: {
+            summary: 'Get all tags',
+            tags: ['Tag'],
+            response: {
+                200: {
+                    type: 'array',
+                    items: { $ref: 'Tag' },
+                },
+            },
+        },
+        handler: tagController.getAll,
+    });
 
-    fastify.put('/tags/:id', tagController.update);
-
-    fastify.delete('/tags/:id', tagController.delete);
+    fastify.get('/tags/:id', {
+        schema: {
+            summary: 'Get a tag by ID',
+            tags: ['Tag'],
+            params: {
+                type: 'object',
+                properties: {
+                    id: { type: 'string', format: 'uuid' },
+                },
+            },
+            response: {
+                200: { $ref: 'Tag#' },
+            },
+        },
+        handler: tagController.getById,
+    });
 }

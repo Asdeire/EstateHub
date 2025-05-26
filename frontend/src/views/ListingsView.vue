@@ -55,7 +55,7 @@ import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
 import Listings from '../components/listing/ListingCard.vue';
 import FilterModal from '../components/listing/FilterModal.vue';
-import { getListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
+import { getActiveListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
 import Swal from 'sweetalert2';
 import type { Listing } from '../types/listing';
 
@@ -119,7 +119,7 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
     try {
         loading.value = true;
         filters.status = 'Active';
-        const data = await getListings(page, listingsPerPage, filters);
+        const data = await getActiveListings(page, listingsPerPage, filters);
         cache.value.set(cacheKey, data);
         listings.value = data.listings;
         totalPages.value = data.totalPages;

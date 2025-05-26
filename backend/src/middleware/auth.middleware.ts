@@ -17,6 +17,9 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
         { path: '/listings', methods: ['GET'] },
         { path: '/tags', methods: ['GET'] },
         { path: '/user', methods: ['GET'] },
+        { path: '/docs/static', methods: ['GET'] },
+        { path: '/docs', methods: ['GET'] },
+
     ];
 
     const isPublicRoute = publicRoutes.some(({ path, methods }) => {

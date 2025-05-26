@@ -85,7 +85,7 @@ import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import { getListings } from '../services/api/index';
+import { getActiveListings } from '../services/api/index';
 
 const location = ref('');
 const price = ref('');
@@ -139,7 +139,7 @@ const calculateSliderMetrics = () => {
 
 onMounted(async () => {
     try {
-        const data = await getListings(1, 8, { status: 'Active' });
+        const data = await getActiveListings(1, 8);
         recentListings.value = data.listings.map(listing => ({
             id: listing.id,
             image: listing.photos && listing.photos.length > 0 ? listing.photos[0] : 'https://via.placeholder.com/300x200',

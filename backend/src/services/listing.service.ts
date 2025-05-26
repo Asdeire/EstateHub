@@ -181,6 +181,76 @@ class ListingService {
         return { listings, totalPages };
     }
 
+    async getActiveListings(
+        page: number = 1,
+        limit: number = 12,
+        filters: {
+            category?: string;
+            type?: string;
+            minPrice?: number;
+            maxPrice?: number;
+            minArea?: number;
+            maxArea?: number;
+            tags?: string[];
+            location?: string;
+        } = {}
+    ): Promise<{ listings: Listing[]; totalPages: number }> {
+        const where: any = {
+            status: 'Active', 
+        };
+
+        if (filters.minPrice !== undefined) {
+            where.price = { gte: Number(filters.minPrice) };
+        }
+        if (filters.maxPrice !== undefined) {
+            where.price = { ...where.price, lte: Number(filters.maxPrice) };
+        }
+
+        if (filters.minArea !== undefined) {
+            where.area = { gte: Number(filters.minArea) };
+        }
+        if (filters.maxArea !== undefined) {
+            where.area = { ...where.area, lte: Number(filters.maxArea) };
+        }
+
+        if (filters.category) {
+            where.category = { id: filters.category };
+        }
+
+        if (filters.type) {
+            where.type = filters.type;
+        }
+
+        if (filters.tags?.length) {
+            where.tags = {
+                some: {
+                    id: { in: filters.tags },
+                },
+            };
+        }
+
+        if (filters.location) {
+            where.location = {
+                contains: filters.location,
+                mode: 'insensitive',
+            };
+        }
+
+        const totalListings = await prisma.listing.count({ where });
+        const totalPages = Math.ceil(totalListings / limit);
+
+        const skip = (page - 1) * limit;
+
+        const listings = await prisma.listing.findMany({
+            skip,
+            take: limit,
+            where,
+            select: listingSelectFields,
+        });
+
+        return { listings, totalPages };
+    }
+
     async getFavoriteListings(userId: string): Promise<(Listing & { isFavorite: true })[]> {
         const favorites = await prisma.favorite.findMany({
             where: { user_id: userId },
@@ -342,7 +412,6 @@ class ListingService {
             where: { id },
         });
     }
-
 }
 
 export const listingService = new ListingService();

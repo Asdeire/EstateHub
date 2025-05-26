@@ -16,7 +16,7 @@
                 </label>
 
                 <label>
-                    Ціна:
+                    Ціна ($): 
                     <input v-model.number="formData.price" type="number" placeholder="Ціна" maxlength="9"
                         @input="limitDigits('price', 9)" required />
                     <span v-if="errors.price" class="error">{{ errors.price }}</span>

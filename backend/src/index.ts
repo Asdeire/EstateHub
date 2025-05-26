@@ -3,6 +3,7 @@ import { registerRoutes } from './routes';
 import cors from '@fastify/cors';
 import { authMiddleware } from './middleware/auth.middleware';
 import { config } from './utils/config';
+import swagger from './utils/swagger';
 
 const start = async () => {
     const app = fastify({ logger: true });
@@ -11,6 +12,8 @@ const start = async () => {
         origin: config.corsOrigin,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     });
+    
+    await app.register(swagger);
 
     app.addHook('preHandler', authMiddleware);
 

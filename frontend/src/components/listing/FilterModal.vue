@@ -29,13 +29,13 @@
                     </div>
                 </div>
 
-                <h4>Ціна</h4>
+                <h4>Ціна ($)</h4>
                 <div class="range-container">
                     <input type="number" v-model="localPriceMin" placeholder="Від" @input="restrictInput($event, 'localPriceMin', 10)" />
                     <input type="number" v-model="localPriceMax" placeholder="До" @input="restrictInput($event, 'localPriceMax', 10)" />
                 </div>
 
-                <h4>Площа</h4>
+                <h4>Площа (м²)</h4>
                 <div class="range-container">
                     <input type="number" v-model="localAreaMin" placeholder="Від" @input="restrictInput($event, 'localAreaMin', 10)" />
                     <input type="number" v-model="localAreaMax" placeholder="До" @input="restrictInput($event, 'localAreaMax', 10)" />

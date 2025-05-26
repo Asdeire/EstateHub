@@ -40,7 +40,7 @@
                     </div>
                 </div>
 
-                <h4>Ціна</h4>
+                <h4>Ціна ($)</h4>
                 <div class="range-container">
                     <input type="number" v-model="formData.filters.minPrice" placeholder="Від"
                         @input="limitDigits('minPrice', 9)" />
@@ -48,7 +48,7 @@
                         @input="limitDigits('maxPrice', 9)" />
                 </div>
 
-                <h4>Площа</h4>
+                <h4>Площа (м²)</h4>
                 <div class="range-container">
                     <input type="number" v-model="formData.filters.minArea" placeholder="Від"
                         @input="limitDigits('minArea', 6)" />
