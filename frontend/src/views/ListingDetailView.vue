@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <Map :location="listing.location" />
+        <Map :current-listing="listing" :nearby-listings="nearbyListings" />
     </div>
     <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
     <Footer />
@@ -47,6 +47,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { watch } from 'vue';
 import { useAuthStore } from '../stores/authDataStore';
 import {
     getListingById,
@@ -54,6 +55,7 @@ import {
     getFavorites,
     addFavorite,
     removeFavorite,
+    getNearbyListings
 } from '../services/api/index';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -71,6 +73,7 @@ const route = useRoute();
 const router = useRouter();
 const listing = ref(null);
 const user = ref(null);
+const nearbyListings = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
@@ -84,10 +87,14 @@ const fetchListing = async () => {
     try {
         const { id } = route.params;
         listing.value = await getListingById(id);
+
         const userId = listing.value.user_id;
         if (userId) {
             user.value = await getUserById(userId);
         }
+
+        nearbyListings.value = await getNearbyListings(id);
+
         if (authStore.isAuthenticated) {
             await fetchFavorites();
         }
@@ -176,6 +183,13 @@ const contactUser = () => {
 const filterByTag = tag => {
     router.push({ name: 'Listings', query: { tag: tag.name } });
 };
+
+watch(() => route.params.id, async (newId) => {
+    if (newId) {
+        loading.value = true;
+        await fetchListing();
+    }
+});
 
 onMounted(async () => {
     await fetchListing();

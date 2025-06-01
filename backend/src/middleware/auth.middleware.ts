@@ -15,6 +15,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
         { path: '/webhook', methods: ['POST'] },
         { path: '/categories', methods: ['GET'] },
         { path: '/listings', methods: ['GET'] },
+        { path: '/listings/nearby', methods: ['GET'] },
         { path: '/tags', methods: ['GET'] },
         { path: '/user', methods: ['GET'] },
         { path: '/docs/static', methods: ['GET'] },

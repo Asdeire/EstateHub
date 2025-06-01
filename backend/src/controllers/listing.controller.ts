@@ -176,6 +176,33 @@ class ListingController {
         }
     }
 
+    async getNearby(
+        req: FastifyRequest<{ Params: { id: string } }>,
+        res: FastifyReply
+    ): Promise<void> {
+        const { id } = req.params;
+
+        try {
+            z.string().uuid().parse(id);
+
+            const currentListing = await listingService.getListingById(id);
+            if (!currentListing) {
+                return res.status(404).send({ message: 'Listing not found' });
+            }
+
+            const nearbyListings = await listingService.getNearbyListings(id, currentListing.location);
+            res.status(200).send(nearbyListings);
+        } catch (error: unknown) {
+            if (error instanceof z.ZodError) {
+                res.status(400).send({ message: 'Invalid listing ID', errors: error.errors });
+            } else if (error instanceof Error) {
+                res.status(500).send({ message: error.message });
+            } else {
+                res.status(500).send({ message: 'An unknown error occurred' });
+            }
+        }
+    }
+
     async update(
         req: FastifyRequest<{ Params: { id: string }; Body: UpdateListingDto }>,
         res: FastifyReply
