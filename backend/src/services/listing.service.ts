@@ -196,7 +196,7 @@ class ListingService {
         } = {}
     ): Promise<{ listings: Listing[]; totalPages: number }> {
         const where: any = {
-            status: 'Active', 
+            status: 'Active',
         };
 
         if (filters.minPrice !== undefined) {
@@ -318,6 +318,20 @@ class ListingService {
                 category: true,
                 tags: true,
             },
+        });
+    }
+
+    async getNearbyListings(id: string, location: string): Promise<Listing[]> {
+        return await prisma.listing.findMany({
+            where: {
+                location: {
+                    contains: location.split(',')[0].trim(),
+                    mode: 'insensitive',
+                },
+                status: 'Active',
+                NOT: { id },
+            },
+            take: 10,
         });
     }
 

@@ -57,7 +57,7 @@
         </section>
 
         <section class="advantages-section">
-            <h2 class="section-title">Наші перевати</h2>
+            <h2 class="section-title">Наші переваги</h2>
             <div class="advantages-cards">
                 <div class="advantages-card">
                     <img src="../assets/check.png" alt="Перевірено" class="card-icon" />
