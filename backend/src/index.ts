@@ -12,8 +12,9 @@ const start = async () => {
   const app = fastify({ logger: true });
 
   await app.register(cors, {
-    origin: config.corsOrigin,
+    origin: config.appUrl,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true 
   });
 
   await app.register(cookie, {

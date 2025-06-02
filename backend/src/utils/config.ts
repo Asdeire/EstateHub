@@ -5,7 +5,6 @@ dotenv.config();
 export const config = {
   isProduction: process.env.NODE_ENV !== "development",
   port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
-  corsOrigin: process.env.CORS_ORIGIN || "*",
   appUrl: process.env.APP_URL || "http://localhost:5173",
   cookieSecret:
     process.env.COOKIE_SECRET || "a-string-secret-at-least-256-bits-long",

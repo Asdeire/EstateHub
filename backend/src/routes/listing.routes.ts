@@ -145,16 +145,17 @@ export async function listingRoutes(fastify: FastifyInstance) {
         handler: listingController.getFavoriteListings,
     });
 
-    fastify.get('/listings/nearby/:id', {
+    fastify.get('/listings/nearby', {
         schema: {
             summary: 'Get listings nearby based on location',
             tags: ['Listing'],
-            params: {
+            querystring: {
                 type: 'object',
                 properties: {
                     id: { type: 'string', format: 'uuid' },
+                    location: { type: 'string' },
                 },
-                required: ['id'],
+                required: ['location'],
             },
             response: {
                 200: {

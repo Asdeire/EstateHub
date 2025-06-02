@@ -47,7 +47,6 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     };
     request.user = { id: decoded.id, role: decoded.role };
   } catch (error) {
-    reply.hijack();
     return reply.code(401).send({ error: 'Invalid or expired token' });
   }
 }

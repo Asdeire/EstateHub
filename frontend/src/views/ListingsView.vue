@@ -19,6 +19,11 @@
             <span @click="showFilters = !showFilters"><img src="../assets/filter.png"></span>
         </div>
 
+        <div class="view-toggle">
+            <button :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">Список</button>
+            <button :class="{ active: viewMode === 'map' }" @click="viewMode = 'map'">Карта</button>
+        </div>
+
         <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
             :selected-type="selectedType" :selected-category="selectedCategory" :selected-tags="selectedTags"
             :price-min="priceMin" :price-max="priceMax" :area-min="areaMin" :area-max="areaMax"
@@ -28,19 +33,25 @@
         <div v-else-if="error" class="error-message">{{ error }}</div>
 
         <div v-else>
-            <Listings :listings="sortedListings" :goToListingDetail="goToListingDetail"
-                :toggleFavorite="toggleFavorite" />
-        </div>
+            <div v-if="viewMode === 'list'">
+                <Listings :listings="sortedListings" :goToListingDetail="goToListingDetail"
+                    :toggleFavorite="toggleFavorite" />
 
-        <div class="pagination-container" v-if="totalPages > 1">
-            <button class="pagination-button" @click="changePage(currentPage - 1)" :disabled="currentPage <= 1">
-                Попередня
-            </button>
-            <span>{{ currentPage }} / {{ totalPages }}</span>
-            <button class="pagination-button" @click="changePage(currentPage + 1)"
-                :disabled="currentPage >= totalPages">
-                Наступна
-            </button>
+                <div class="pagination-container" v-if="totalPages > 1">
+                    <button class="pagination-button" @click="changePage(currentPage - 1)" :disabled="currentPage <= 1">
+                        Попередня
+                    </button>
+                    <span>{{ currentPage }} / {{ totalPages }}</span>
+                    <button class="pagination-button" @click="changePage(currentPage + 1)"
+                        :disabled="currentPage >= totalPages">
+                        Наступна
+                    </button>
+                </div>
+            </div>
+
+            <div v-else-if="viewMode === 'map'" class="map-container">
+                <MapView :nearbyListings="nearbyListings" />
+            </div>
         </div>
     </div>
     <Footer />
@@ -53,11 +64,13 @@ import { useAuthStore } from '../stores/authDataStore';
 import { useDataStore } from '../stores/dataStore';
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
+import MapView from '../components/listing/Map.vue';
 import Listings from '../components/listing/ListingCard.vue';
 import FilterModal from '../components/listing/FilterModal.vue';
-import { getActiveListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
+import { getActiveListings, addFavorite, removeFavorite, getFavorites, getNearbyListings } from '../services/api/index';
 import Swal from 'sweetalert2';
 import type { Listing } from '../types/listing';
+import { reverseGeocode } from '../services/utils/geolocation';
 
 const router = useRouter();
 const route = useRoute();
@@ -65,6 +78,8 @@ const authStore = useAuthStore();
 const dataStore = useDataStore();
 
 const listings = ref<Listing[]>([]);
+const nearbyListings = ref<Listing[]>([]);
+
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
 
@@ -78,6 +93,7 @@ const areaMin = ref<number | null>(null);
 const areaMax = ref<number | null>(null);
 const sortBy = ref<string>('newest');
 const showFilters = ref<boolean>(false);
+const viewMode = ref<'list' | 'map'>('list');
 
 const currentPage = ref<number>(1);
 const listingsPerPage = 12;
@@ -88,6 +104,7 @@ const favorites = ref<Set<string>>(new Set());
 const onSearchInput = () => {
     currentPage.value = 1;
     applyFilters();
+    fetchNearbyListings(searchQuery.value);
 };
 
 const updateFavorites = async () => {
@@ -100,7 +117,6 @@ const updateFavorites = async () => {
         console.error('Error loading favorites:', error);
     }
 };
-
 
 const cache = ref<Map<string, { listings: Listing[], totalPages: number }>>(new Map());
 
@@ -133,6 +149,37 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
         loading.value = false;
     }
 };
+
+
+const detectUserCityAndFetchNearby = async () => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        const city = await reverseGeocode(latitude, longitude);
+        console.log('Detected city:', city);
+        if (city) {
+            await fetchNearbyListings(city);
+        }
+    }, (error) => {
+        console.warn('Геолокація не дозволена або сталася помилка:', error);
+        fetchNearbyListings("Ужгород");
+    });
+};
+
+
+const fetchNearbyListings = async (query: string) => {
+    try {
+        if (!query) return;
+        const city = query.split(',')[0].trim();
+        const nearby = await getNearbyListings(city);
+        nearbyListings.value = nearby;
+    } catch (err) {
+        console.error('Помилка при завантаженні nearby оголошень:', err);
+    }
+};
+
 
 const toggleFavorite = async (listing: Listing) => {
     if (!authStore.isAuthenticated) {
@@ -249,5 +296,10 @@ onMounted(async () => {
     if (type) selectedType.value = type as string;
 
     applyFilters();
+    if (searchQuery.value) {
+        fetchNearbyListings(searchQuery.value);
+    } else {
+        detectUserCityAndFetchNearby();
+    }
 });
 </script>

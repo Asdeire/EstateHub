@@ -21,8 +21,6 @@ export class EmailHandler {
       purpose === "registration" ? "verification" : "password reset"
     } code is: <strong>${code}</strong></p>`;
 
-    // await this.emailService.sendNotificationEmail(email, subject, html);
+    await this.emailService.sendNotificationEmail(email, subject, html);
   }
-
-  // You can add more email-related methods here as needed
 }

@@ -110,12 +110,21 @@ export const getFavoriteListings = async (user_id: string): Promise<Listing[]> =
     }
 };
 
-export const getNearbyListings = async (id: string): Promise<Listing[]> => {
+export const getNearbyListings = async (
+    location: string,
+    id?: string
+): Promise<Listing[]> => {
     try {
-        const response = await api.get(`/listings/nearby/${id}`);
+        const params: Record<string, string> = { location };
+        if (id) {
+            params.id = id;
+        }
+
+        const response = await api.get('/listings/nearby', { params });
         return response.data;
     } catch (error) {
-        console.error(`Error fetching nearby listings for ID ${id}:`, error);
+        console.error(`Error fetching nearby listings${id ? ` for ID ${id}` : ''}:`, error);
         throw error;
     }
 };
+

@@ -321,16 +321,21 @@ class ListingService {
         });
     }
 
-    async getNearbyListings(id: string, location: string): Promise<Listing[]> {
-        return await prisma.listing.findMany({
-            where: {
-                location: {
-                    contains: location.split(',')[0].trim(),
-                    mode: 'insensitive',
-                },
-                status: 'Active',
-                NOT: { id },
+    async getNearbyListings(location: string, id?: string): Promise<Listing[]> {
+        const where: any = {
+            location: {
+                contains: location.split(',')[0].trim(),
+                mode: 'insensitive',
             },
+            status: 'Active',
+        };
+
+        if (id) {
+            where.NOT = { id };
+        }
+
+        return await prisma.listing.findMany({
+            where,
             take: 10,
         });
     }

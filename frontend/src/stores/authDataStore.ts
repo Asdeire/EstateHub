@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { getUserById } from '../services/api/user';
 import type { User } from '../types/user';
+import { refreshAccessToken } from '../services/api/index';
+import { api } from '../services/api/index';
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null);
@@ -20,10 +22,24 @@ export const useAuthStore = defineStore('auth', () => {
 
     const fetchUser = async (userId: string) => {
         try {
-            if (!userId || !isTokenValid()) {
+            if (!userId) {
                 logout();
                 return;
             }
+
+            let tokenToUse = localStorage.getItem('authToken');
+
+            if (!isTokenValid()) {
+                const newToken = await refreshAccessToken();
+                if (!newToken) {
+                    logout();
+                    return;
+                }
+
+                tokenToUse = newToken;
+            }
+
+            api.defaults.headers.common['Authorization'] = `Bearer ${tokenToUse}`;
 
             const data = await getUserById(userId);
             user.value = data;

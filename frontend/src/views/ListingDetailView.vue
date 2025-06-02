@@ -93,7 +93,7 @@ const fetchListing = async () => {
             user.value = await getUserById(userId);
         }
 
-        nearbyListings.value = await getNearbyListings(id);
+        nearbyListings.value = await getNearbyListings(listing.value.location, id);
 
         if (authStore.isAuthenticated) {
             await fetchFavorites();

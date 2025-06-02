@@ -1,5 +1,5 @@
 import { api } from '../api';
-import { setItem, getUserIdFromToken } from '../localStorageService';
+import { setItem, getUserIdFromToken, removeItem } from '../localStorageService';
 
 export const registerUser = async (userData: {
     name: string;
@@ -65,5 +65,25 @@ export const resetPassword = async (resetData: {
     } catch (error: any) {
         console.error('Password reset error:', error.response?.data || error.message);
         throw error;
+    }
+};
+
+export const refreshAccessToken = async (): Promise<string | null> => {
+    try {
+        const response = await api.post('/refresh', {}, {
+            withCredentials: true
+        });
+
+        const accessToken = response.data.token;
+        if (accessToken) {
+            setItem('authToken', accessToken);
+            return accessToken;
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Refresh token failed:', error);
+        removeItem('authToken');
+        return null;
     }
 };

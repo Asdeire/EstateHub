@@ -177,20 +177,17 @@ class ListingController {
     }
 
     async getNearby(
-        req: FastifyRequest<{ Params: { id: string } }>,
+        req: FastifyRequest<{ Querystring: { location: string; id?: string } }>,
         res: FastifyReply
     ): Promise<void> {
-        const { id } = req.params;
+        const { location, id } = req.query;
 
         try {
-            z.string().uuid().parse(id);
-
-            const currentListing = await listingService.getListingById(id);
-            if (!currentListing) {
-                return res.status(404).send({ message: 'Listing not found' });
+            if (id) {
+                z.string().uuid().parse(id);
             }
 
-            const nearbyListings = await listingService.getNearbyListings(id, currentListing.location);
+            const nearbyListings = await listingService.getNearbyListings(location, id);
             res.status(200).send(nearbyListings);
         } catch (error: unknown) {
             if (error instanceof z.ZodError) {
