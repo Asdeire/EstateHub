@@ -28,17 +28,17 @@
 
             <div class="listing-contact">
                 <div class="user-info">
-                    <img :src="userIcon" alt="Іконка користувача" class="user-icon" />
                     <div class="user-details">
                         <p class="user-name">{{ user?.name }}</p>
-                        <p v-if="user?.role === 'Makler'" class="agent-status">Агент</p>
+                        <img v-if="authStore.user?.role === 'Makler'" src="../assets/verify.png" alt="Agent"
+                            class="agent-icon" />
                     </div>
                 </div>
                 <button class="contact-button" @click="contactUser">Зв'язатись</button>
             </div>
         </div>
 
-        <Map :current-listing="listing" :nearby-listings="nearbyListings" />
+        <Map :current-listing="listing" :nearby-listings="nearbyListings" style-variant="compact" />
     </div>
     <div v-else-if="error" class="error-message" role="alert">{{ error }}</div>
     <Footer />
@@ -66,7 +66,6 @@ import Map from '../components/listing/Map.vue';
 import PhotoGallery from '../components/listing/PhotoGallery.vue';
 
 import agentIcon from '../assets/agency.png';
-import userIconDefault from '../assets/user-icon.png';
 import defaultPhoto from '../assets/undefined.png';
 
 const route = useRoute();
@@ -162,7 +161,6 @@ const toggleCurrency = () => {
     currency.value = currency.value === 'USD' ? 'UAH' : 'USD';
 };
 
-const userIcon = computed(() => (user.value?.role === 'Makler' ? agentIcon : userIconDefault));
 
 const contactUser = () => {
     if (!authStore.isAuthenticated) {

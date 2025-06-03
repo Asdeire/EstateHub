@@ -18,6 +18,8 @@
                 <template v-if="authStore.isAuthenticated">
                     <div class="user-menu" ref="userMenuRef" @click="toggleUserMenu">
                         {{ authStore.user?.name }}
+                        <img v-if="authStore.user?.role === 'Makler'" src="../assets/verify.png" alt="Agent"
+                            class="agent-icon" />
                         <ul v-if="showUserMenu" class="dropdown-menu">
                             <li class="nav-item" @click="goTo('/profile')">Профіль</li>
                             <li class="nav-item" @click="goTo('/notifications')">Повідомлення</li>

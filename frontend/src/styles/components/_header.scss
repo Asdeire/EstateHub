@@ -85,6 +85,12 @@
             position: relative;
             cursor: pointer;
             font-size: 18px;
+            align-items: center;
+            display: flex;
+        }
+
+        .agent-icon{
+            height: 24px;
         }
 
         .dropdown-menu {

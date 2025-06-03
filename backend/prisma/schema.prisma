@@ -26,6 +26,7 @@ model User {
   telegram_username String?    @unique 
   password_hash String
   role          Role
+  fop_code      String   @default("none")
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
   listings      Listing[]

@@ -9,6 +9,12 @@
 
             <div class="divider"></div>
 
+            <div class="view-toggle">
+                <button @click="toggleViewMode" :class="viewMode">
+                    {{ viewMode === 'list' ? 'Перейти до карти' : 'Перейти до списку' }}
+                </button>
+            </div>
+
             <select v-model="sortBy">
                 <option value="newest">Новіші</option>
                 <option value="oldest">Старіші</option>
@@ -17,11 +23,6 @@
             </select>
 
             <span @click="showFilters = !showFilters"><img src="../assets/filter.png"></span>
-        </div>
-
-        <div class="view-toggle">
-            <button :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">Список</button>
-            <button :class="{ active: viewMode === 'map' }" @click="viewMode = 'map'">Карта</button>
         </div>
 
         <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
@@ -50,7 +51,7 @@
             </div>
 
             <div v-else-if="viewMode === 'map'" class="map-container">
-                <MapView :nearbyListings="nearbyListings" />
+                <MapView :nearbyListings="sortedListings" style-variant="default" />
             </div>
         </div>
     </div>
@@ -67,10 +68,9 @@ import Footer from '../components/Footer.vue';
 import MapView from '../components/listing/Map.vue';
 import Listings from '../components/listing/ListingCard.vue';
 import FilterModal from '../components/listing/FilterModal.vue';
-import { getActiveListings, addFavorite, removeFavorite, getFavorites, getNearbyListings } from '../services/api/index';
+import { getActiveListings, addFavorite, removeFavorite, getFavorites } from '../services/api/index';
 import Swal from 'sweetalert2';
 import type { Listing } from '../types/listing';
-import { reverseGeocode } from '../services/utils/geolocation';
 
 const router = useRouter();
 const route = useRoute();
@@ -78,7 +78,6 @@ const authStore = useAuthStore();
 const dataStore = useDataStore();
 
 const listings = ref<Listing[]>([]);
-const nearbyListings = ref<Listing[]>([]);
 
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
@@ -104,7 +103,10 @@ const favorites = ref<Set<string>>(new Set());
 const onSearchInput = () => {
     currentPage.value = 1;
     applyFilters();
-    fetchNearbyListings(searchQuery.value);
+};
+
+const toggleViewMode = () => {
+    viewMode.value = viewMode.value === 'list' ? 'map' : 'list';
 };
 
 const updateFavorites = async () => {
@@ -149,37 +151,6 @@ const fetchListings = async (page: number = 1, filters: Record<string, any> = {}
         loading.value = false;
     }
 };
-
-
-const detectUserCityAndFetchNearby = async () => {
-    if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude, longitude } = position.coords;
-
-        const city = await reverseGeocode(latitude, longitude);
-        console.log('Detected city:', city);
-        if (city) {
-            await fetchNearbyListings(city);
-        }
-    }, (error) => {
-        console.warn('Геолокація не дозволена або сталася помилка:', error);
-        fetchNearbyListings("Ужгород");
-    });
-};
-
-
-const fetchNearbyListings = async (query: string) => {
-    try {
-        if (!query) return;
-        const city = query.split(',')[0].trim();
-        const nearby = await getNearbyListings(city);
-        nearbyListings.value = nearby;
-    } catch (err) {
-        console.error('Помилка при завантаженні nearby оголошень:', err);
-    }
-};
-
 
 const toggleFavorite = async (listing: Listing) => {
     if (!authStore.isAuthenticated) {
@@ -296,10 +267,5 @@ onMounted(async () => {
     if (type) selectedType.value = type as string;
 
     applyFilters();
-    if (searchQuery.value) {
-        fetchNearbyListings(searchQuery.value);
-    } else {
-        detectUserCityAndFetchNearby();
-    }
 });
 </script>

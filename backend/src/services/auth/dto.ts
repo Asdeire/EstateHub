@@ -10,6 +10,7 @@ export interface RegisterUser {
   email: string;
   password: string;
   role: UserRole;
+  fop_code?: string;
 }
 
 export interface LoginUser {
@@ -23,6 +24,7 @@ export interface VerifyCodeAndRegisterUser {
   name: string;
   password: string;
   role: UserRole;
+  fop_code?: string;
 }
 
 export interface ResetPassword {

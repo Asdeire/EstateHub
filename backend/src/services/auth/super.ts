@@ -83,6 +83,7 @@ export class AuthService {
         name: dto.name,
         email: dto.email,
         password_hash: hashedPassword,
+        fop_code: dto.fop_code || "none",
       },
     });
   }

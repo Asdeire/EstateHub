@@ -118,8 +118,11 @@
 
             .user-details {
                 display: flex;
-                flex-direction: column;
                 gap: 2px;
+
+                .agent-icon{
+                    height: 24px;
+                }
             }
 
             .user-name {

@@ -21,9 +21,9 @@
                     <div class="form-group">
                         <label for="password">Пароль</label>
                         <input v-model="form.password" type="password" id="password" required />
-                        <p v-if="passwordError" class="error-text">Пароль повинен містити мінімум 6 символів, в тому
-                            числі
-                            одну цифру і одну велику літеру.</p>
+                        <p v-if="passwordError" class="error-text">
+                            Пароль повинен містити мінімум 6 символів, в тому числі одну цифру і одну велику літеру.
+                        </p>
                     </div>
 
                     <div class="checkbox-group">
@@ -31,10 +31,14 @@
                         <label for="isAgent">Я посередник</label>
                     </div>
 
+                    <div v-if="form.isAgent" class="form-group">
+                        <label for="fopCode">ІПН або ЄДРПОУ</label>
+                        <input v-model="form.fopCode" type="text" id="fopCode" required />
+                    </div>
+
                     <button type="submit" :disabled="passwordError || isLoading">
                         {{ isLoading ? 'Завантаження...' : 'Зареєструватись' }}
                     </button>
-
                 </div>
 
                 <div v-if="step === 2">
@@ -49,7 +53,6 @@
             </form>
 
             <p class="terms">Вже є аккаунт? <a href="login">Увійти</a></p>
-
         </div>
     </div>
 </template>
@@ -61,13 +64,18 @@ import { registerUser, verifyCode } from '../services/api/index';
 import Swal from 'sweetalert2';
 
 const router = useRouter();
+
 const form = ref({
     name: '',
     email: '',
     password: '',
     isAgent: false,
     verificationCode: '',
+    fopCode: '',
 });
+
+const step = ref(1);
+const isLoading = ref(false);
 
 const passwordError = computed(() => {
     const password = form.value.password;
@@ -75,24 +83,41 @@ const passwordError = computed(() => {
     return password && !regex.test(password);
 });
 
-const step = ref(1);
-const isLoading = ref(false);
+const fopCodeError = computed(() => {
+    if (!form.value.isAgent) return false;
+    const code = form.value.fopCode.trim();
+    return !(code.length === 8 || code.length === 10) || !/^\d+$/.test(code);
+});
 
 const submitForm = async () => {
     isLoading.value = true;
+
     try {
         if (step.value === 1) {
+            if (form.value.isAgent && fopCodeError.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Невірний ІПН або ЄДРПОУ',
+                    text: 'Введіть коректний ІПН (10 цифр) або ЄДРПОУ (8 цифр).',
+                });
+                isLoading.value = false;
+                return;
+            }
+
             await registerUser({
                 name: form.value.name,
                 email: form.value.email,
                 password: form.value.password,
                 role: form.value.isAgent ? 'Makler' : 'User',
+                fopCode: form.value.isAgent ? form.value.fopCode : undefined,
             });
+
             Swal.fire({
                 icon: 'info',
                 title: 'Підтвердження',
                 text: 'Код підтвердження надіслано на вашу електронну пошту.',
             });
+
             step.value = 2;
         } else if (step.value === 2) {
             await verifyCode({
@@ -101,7 +126,9 @@ const submitForm = async () => {
                 name: form.value.name,
                 password: form.value.password,
                 role: form.value.isAgent ? 'Makler' : 'User',
+                fopCode: form.value.isAgent ? form.value.fopCode : undefined,
             });
+
             Swal.fire({
                 icon: 'success',
                 title: 'Успішно!',
@@ -111,7 +138,7 @@ const submitForm = async () => {
             });
         }
     } catch (err) {
-        if (err.response && err.response.data.message === 'Email is already in use') {
+        if (err.response?.data?.message === 'Email is already in use') {
             Swal.fire({
                 icon: 'error',
                 title: 'Помилка',
@@ -128,5 +155,4 @@ const submitForm = async () => {
         isLoading.value = false;
     }
 };
-
 </script>

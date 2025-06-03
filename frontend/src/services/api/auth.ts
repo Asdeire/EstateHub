@@ -6,6 +6,7 @@ export const registerUser = async (userData: {
     email: string;
     password: string;
     role: 'User' | 'Makler';
+    fop_code?: string;
 }) => {
     try {
         const response = await api.post('/register', userData);
@@ -22,6 +23,7 @@ export const verifyCode = async (verificationData: {
     name: string;
     password: string;
     role: 'User' | 'Makler';
+    fop_code?: string;
 }) => {
     const response = await api.post('/verify', verificationData);
     return response.data;

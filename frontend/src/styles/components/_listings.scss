@@ -2,7 +2,6 @@
     width: 100vw;
     justify-items: center;
 
-
     .top-container {
         padding: 20px 0;
         margin-top: 50px;
@@ -10,10 +9,11 @@
         justify-content: center;
         align-items: center;
         gap: 20px;
-        width: 100%;
+        width: 90%;
         flex-wrap: wrap;
 
         select {
+            width: 10%;
             color: $primary-color;
             padding: 10px;
             border: 1px solid $primary-color;
@@ -51,6 +51,20 @@
         }
     }
 
+    .view-toggle {
+        button {
+            height: 40px;
+            width: fit-content;
+        }
+    }
+
+    .divider {
+        display: none;
+        width: 100vw;
+        height: 1px;
+        background-color: $secondary-color;
+    }
+
     .pagination-container {
         padding: 15px 0;
         display: flex;
@@ -66,27 +80,28 @@
         }
     }
 
-    .divider {
-        display: none;
-        width: 100vw;
-        height: 1px;
-        background-color: $secondary-color;
-    }
-
     @media (max-width: 1000px) {
         .top-container {
-            padding: 20px 20px;
-            justify-content: right;
+            padding: 20px 0;
             gap: 10px;
-        }
+            justify-content: right;
 
-        .search-container {
-            width: 100%;
-            padding: 0;
-        }
+            select {
+                width: auto;
+            }
 
-        .divider {
-            display: block;
+            .view-toggle {
+                width: auto;
+            }
+
+            .search-container {
+                width: 100%;
+                padding: 0;
+            }
+
+            .divider {
+                display: block;
+            }
         }
     }
 }
