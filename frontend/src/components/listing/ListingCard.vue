@@ -6,6 +6,11 @@
             <img :src="listing.photos?.[0] || '/house.png'" alt="Image {{ listing.title }}" class="listing-image"
                 loading="lazy" />
 
+            <div v-if="listing.is_verified == true" class="listing-verified" loading="lazy"><img src="../../assets/verify.png"
+                    alt="Agent" class="agent-icon" />
+                <p>Перевірено</p>
+            </div>
+
             <div class="listing-info">
                 <div class="title-and-favorite">
                     <h2>{{ listing.title }}</h2>

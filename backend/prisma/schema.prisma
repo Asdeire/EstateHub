@@ -40,6 +40,7 @@ model Listing {
   user_id       String
   user          User     @relation(fields: [user_id], references: [id])
   is_agent_listing Boolean
+  is_verified Boolean @default(false)
   type          String
   location      String
   price         Float

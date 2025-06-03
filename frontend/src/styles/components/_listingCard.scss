@@ -10,7 +10,7 @@
         width: 340px;
         padding: 20px;
         height: fit-content;
-        background: #F5F4F1;
+        background: #f5f4f1;
         border-radius: 12px;
         box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease-in-out;
@@ -93,6 +93,24 @@
     .no-listings {
         height: 90vh;
         font-size: large;
+    }
+
+    .listing-verified{
+        background-color: rgb(245, 244, 241, 0.85);
+        position: absolute;
+        top: 25px;
+        right: 24px;
+        height: 30px;
+        width: 110px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
     }
 
     @media(max-width: 1700px) {

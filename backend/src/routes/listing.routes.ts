@@ -50,6 +50,7 @@ export async function listingRoutes(fastify: FastifyInstance) {
                     type: { type: 'string' },
                     tags: { type: 'string' },
                     location: { type: 'string' },
+                    is_verified: { type: 'boolean' },
                 },
             },
             response: {

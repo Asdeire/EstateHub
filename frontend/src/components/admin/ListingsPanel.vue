@@ -14,6 +14,9 @@
                 <n-form-item label="Ціна" path="price">
                     <n-input-number v-model:value="currentListing.price" :min="0" />
                 </n-form-item>
+                <n-form-item label="Перевірено" path="is_verified">
+                    <n-switch v-model:value="currentListing.is_verified" />
+                </n-form-item>
             </n-form>
             <template #action>
                 <n-button @click="showEditListingModal = false">Скасувати</n-button>
@@ -28,7 +31,7 @@
 
 <script setup lang="ts">
 import { ref, h, onMounted } from 'vue';
-import { NDataTable, NButton, NModal, NForm, NFormItem, NInput, NSelect, NInputNumber } from 'naive-ui';
+import { NDataTable, NButton, NModal, NForm, NFormItem, NInput, NSelect, NInputNumber, NSwitch} from 'naive-ui';
 import Swal from 'sweetalert2';
 import { updateAdminListing, deleteAdminListing } from '../../services/api/admin';
 import type { Listing } from '../../types/listing';
@@ -95,6 +98,17 @@ const listingColumns = [
             rowA.is_agent_listing === rowB.is_agent_listing ? 0 : rowA.is_agent_listing ? -1 : 1,
         render(row: Listing) {
             return row.is_agent_listing ? 'Так' : 'Ні';
+        },
+    },
+    {
+        title: 'Перевірено',
+        key: 'is_verified',
+        minWidth: 130,
+        sortable: true,
+        sorter: (rowA: Listing, rowB: Listing) =>
+            rowA.is_verified === rowB.is_verified ? 0 : rowA.is_verified ? -1 : 1,
+        render(row: Listing) {
+            return row.is_verified ? '✅' : '❌';
         },
     },
     {

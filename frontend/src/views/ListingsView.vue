@@ -26,7 +26,7 @@
         </div>
 
         <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
-            :selected-type="selectedType" :selected-category="selectedCategory" :selected-tags="selectedTags"
+            :selected-type="selectedType" :selected-category="selectedCategory" :selected-tags="selectedTags" :selected-is-verified="isVerified"
             :price-min="priceMin" :price-max="priceMax" :area-min="areaMin" :area-max="areaMax"
             @close="showFilters = false" @apply="handleApplyFilters" @clear="clearFilters" />
 
@@ -92,6 +92,8 @@ const areaMin = ref<number | null>(null);
 const areaMax = ref<number | null>(null);
 const sortBy = ref<string>('newest');
 const showFilters = ref<boolean>(false);
+const isVerified = ref<string>('');
+
 const viewMode = ref<'list' | 'map'>('list');
 
 const currentPage = ref<number>(1);
@@ -221,6 +223,7 @@ const applyFilters = () => {
         maxArea: areaMax.value,
         tags: selectedTags.value,
         search: searchQuery.value.trim(),
+        is_verified: isVerified.value === '' ? undefined : isVerified.value === 'true',
     };
     fetchListings(currentPage.value, filters);
 };
@@ -234,6 +237,7 @@ const handleApplyFilters = (filters: Record<string, any>) => {
     areaMin.value = filters.minArea;
     areaMax.value = filters.maxArea;
     searchQuery.value = filters.search || '';
+    isVerified.value = filters.is_verified !== undefined ? String(filters.is_verified) : '';
     applyFilters();
 };
 

@@ -21,6 +21,15 @@
                     </option>
                 </select>
 
+                <label>
+                    Перевірені:
+                    <select v-model="localIsVerified">
+                        <option value="">Усі</option>
+                        <option value="true">Тільки перевірені</option>
+                        <option value="false">Тільки не перевірені</option>
+                    </select>
+                </label>
+
                 <label>Теги</label>
                 <div class="tag-container">
                     <div v-for="tag in tags" :key="tag.id" class="tag-item"
@@ -31,14 +40,18 @@
 
                 <h4>Ціна ($)</h4>
                 <div class="range-container">
-                    <input type="number" v-model="localPriceMin" placeholder="Від" @input="restrictInput($event, 'localPriceMin', 10)" />
-                    <input type="number" v-model="localPriceMax" placeholder="До" @input="restrictInput($event, 'localPriceMax', 10)" />
+                    <input type="number" v-model="localPriceMin" placeholder="Від"
+                        @input="restrictInput($event, 'localPriceMin', 10)" />
+                    <input type="number" v-model="localPriceMax" placeholder="До"
+                        @input="restrictInput($event, 'localPriceMax', 10)" />
                 </div>
 
                 <h4>Площа (м²)</h4>
                 <div class="range-container">
-                    <input type="number" v-model="localAreaMin" placeholder="Від" @input="restrictInput($event, 'localAreaMin', 10)" />
-                    <input type="number" v-model="localAreaMax" placeholder="До" @input="restrictInput($event, 'localAreaMax', 10)" />
+                    <input type="number" v-model="localAreaMin" placeholder="Від"
+                        @input="restrictInput($event, 'localAreaMin', 10)" />
+                    <input type="number" v-model="localAreaMax" placeholder="До"
+                        @input="restrictInput($event, 'localAreaMax', 10)" />
                 </div>
 
                 <div class="filter-buttons">
@@ -59,6 +72,7 @@ const props = defineProps<{
     tags: Tag[];
     selectedType: string;
     selectedCategory: string;
+    selectedIsVerified: string;
     selectedTags: string[];
     priceMin: number | null;
     priceMax: number | null;
@@ -79,9 +93,11 @@ const localPriceMin = ref<number | null>(props.priceMin);
 const localPriceMax = ref<number | null>(props.priceMax);
 const localAreaMin = ref<number | null>(props.areaMin);
 const localAreaMax = ref<number | null>(props.areaMax);
+const localIsVerified = ref<string>('');
 
 watch(() => props.selectedType, (value) => (localSelectedType.value = value));
 watch(() => props.selectedCategory, (value) => (localSelectedCategory.value = value));
+watch(() => props.selectedIsVerified, (value) => { localIsVerified.value = value; });
 watch(() => props.selectedTags, (value) => (localSelectedTags.value = [...value]));
 watch(() => props.priceMin, (value) => (localPriceMin.value = value));
 watch(() => props.priceMax, (value) => (localPriceMax.value = value));
@@ -128,6 +144,11 @@ const applyFilters = () => {
         maxPrice: localPriceMax.value,
         minArea: localAreaMin.value,
         maxArea: localAreaMax.value,
+        is_verified:
+            localIsVerified.value === ''
+                ? undefined
+                : localIsVerified.value === 'true',
+
     };
     emit('apply', filters);
     emit('close');
@@ -141,6 +162,7 @@ const clearFilters = () => {
     localPriceMax.value = null;
     localAreaMin.value = null;
     localAreaMax.value = null;
+    localIsVerified.value = '';
     emit('clear');
     emit('close');
 };

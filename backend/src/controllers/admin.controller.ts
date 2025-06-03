@@ -111,6 +111,7 @@ class AdminController {
                 area?: number;
                 photos?: string[];
                 category_id?: string;
+                is_verified?: boolean;
             };
         }>,
         res: FastifyReply

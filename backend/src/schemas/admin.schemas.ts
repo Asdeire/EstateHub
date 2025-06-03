@@ -21,6 +21,7 @@ export const updateListingSchema = z.object({
     area: z.number().optional(),
     photos: z.array(z.string()).optional(),
     category_id: z.string().uuid().optional(),
+    is_verified: z.boolean().optional(),
 });
 
 export const createCategorySchema = z.object({

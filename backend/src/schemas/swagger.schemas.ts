@@ -38,6 +38,7 @@ export const swaggerSchemas = {
       id: { type: "string", format: "uuid" },
       user_id: { type: "string", format: "uuid" },
       is_agent_listing: { type: "boolean" },
+      is_verified: { type: "boolean" },
       description: { type: "string" },
       photos: { type: "array", items: { type: "string" } },
       category_id: { type: "string", format: "uuid" },

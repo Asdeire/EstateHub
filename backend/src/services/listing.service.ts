@@ -10,6 +10,7 @@ const listingSelectFields = {
     id: true,
     user_id: true,
     is_agent_listing: true,
+    is_verified: true,
     description: true,
     photos: true,
     category_id: true,
@@ -193,6 +194,7 @@ class ListingService {
             maxArea?: number;
             tags?: string[];
             location?: string;
+            is_verified?: boolean;
         } = {}
     ): Promise<{ listings: Listing[]; totalPages: number }> {
         const where: any = {
@@ -234,6 +236,10 @@ class ListingService {
                 contains: filters.location,
                 mode: 'insensitive',
             };
+        }
+
+        if (filters.is_verified !== undefined) {
+            where.is_verified = filters.is_verified;
         }
 
         const totalListings = await prisma.listing.count({ where });

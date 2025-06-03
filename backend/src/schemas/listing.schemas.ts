@@ -27,6 +27,7 @@ export const getAllFiltersSchema = z.object({
     status: z.string().optional(),
     tags: z.string().optional(),
     location: z.string().optional(),
+    is_verified: z.boolean().optional(),
 });
 
 export const updateListingSchema = z.object({

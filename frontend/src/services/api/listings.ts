@@ -14,6 +14,7 @@ export const getActiveListings = async (
         maxArea?: number,
         tags?: string[],
         search?: string,
+        is_verified?: boolean,
     } = {}
 ): Promise<{ listings: Listing[], totalPages: number }> => {
     const queryParams = new URLSearchParams({
@@ -27,6 +28,7 @@ export const getActiveListings = async (
         ...(filters.maxArea && { maxArea: String(filters.maxArea) }),
         ...(filters.tags?.length && { tags: filters.tags.join(',') }),
         ...(filters.search && { location: filters.search }),
+        ...(filters.is_verified !== undefined && { is_verified: String(filters.is_verified) }), // ← ДОДАНО
     });
 
     try {
