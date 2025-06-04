@@ -28,6 +28,8 @@ export const getAllFiltersSchema = z.object({
     tags: z.string().optional(),
     location: z.string().optional(),
     is_verified: z.boolean().optional(),
+    sortBy: z.string().optional(),
+    sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
 export const updateListingSchema = z.object({

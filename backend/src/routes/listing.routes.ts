@@ -51,6 +51,8 @@ export async function listingRoutes(fastify: FastifyInstance) {
                     tags: { type: 'string' },
                     location: { type: 'string' },
                     is_verified: { type: 'boolean' },
+                    sortBy: { type: 'string', enum: ['updated_at', 'title'] },
+                    sortOrder: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
                 },
             },
             response: {

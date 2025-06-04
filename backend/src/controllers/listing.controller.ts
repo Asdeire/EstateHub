@@ -78,6 +78,8 @@ class ListingController {
             const filters = {
                 ...query,
                 tags: query.tags ? query.tags.split(',') : undefined,
+                sortBy: query.sortBy || 'updated_at',
+                sortOrder: query.sortOrder || 'desc',
             };
 
             if (filters.minPrice && filters.maxPrice && filters.minPrice > filters.maxPrice) {

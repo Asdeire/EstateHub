@@ -15,27 +15,27 @@
                 </button>
             </div>
 
-            <select v-model="sortBy">
-                <option value="newest">Новіші</option>
-                <option value="oldest">Старіші</option>
-                <option value="a-z">A-Я</option>
-                <option value="z-a">Я-A</option>
+            <select v-model="selectedSort" @change="applyFilters">
+                <option value="updated_at:desc">Новіші</option>
+                <option value="updated_at:asc">Старіші</option>
+                <option value="title:asc">A-Я</option>
+                <option value="title:desc">Я-A</option>
             </select>
 
             <span @click="showFilters = !showFilters"><img src="../assets/filter.png"></span>
         </div>
 
         <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
-            :selected-type="selectedType" :selected-category="selectedCategory" :selected-tags="selectedTags" :selected-is-verified="isVerified"
-            :price-min="priceMin" :price-max="priceMax" :area-min="areaMin" :area-max="areaMax"
-            @close="showFilters = false" @apply="handleApplyFilters" @clear="clearFilters" />
+            :selected-type="selectedType" :selected-category="selectedCategory" :selected-tags="selectedTags"
+            :selected-is-verified="isVerified" :price-min="priceMin" :price-max="priceMax" :area-min="areaMin"
+            :area-max="areaMax" @close="showFilters = false" @apply="handleApplyFilters" @clear="clearFilters" />
 
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
 
         <div v-else>
             <div v-if="viewMode === 'list'">
-                <Listings :listings="sortedListings" :goToListingDetail="goToListingDetail"
+                <Listings :listings="listings" :goToListingDetail="goToListingDetail"
                     :toggleFavorite="toggleFavorite" />
 
                 <div class="pagination-container" v-if="totalPages > 1">
@@ -51,7 +51,7 @@
             </div>
 
             <div v-else-if="viewMode === 'map'" class="map-container">
-                <MapView :nearbyListings="sortedListings" style-variant="default" />
+                <MapView :nearbyListings="listings" style-variant="default" />
             </div>
         </div>
     </div>
@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authDataStore';
 import { useDataStore } from '../stores/dataStore';
@@ -78,29 +78,27 @@ const authStore = useAuthStore();
 const dataStore = useDataStore();
 
 const listings = ref<Listing[]>([]);
-
-const loading = ref<boolean>(true);
+const loading = ref(true);
 const error = ref<string | null>(null);
 
-const searchQuery = ref<string>('');
-const selectedType = ref<string>('');
+const searchQuery = ref('');
+const selectedType = ref('');
 const selectedTags = ref<string[]>([]);
-const selectedCategory = ref<string>('');
+const selectedCategory = ref('');
 const priceMin = ref<number | null>(null);
 const priceMax = ref<number | null>(null);
 const areaMin = ref<number | null>(null);
 const areaMax = ref<number | null>(null);
-const sortBy = ref<string>('newest');
-const showFilters = ref<boolean>(false);
 const isVerified = ref<string>('');
+const selectedSort = ref('updated_at:desc');
 
 const viewMode = ref<'list' | 'map'>('list');
-
-const currentPage = ref<number>(1);
+const currentPage = ref(1);
 const listingsPerPage = 12;
-const totalPages = ref<number>(0);
+const totalPages = ref(0);
 
 const favorites = ref<Set<string>>(new Set());
+const showFilters = ref(false);
 
 const onSearchInput = () => {
     currentPage.value = 1;
@@ -122,27 +120,21 @@ const updateFavorites = async () => {
     }
 };
 
-const cache = ref<Map<string, { listings: Listing[], totalPages: number }>>(new Map());
-
-const fetchListings = async (page: number = 1, filters: Record<string, any> = {}) => {
-    const cacheKey = JSON.stringify({ page, filters });
-    if (cache.value.has(cacheKey)) {
-        const cached = cache.value.get(cacheKey)!;
-        listings.value = cached.listings;
-        totalPages.value = cached.totalPages;
-        loading.value = false;
-        if (authStore.isAuthenticated) {
-            await updateFavorites();
-        }
-        return;
-    }
+const fetchListings = async (page = 1, filters: Record<string, any> = {}) => {
     try {
         loading.value = true;
-        filters.status = 'Active';
-        const data = await getActiveListings(page, listingsPerPage, filters);
-        cache.value.set(cacheKey, data);
+
+        const [sortBy, sortOrder] = selectedSort.value.split(':');
+
+        const data = await getActiveListings(page, listingsPerPage, {
+            ...filters,
+            sortBy,
+            sortOrder: sortOrder as 'asc' | 'desc' | undefined,
+        });
+
         listings.value = data.listings;
         totalPages.value = data.totalPages;
+
         if (authStore.isAuthenticated) {
             await updateFavorites();
         }
@@ -196,22 +188,6 @@ const changePage = (page: number) => {
         applyFilters();
     }
 };
-
-const sortedListings = computed(() => {
-    const sorted = [...listings.value];
-    switch (sortBy.value) {
-        case 'newest':
-            return sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-        case 'oldest':
-            return sorted.sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
-        case 'a-z':
-            return sorted.sort((a, b) => a.title.localeCompare(b.title));
-        case 'z-a':
-            return sorted.sort((a, b) => b.title.localeCompare(a.title));
-        default:
-            return sorted;
-    }
-});
 
 const applyFilters = () => {
     const filters = {

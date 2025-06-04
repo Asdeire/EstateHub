@@ -15,6 +15,8 @@ export const getActiveListings = async (
         tags?: string[],
         search?: string,
         is_verified?: boolean,
+        sortBy?: string,
+        sortOrder?: 'asc' | 'desc',
     } = {}
 ): Promise<{ listings: Listing[], totalPages: number }> => {
     const queryParams = new URLSearchParams({
@@ -28,7 +30,9 @@ export const getActiveListings = async (
         ...(filters.maxArea && { maxArea: String(filters.maxArea) }),
         ...(filters.tags?.length && { tags: filters.tags.join(',') }),
         ...(filters.search && { location: filters.search }),
-        ...(filters.is_verified !== undefined && { is_verified: String(filters.is_verified) }), // ← ДОДАНО
+        ...(filters.is_verified !== undefined && { is_verified: String(filters.is_verified) }),
+        ...(filters.sortBy && { sortBy: filters.sortBy }),
+        ...(filters.sortOrder && { sortOrder: filters.sortOrder }),
     });
 
     try {

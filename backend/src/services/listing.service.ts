@@ -195,6 +195,8 @@ class ListingService {
             tags?: string[];
             location?: string;
             is_verified?: boolean;
+            sortBy?: string;
+            sortOrder?: 'asc' | 'desc';
         } = {}
     ): Promise<{ listings: Listing[]; totalPages: number }> {
         const where: any = {
@@ -242,20 +244,25 @@ class ListingService {
             where.is_verified = filters.is_verified;
         }
 
+        const orderBy: Prisma.ListingOrderByWithRelationInput = filters.sortBy
+            ? { [filters.sortBy]: filters.sortOrder === 'desc' ? 'desc' : 'asc' }
+            : { created_at: 'desc' };
+
         const totalListings = await prisma.listing.count({ where });
         const totalPages = Math.ceil(totalListings / limit);
-
         const skip = (page - 1) * limit;
 
         const listings = await prisma.listing.findMany({
             skip,
             take: limit,
             where,
+            orderBy,
             select: listingSelectFields,
         });
 
         return { listings, totalPages };
     }
+
 
     async getFavoriteListings(userId: string): Promise<(Listing & { isFavorite: true })[]> {
         const favorites = await prisma.favorite.findMany({
