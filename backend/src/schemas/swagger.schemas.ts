@@ -13,6 +13,7 @@ export const swaggerSchemas = {
       role: { type: "string", enum: ["User", "Makler", "Admin"] },
       created_at: { type: "string", format: "date-time" },
       updated_at: { type: "string", format: "date-time" },
+      fop_code: { type: "string", nullable: true },
     },
   },
 
@@ -276,6 +277,7 @@ export const swaggerSchemas = {
       password: { type: "string" },
       telegram_chat_id: { type: "string", nullable: true },
       telegram_username: { type: "string", nullable: true },
+      fop_code: { type: "string", nullable: true },
     },
   },
 

@@ -16,6 +16,7 @@ export const registerSchema = z.object({
   role: z.enum(["User", "Makler"], {
     message: 'Role must be either "User" or "Makler"',
   }),
+    fop_code: z.string().optional(),
 });
 
 export const verifySchema = z.object({
@@ -28,6 +29,7 @@ export const verifySchema = z.object({
   role: z.enum(["User", "Makler"], {
     message: 'Role must be either "User" or "Makler"',
   }),
+  fop_code: z.string().optional(),
 });
 
 export const passwordResetSchema = z.object({

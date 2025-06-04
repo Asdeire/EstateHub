@@ -109,7 +109,7 @@ const submitForm = async () => {
                 email: form.value.email,
                 password: form.value.password,
                 role: form.value.isAgent ? 'Makler' : 'User',
-                fopCode: form.value.isAgent ? form.value.fopCode : undefined,
+                fop_code: form.value.isAgent ? form.value.fopCode : undefined,
             });
 
             Swal.fire({
@@ -126,7 +126,7 @@ const submitForm = async () => {
                 name: form.value.name,
                 password: form.value.password,
                 role: form.value.isAgent ? 'Makler' : 'User',
-                fopCode: form.value.isAgent ? form.value.fopCode : undefined,
+                fop_code: form.value.isAgent ? form.value.fopCode : undefined,
             });
 
             Swal.fire({

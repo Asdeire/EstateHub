@@ -75,7 +75,7 @@ export class AuthController {
     try {
       const parsedBody = registerSchema.parse(request.body);
 
-      const { name, email, password, role } = parsedBody;
+      const { name, email, password, role, fop_code } = parsedBody;
 
       const existingUser = await authService.findUserByEmail(email);
 
