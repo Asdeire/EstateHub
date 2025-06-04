@@ -31,7 +31,7 @@
                         <input id="telegram" v-model="form.telegram_username" type="text" placeholder="Введіть username"
                             class="form-input" />
                         <p v-if="telegramError" class="error-text">
-                            Цей Telegram username вже зайнято
+                            Цей Telegram username не валідний
                         </p>
                     </div>
                     <div class="form-group">

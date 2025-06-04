@@ -82,12 +82,14 @@
 
     @media (max-width: 1000px) {
         .top-container {
-            padding: 20px 0;
             gap: 10px;
             justify-content: right;
+            width: 100%;
+            padding: 20px;
 
             select {
                 width: auto;
+                height: 40px;
             }
 
             .view-toggle {
@@ -96,7 +98,6 @@
 
             .search-container {
                 width: 100%;
-                padding: 0;
             }
 
             .divider {

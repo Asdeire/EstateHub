@@ -9,11 +9,7 @@
 
             <div class="divider"></div>
 
-            <div class="view-toggle">
-                <button @click="toggleViewMode" :class="viewMode">
-                    {{ viewMode === 'list' ? 'Перейти до карти' : 'Перейти до списку' }}
-                </button>
-            </div>
+            <span @click="showFilters = !showFilters"><img src="../assets/filter.png"></span>
 
             <select v-model="selectedSort" @change="applyFilters">
                 <option value="updated_at:desc">Новіші</option>
@@ -22,7 +18,11 @@
                 <option value="title:desc">Я-A</option>
             </select>
 
-            <span @click="showFilters = !showFilters"><img src="../assets/filter.png"></span>
+            <div class="view-toggle">
+                <button @click="toggleViewMode" :class="viewMode">
+                    {{ viewMode === 'list' ? 'Перейти до карти' : 'Перейти до списку' }}
+                </button>
+            </div>
         </div>
 
         <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
