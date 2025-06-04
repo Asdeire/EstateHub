@@ -20,11 +20,10 @@ const start = async () => {
   await app.register(cookie, {
     secret: config.cookieSecret,
     parseOptions: {
-      domain: config.cookieDomain,
       secure: config.isProduction,
       httpOnly: true,
       signed: true,
-      sameSite: "strict", // CSRF protection
+      sameSite: "none", 
     },
   } as FastifyCookieOptions);
 
