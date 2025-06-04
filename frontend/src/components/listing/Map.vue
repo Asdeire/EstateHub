@@ -19,7 +19,8 @@
                     <l-tooltip>
                         <div style="max-width: 220px;">
                             <strong>{{ listing.title }}</strong>
-                            <p>{{ listing.price }} грн</p>
+                            <p>{{ formatPrice(convertPrice(listing.price, "USD", currency),
+                                currency) }}</p>
                             <p style="font-size: 0.9em;">
                                 {{ listing.area }} м² &mdash; {{ listing.type }}
                             </p>
@@ -40,9 +41,12 @@ import { useRouter } from 'vue-router';
 import { LMap, LTileLayer, LMarker, LTooltip } from '@vue-leaflet/vue-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
+import { formatPrice, convertPrice } from '../../services/utils/currencyConverter';
 
 import LocationIcon from '../../assets/loc-light.png';
 import SecondaryLocationIcon from '../../assets/loc.png';
+
+const currency = "UAH";
 
 const props = defineProps({
     currentListing: Object,

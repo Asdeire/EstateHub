@@ -7,12 +7,22 @@
                 <h1 class="title">Знайдіть житло<br /> своєї мрії</h1>
                 <div class="search-bar-wrapper">
                     <div class="search-bar">
+
                         <div class="input-with-icon">
                             <span class="icon"><img src="../assets/location.png"></span>
                             <input type="text" placeholder="Ввести напрямок" v-model="location" />
                         </div>
-                        <input type="text" placeholder="Ціна" v-model="price" />
+
+                        <div class="input-with-icon">
+                            <input type="text" placeholder="Ціна" v-model="price" />
+                            <select v-model="currency" class="currency-select">
+                                <option value="UAH">₴</option>
+                                <option value="USD">$</option>
+                            </select>
+                        </div>
+
                         <input type="text" placeholder="Площа" v-model="area" />
+
                         <select v-model="selectedType">
                             <option value="">Тип нерухомості</option>
                             <option value="квартира">Квартира</option>
@@ -34,7 +44,8 @@
                         <img :src="listing.image" alt="Listing image" class="listing-image" />
                         <h3 class="listing-title">{{ listing.title }}</h3>
                         <p class="listing-description">{{ listing.description }}</p>
-                        <p class="listing-price">{{ listing.price }}</p>
+                        <p class="listing-price">{{ formatPrice(convertPrice(listing.price, "USD", currency),
+                            currency) }}</p>
                     </div>
                 </div>
             </div>
@@ -46,7 +57,8 @@
                 </div>
                 <div class="nav-controls">
                     <button class="nav-button prev" @click="scrollPrev" :disabled="currentSlide === 0">
-                        <span><</span>
+                        <span>
+                            < </span>
                     </button>
                     <button class="nav-button next" @click="scrollNext" :disabled="currentSlide >= maxSlides - 1">
                         <span>></span>
@@ -86,11 +98,13 @@ import Footer from '../components/Footer.vue';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { getActiveListings } from '../services/api/index';
+import { convertPrice, formatPrice } from '../services/utils/currencyConverter';
 
 const location = ref('');
 const price = ref('');
 const area = ref('');
 const selectedType = ref('');
+const currency = ref('UAH');
 
 const recentListings = ref([]);
 
@@ -145,7 +159,7 @@ onMounted(async () => {
             image: listing.photos && listing.photos.length > 0 ? listing.photos[0] : 'https://via.placeholder.com/300x200',
             title: listing.title,
             description: listing.location,
-            price: `$${listing.price}`
+            price: listing.price,
         }));
         calculateSliderMetrics();
     } catch (error) {
@@ -234,11 +248,14 @@ const scrollNext = () => {
 };
 
 const handleSearch = () => {
+    const priceInUSD = convertPrice(price.value, currency.value, 'USD');
+
     router.push({
         path: '/listings',
         query: {
             location: location.value,
-            price: price.value,
+            price: priceInUSD,
+            currency: currency.value,
             area: area.value,
             type: selectedType.value
         }

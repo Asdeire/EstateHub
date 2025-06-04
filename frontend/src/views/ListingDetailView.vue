@@ -15,7 +15,8 @@
                 </div>
 
                 <div class="listing-price" @click="toggleCurrency">
-                    {{ formattedPrice }}
+                    {{ formatPrice(convertPrice(listing.price, "USD", currency),
+                    currency) }}
                     <span class="favorite-icon" @click.stop="toggleFavorite">
                         <img :src="listing.isFavorite ? '/fav-filled.png' : '/fav.png'" alt="Позначити як улюблене"
                             class="icon" />
@@ -59,6 +60,7 @@ import {
 } from '../services/api/index';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { convertPrice, formatPrice } from '../services/utils/currencyConverter';
 
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
@@ -79,8 +81,7 @@ const error = ref(null);
 const authStore = useAuthStore();
 const favorites = ref(new Set());
 
-const currency = ref('USD');
-const exchangeRate = ref(1);
+const currency = ref('UAH');
 
 const fetchListing = async () => {
     try {
@@ -138,27 +139,14 @@ const toggleFavorite = async () => {
     }
 };
 
-const fetchExchangeRate = async () => {
-    try {
-        const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
-        exchangeRate.value = response.data.rates.UAH;
-    } catch (err) {
-        console.error('Error:', err);
-    }
-};
-
 const formattedPrice = computed(() => {
     if (!listing.value) return '';
-    const price = currency.value === 'USD' ? listing.value.price : listing.value.price * exchangeRate.value;
-    return new Intl.NumberFormat('uk-UA', {
-        style: 'currency',
-        currency: currency.value,
-        minimumFractionDigits: 0,
-    }).format(price);
+    const converted = convertPrice(listing.value.price, currency.value);
+    return formatPrice(converted, currency.value);
 });
 
 const toggleCurrency = () => {
-    currency.value = currency.value === 'USD' ? 'UAH' : 'USD';
+    currency.value = currency.value === 'UAH' ? 'USD' : 'UAH';
 };
 
 
@@ -191,6 +179,5 @@ watch(() => route.params.id, async (newId) => {
 
 onMounted(async () => {
     await fetchListing();
-    await fetchExchangeRate();
 });
 </script>

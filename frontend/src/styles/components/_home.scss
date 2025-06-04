@@ -83,21 +83,32 @@
                         display: flex;
                         align-items: center;
                         background-color: white;
-                        padding: 0 12px;
-                        gap: 8px;
                         border-radius: 10px;
                         flex: 1;
                         min-width: 180px;
 
-                        .icon img {
-                            width: 24px;
+                        .icon {
+                            display: flex;
+                            padding-left: 8px;
+                            img {
+                                width: 24px;
+                            }
                         }
 
                         input {
                             border: none;
                             background: transparent;
-                            padding: 12px 0;
+                            padding: 12px 12px;
                             flex: 1;
+                        }
+
+                        .currency-select {
+                            padding: 8px 0;
+                            min-width: 40px;
+                            max-width: 40px;
+                            box-sizing: border-box;
+                            display: inline-block;
+                            text-align: center;
                         }
                     }
                 }

@@ -16,7 +16,15 @@
                 </label>
 
                 <label>
-                    Ціна ($): 
+                    Валюта:
+                    <select v-model="formData.currency">
+                        <option value="UAH">UAH</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </label>
+
+                <label>
+                    Ціна:
                     <input v-model.number="formData.price" type="number" placeholder="Ціна" maxlength="9"
                         @input="limitDigits('price', 9)" required />
                     <span v-if="errors.price" class="error">{{ errors.price }}</span>
@@ -84,6 +92,7 @@ import { useAuthStore } from '../../stores/authDataStore';
 import { storage } from '../../services/utils/firebase.config';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Swal from 'sweetalert2';
+import { convertPrice } from '../../services/utils/currencyConverter';
 
 const props = defineProps({ showModal: Boolean });
 const emit = defineEmits(['close', 'save']);
@@ -94,6 +103,7 @@ const formData = ref({
     is_agent_listing: false,
     title: '',
     location: '',
+    currency: 'UAH',
     price: 0,
     area: 0,
     description: '',
@@ -202,8 +212,15 @@ const handleSubmit = async () => {
 
         const fileUrls = await uploadFilesToStorage(selectedFiles.value);
 
+        let priceToSend = formData.value.price;
+
+        if (formData.value.currency === 'UAH') {
+            priceToSend = convertPrice(formData.value.price, 'UAH', 'USD');
+        }
+
         const data = {
             ...formData.value,
+            price: priceToSend,
             is_agent_listing: true,
             photos: fileUrls,
         };

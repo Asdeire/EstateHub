@@ -5,7 +5,8 @@
             <p v-if="categoryName">Категорія: {{ categoryName }}</p>
             <p v-if="subscription.filters?.type">Тип: {{ subscription.filters.type }}</p>
             <p v-if="subscription.filters?.minPrice || subscription.filters?.maxPrice">
-                Ціна: {{ subscription.filters.minPrice || 0 }} - {{ subscription.filters.maxPrice || '∞' }}
+                Ціна: {{ convertPrice(subscription.filters.minPrice || 0, "USD", "UAH") }} - {{
+                    convertPrice(subscription.filters.maxPrice || '∞', "USD", "UAH") }}
             </p>
             <p v-if="subscription.filters?.minArea || subscription.filters?.maxArea">
                 Площа: {{ subscription.filters.minArea || 0 }} - {{ subscription.filters.maxArea || '∞' }} м²
@@ -20,7 +21,8 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { useDataStore } from '../../stores/dataStore'; 
+import { useDataStore } from '../../stores/dataStore';
+import { convertPrice } from '../../services/utils/currencyConverter';
 
 const props = defineProps({
     subscription: Object
@@ -31,7 +33,7 @@ defineEmits(['delete']);
 const dataStore = useDataStore();
 
 onMounted(async () => {
-    await dataStore.loadData(); 
+    await dataStore.loadData();
 });
 
 const categoryName = computed(() => {

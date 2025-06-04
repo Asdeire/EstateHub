@@ -40,7 +40,15 @@
                     </div>
                 </div>
 
-                <h4>Ціна ($)</h4>
+                <label>
+                    Валюта:
+                    <select v-model="formData.currency">
+                        <option value="UAH">UAH</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </label>
+
+                <h4>Ціна</h4>
                 <div class="range-container">
                     <input type="number" v-model="formData.filters.minPrice" placeholder="Від"
                         @input="limitDigits('minPrice', 9)" />
@@ -74,6 +82,8 @@ import { useAuthStore } from '../../stores/authDataStore';
 import { createSubscription } from '../../services/api/index';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
+import { convertPrice } from '../../services/utils/currencyConverter';
+import { filter, max } from 'lodash';
 
 const props = defineProps({ showModal: Boolean });
 const emit = defineEmits(['close', 'save']);
@@ -87,6 +97,7 @@ const formData = ref({
     filters: {
         type: '',
         category: '',
+        currency: 'UAH',
         minPrice: null,
         maxPrice: null,
         minArea: null,
@@ -172,8 +183,30 @@ const handleSubmit = async () => {
     }
 
     try {
+        let minPriceToSend = formData.value.filters.minPrice;
+        let maxPriceToSend = formData.value.filters.maxPrice;
+
+
+        if (formData.value.currency === 'UAH') {
+            minPriceToSend = convertPrice(formData.value.filters.minPrice, 'UAH', 'USD');
+            maxPriceToSend = convertPrice(formData.value.filters.maxPrice, 'UAH', 'USD');
+            console.log('Converted prices:', minPriceToSend, maxPriceToSend);
+
+        }
+
+        const data = {
+            ...formData.value,
+            filters: {
+                ...formData.value.filters,
+                minPrice: minPriceToSend,
+                maxPrice: maxPriceToSend,
+            },
+        };
+
+        console.log(data)
+
         isLoading.value = true;
-        const createdSubscription = await createSubscription(formData.value);
+        const createdSubscription = await createSubscription(data);
 
         if (!createdSubscription || !createdSubscription.id) {
             throw new Error('Помилка створення підписки.');

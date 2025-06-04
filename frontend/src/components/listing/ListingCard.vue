@@ -6,8 +6,8 @@
             <img :src="listing.photos?.[0] || '/house.png'" alt="Image {{ listing.title }}" class="listing-image"
                 loading="lazy" />
 
-            <div v-if="listing.is_verified == true" class="listing-verified" loading="lazy"><img src="../../assets/verify.png"
-                    alt="Agent" class="agent-icon" />
+            <div v-if="listing.is_verified == true" class="listing-verified" loading="lazy"><img
+                    src="../../assets/verify.png" alt="Agent" class="agent-icon" />
                 <p>Перевірено</p>
             </div>
 
@@ -19,7 +19,8 @@
                     </span>
                 </div>
                 <p class="listing-location">{{ listing.location }}</p>
-                <h2 class="listing-price">{{ listing.price }}$</h2>
+                <h2 class="listing-price">{{ formatPrice(convertPrice(listing.price, "USD", currency),
+                    currency) }}</h2>
 
                 <div v-if="hasActions" class="actions">
                     <span v-if="props.editListing" @click.stop="props.editListing(listing)" class="button">
@@ -43,6 +44,7 @@
 
 <script setup>
 import { defineProps, computed } from "vue";
+import { convertPrice, formatPrice } from '../../services/utils/currencyConverter';
 
 const props = defineProps({
     listings: { type: Array, required: true },
@@ -51,6 +53,7 @@ const props = defineProps({
     editListing: { type: Function, default: null },
     toggleListingStatus: { type: Function, default: null },
     deleteListing: { type: Function, default: null },
+    currency: { type: String, default: 'UAH' }
 });
 
 const hasActions = computed(() => props.editListing || props.toggleListingStatus || props.deleteListing);

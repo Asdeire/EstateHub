@@ -26,17 +26,18 @@
         </div>
 
         <FilterModal v-if="showFilters" :categories="dataStore.categories" :tags="dataStore.tags"
-            :selected-type="selectedType" :selected-category="selectedCategory" :selected-tags="selectedTags"
-            :selected-is-verified="isVerified" :price-min="priceMin" :price-max="priceMax" :area-min="areaMin"
-            :area-max="areaMax" @close="showFilters = false" @apply="handleApplyFilters" @clear="clearFilters" />
+            :currency="selectedCurrency" :selected-type="selectedType" :selected-category="selectedCategory"
+            :selected-tags="selectedTags" :selected-is-verified="isVerified" :price-min="priceMin" :price-max="priceMax"
+            :area-min="areaMin" :area-max="areaMax" @close="showFilters = false" @apply="handleApplyFilters"
+            @clear="clearFilters" />
 
         <div v-if="loading" class="loading-message">Завантаження...</div>
         <div v-else-if="error" class="error-message">{{ error }}</div>
 
         <div v-else>
             <div v-if="viewMode === 'list'">
-                <Listings :listings="listings" :goToListingDetail="goToListingDetail"
-                    :toggleFavorite="toggleFavorite" />
+                <Listings :listings="listings" :goToListingDetail="goToListingDetail" :toggleFavorite="toggleFavorite"
+                    :currency="selectedCurrency" />
 
                 <div class="pagination-container" v-if="totalPages > 1">
                     <button class="pagination-button" @click="changePage(currentPage - 1)" :disabled="currentPage <= 1">
@@ -91,6 +92,7 @@ const areaMin = ref<number | null>(null);
 const areaMax = ref<number | null>(null);
 const isVerified = ref<string>('');
 const selectedSort = ref('updated_at:desc');
+const selectedCurrency = ref<'USD' | 'UAH'>('UAH');
 
 const viewMode = ref<'list' | 'map'>('list');
 const currentPage = ref(1);
@@ -200,6 +202,7 @@ const applyFilters = () => {
         tags: selectedTags.value,
         search: searchQuery.value.trim(),
         is_verified: isVerified.value === '' ? undefined : isVerified.value === 'true',
+        currency: selectedCurrency.value,
     };
     fetchListings(currentPage.value, filters);
 };
@@ -214,6 +217,7 @@ const handleApplyFilters = (filters: Record<string, any>) => {
     areaMax.value = filters.maxArea;
     searchQuery.value = filters.search || '';
     isVerified.value = filters.is_verified !== undefined ? String(filters.is_verified) : '';
+    selectedCurrency.value = filters.currency || 'UAH';
     applyFilters();
 };
 
@@ -225,6 +229,7 @@ const clearFilters = () => {
     priceMax.value = null;
     areaMin.value = null;
     areaMax.value = null;
+    selectedCurrency.value = 'UAH';
     applyFilters();
 };
 
@@ -239,12 +244,16 @@ onMounted(async () => {
         }
     }
 
-    const { location, price, area, type } = route.query;
+    const { location, price, area, type, currency } = route.query;
 
     if (location) searchQuery.value = location as string;
     if (price) priceMax.value = Number(price);
     if (area) areaMax.value = Number(area);
     if (type) selectedType.value = type as string;
+    if (currency === 'UAH' || currency === 'USD') selectedCurrency.value = currency;
+    if (route.query.currency) {
+        selectedCurrency.value = route.query.currency as 'UAH' | 'USD';
+    }
 
     applyFilters();
 });

@@ -38,7 +38,15 @@
                     </div>
                 </div>
 
-                <h4>Ціна ($)</h4>
+                <label>
+                    Валюта:
+                    <select v-model="localCurrency">
+                        <option value="USD">USD</option>
+                        <option value="UAH">UAH</option>
+                    </select>
+                </label>
+
+                <h4>Ціна</h4>
                 <div class="range-container">
                     <input type="number" v-model="localPriceMin" placeholder="Від"
                         @input="restrictInput($event, 'localPriceMin', 10)" />
@@ -66,6 +74,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import type { Category, Tag } from '../../stores/dataStore';
+import { convertPrice } from '../../services/utils/currencyConverter';
 
 const props = defineProps<{
     categories: Category[];
@@ -74,11 +83,14 @@ const props = defineProps<{
     selectedCategory: string;
     selectedIsVerified: string;
     selectedTags: string[];
+    currency: 'USD' | 'UAH';
     priceMin: number | null;
     priceMax: number | null;
     areaMin: number | null;
     areaMax: number | null;
 }>();
+
+const localCurrency = ref(props.currency);
 
 const emit = defineEmits<{
     (e: 'close'): void;
@@ -99,6 +111,7 @@ watch(() => props.selectedType, (value) => (localSelectedType.value = value));
 watch(() => props.selectedCategory, (value) => (localSelectedCategory.value = value));
 watch(() => props.selectedIsVerified, (value) => { localIsVerified.value = value; });
 watch(() => props.selectedTags, (value) => (localSelectedTags.value = [...value]));
+watch(() => props.currency, (value) => { localCurrency.value = value; });
 watch(() => props.priceMin, (value) => (localPriceMin.value = value));
 watch(() => props.priceMax, (value) => (localPriceMax.value = value));
 watch(() => props.areaMin, (value) => (localAreaMin.value = value));
@@ -136,12 +149,25 @@ const restrictInput = (event: Event, field: string, maxLength: number) => {
 };
 
 const applyFilters = () => {
+    let minPriceUSD = localPriceMin.value;
+    let maxPriceUSD = localPriceMax.value;
+
+    if (localCurrency.value === 'UAH') {
+        if (minPriceUSD !== null) {
+            minPriceUSD = +convertPrice(minPriceUSD, 'UAH', 'USD').toFixed(2);
+        }
+        if (maxPriceUSD !== null) {
+            maxPriceUSD = +convertPrice(maxPriceUSD, 'UAH', 'USD').toFixed(2);
+        }
+    }
+
     const filters = {
         type: localSelectedType.value,
         category: localSelectedCategory.value,
         tags: localSelectedTags.value,
-        minPrice: localPriceMin.value,
-        maxPrice: localPriceMax.value,
+        currency: localCurrency.value,
+        minPrice: minPriceUSD,
+        maxPrice: maxPriceUSD,
         minArea: localAreaMin.value,
         maxArea: localAreaMax.value,
         is_verified:

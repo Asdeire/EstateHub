@@ -16,7 +16,15 @@
                 </label>
 
                 <label>
-                    Ціна ($):
+                    Валюта:
+                    <select v-model="formData.currency">
+                        <option value="UAH">UAH</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </label>
+
+                <label>
+                    Ціна:
                     <input v-model.number="formData.price" type="number" placeholder="Ціна" maxlength="9"
                         @input="limitDigits('price', 9)" required />
                     <span v-if="errors.price" class="error">{{ errors.price }}</span>
@@ -86,8 +94,9 @@
 import { ref, onMounted } from 'vue';
 import { getTags, getCategories, updateListing } from '../../services/api/index';
 import { storage } from '../../services/utils/firebase.config';
-import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref as storageRef, uploadBytesResumable, getDownloadURL, list } from 'firebase/storage';
 import Swal from 'sweetalert2';
+import { convertPrice } from '../../services/utils/currencyConverter';
 
 const props = defineProps({
     showEditModal: Boolean,
@@ -98,6 +107,7 @@ const emit = defineEmits(['close', 'save']);
 const formData = ref({
     title: '',
     location: '',
+    currency: 'USD',
     price: 0,
     area: 0,
     type: '',
@@ -153,6 +163,7 @@ onMounted(async () => {
     try {
         tags.value = await getTags();
         categories.value = await getCategories();
+
         if (props.listing) {
             Object.assign(formData.value, {
                 ...props.listing,
@@ -200,8 +211,15 @@ const handleSubmit = async () => {
             updatedPhotos = fileUrls;
         }
 
+        let priceToSend = formData.value.price;
+
+        if (formData.value.currency === 'UAH') {
+            priceToSend = convertPrice(formData.value.price, 'UAH', 'USD');
+        }
+
         const updatedData = {
             ...formData.value,
+            price: priceToSend,
             photos: updatedPhotos,
         };
 
