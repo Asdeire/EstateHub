@@ -71,11 +71,6 @@ export const resetPassword = async (resetData: {
 };
 
 export const refreshAccessToken = async (): Promise<string | null> => {
-    const hasRefreshToken = document.cookie.includes('refreshToken=');
-    if (!hasRefreshToken) {
-        return null; 
-    }
-
     try {
         const response = await api.post('/refresh', {}, {
             withCredentials: true

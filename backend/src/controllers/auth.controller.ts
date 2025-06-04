@@ -48,14 +48,14 @@ export class AuthController {
       const sessionCookie = request.cookies._session;
 
       if (!sessionCookie) {
-        return reply.status(401).send({ message: "Session not found" });
+        return reply.status(403).send({ message: "Session not found" });
       }
 
       const { value, valid } = request.server.unsignCookie(sessionCookie);
 
       if (!valid) {
         return reply
-          .status(401)
+          .status(403)
           .send({ message: "Invalid or expired refresh token" });
       }
 

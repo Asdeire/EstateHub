@@ -37,7 +37,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
   try {
     const authHeader = request.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return reply.code(401).send({ error: 'Authorization header missing or invalid' });
+      return reply.code(403).send({ error: 'Authorization header missing or invalid' });
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -47,6 +47,6 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     };
     request.user = { id: decoded.id, role: decoded.role };
   } catch (error) {
-    return reply.code(401).send({ error: 'Invalid or expired token' });
+    return reply.code(403).send({ error: 'Invalid or expired token' });
   }
 }
