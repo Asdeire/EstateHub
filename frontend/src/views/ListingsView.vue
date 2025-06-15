@@ -122,16 +122,38 @@ const updateFavorites = async () => {
     }
 };
 
+const listingsCache = new Map<string, { listings: Listing[], totalPages: number }>();
+
+const generateCacheKey = (page: number, filters: Record<string, any>) => {
+    return JSON.stringify({ page, ...filters });
+};
+
 const fetchListings = async (page = 1, filters: Record<string, any> = {}) => {
     try {
         loading.value = true;
-
         const [sortBy, sortOrder] = selectedSort.value.split(':');
+        const key = generateCacheKey(page, {
+            ...filters,
+            sortBy,
+            sortOrder,
+        });
+
+        if (listingsCache.has(key)) {
+            const cached = listingsCache.get(key)!;
+            listings.value = cached.listings;
+            totalPages.value = cached.totalPages;
+            return;
+        }
 
         const data = await getActiveListings(page, listingsPerPage, {
             ...filters,
             sortBy,
-            sortOrder: sortOrder as 'asc' | 'desc' | undefined,
+            sortOrder: sortOrder as 'asc' | 'desc',
+        });
+
+        listingsCache.set(key, {
+            listings: data.listings,
+            totalPages: data.totalPages,
         });
 
         listings.value = data.listings;

@@ -31,7 +31,7 @@
                 <div class="user-info">
                     <div class="user-details">
                         <p class="user-name">{{ user?.name }}</p>
-                        <img v-if="authStore.user?.role === 'Makler'" src="../assets/verify.png" alt="Agent"
+                        <img v-if="user?.role === 'Makler'" src="../assets/verify.png" alt="Agent"
                             class="agent-icon" />
                     </div>
                 </div>
