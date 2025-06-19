@@ -14,14 +14,14 @@
                         </div>
 
                         <div class="input-with-icon">
-                            <input type="text" placeholder="Ціна" v-model="price" />
+                            <input type="text" placeholder="Ціна до" v-model="price" />
                             <select v-model="currency" class="currency-select">
                                 <option value="UAH">₴</option>
                                 <option value="USD">$</option>
                             </select>
                         </div>
 
-                        <input type="text" placeholder="Площа" v-model="area" />
+                        <input type="text" placeholder="Площа до" v-model="area" />
 
                         <select v-model="selectedType">
                             <option value="">Тип нерухомості</option>
