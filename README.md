@@ -1,6 +1,6 @@
 # EstateHub
 
-🔗 [Live Demo](https://your-deployed-site.com)
+🔗 [Live Demo](https://www.estatehub.pp.ua/)
 
 **EstateHub** is a modern web-based platform designed to streamline real estate listings, search, and user communication between buyers, agents, and administrators. The system provides a fully functional listing engine with support for subscriptions, notifications (email & Telegram), user management, and an admin interface.
 
